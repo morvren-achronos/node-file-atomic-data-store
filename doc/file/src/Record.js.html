@@ -1,9 +1,50 @@
-/**
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">src/Record.js | fs-atomic-data-store</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="key-record store, allows any data, uses filesystem, supports transactions"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="fs-atomic-data-store"><meta property="twitter:description" content="key-record store, allows any data, uses filesystem, supports transactions"></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/Record.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
  * class Record
  */
 
  // Libraries
- const stream = require('stream');
+ const stream = require(&apos;stream&apos;);
 
 /**
  * Interact with a record
@@ -80,9 +121,9 @@ module.exports = class Record {
 		while(i) {
 			hash = (hash * 33) ^ id.charCodeAt(--i);
 		}
-		hash = (hash >>> 0).toString(16);
-		if (hash.length < 8) {
-			hash = '0'.repeat(8 - hash.length) + hash;
+		hash = (hash &gt;&gt;&gt; 0).toString(16);
+		if (hash.length &lt; 8) {
+			hash = &apos;0&apos;.repeat(8 - hash.length) + hash;
 		}
 		return hash;
 	}
@@ -90,17 +131,17 @@ module.exports = class Record {
 	/**
 	 * Get directory path of record
 	 *
-	 * Directory is created if it doesn't exist.
+	 * Directory is created if it doesn&apos;t exist.
 	 *
 	 * @param {bool} create - true to create directory if it does not exist
-	 * @returns {Promise<string>} dirpath
+	 * @returns {Promise&lt;string&gt;} dirpath
 	 */
 	async dir(create = true) {
 		let
 			hash = this.generateHash(),
 			dirParts = []
 		;
-		for (let i = 0; i < 8; i += 2) {
+		for (let i = 0; i &lt; 8; i += 2) {
 			dirParts.push(hash.slice(i, i + 2));
 		}
 		return this.collection.dir([...dirParts, this.identifier], create);
@@ -111,12 +152,12 @@ module.exports = class Record {
 	 *
 	 * @param {?string} part - name of part, or null for default part
 	 * @param {bool} createDir - true to create directory if it does not exist
-	 * @returns {Promise<string>} filepath
+	 * @returns {Promise&lt;string&gt;} filepath
 	 */
 	async filepath(part = null, createDir = true) {
 		return this.store.path.join(
 			await this.dir(createDir),
-			part || this.store.option('defaultPart')
+			part || this.store.option(&apos;defaultPart&apos;)
 		);
 	}
 
@@ -126,22 +167,22 @@ module.exports = class Record {
 	/**
 	 * Get list of record parts
 	 *
-	 * @returns {Promise<array>} partnames
+	 * @returns {Promise&lt;array&gt;} partnames
 	 */
 	async listParts() {
 		const
 			dir = await this.dir(false),
 			fs = this.store.fs
 		;
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, reject) =&gt; {
 			fs.readdir(
 				dir,
 				{
 					withFileTypes: true
 				},
-				(err, entries) => {
+				(err, entries) =&gt; {
 					if (err) {
-						if (err.code == 'ENOENT') {
+						if (err.code == &apos;ENOENT&apos;) {
 							resolve([]);
 						}
 						reject(err);
@@ -164,7 +205,7 @@ module.exports = class Record {
 	 * Get file stat data for multiple record parts
 	 *
 	 * @param {array} parts - part names to remove
-	 * @returns {Promise<object>} results. Property name is part name. Property value is {fs.Stats}
+	 * @returns {Promise&lt;object&gt;} results. Property name is part name. Property value is {fs.Stats}
 	 */
 	async statMultipleParts(parts) {
 		const
@@ -178,10 +219,10 @@ module.exports = class Record {
 		let promises = [];
 		let results = {};
 		for (let part of parts) {
-			promises.push(new Promise(async (resolve, reject) => {
+			promises.push(new Promise(async (resolve, reject) =&gt; {
 				fs.stat(
 					path.join(dir, part),
-					(err, stat) => {
+					(err, stat) =&gt; {
 						if (err) {
 							reject(err);
 							return;
@@ -203,7 +244,7 @@ module.exports = class Record {
 	 * @param {bool false} parts.__partname__ - return content in Buffer
 	 * @param {bool true} parts.__partname__ - return ReadStream
 	 * @param {stream.Writable} parts.__partname__ - pipe part content to this stream
-	 * @returns {Promise<object>} results. Property name is part name. Property value is {Buffer} or {fs.ReadStream} or {bool true}
+	 * @returns {Promise&lt;object&gt;} results. Property name is part name. Property value is {Buffer} or {fs.ReadStream} or {bool true}
 	 */
 	async readMultipleParts(parts) {
 		const
@@ -226,14 +267,14 @@ module.exports = class Record {
 				results[part] = fs.createReadStream(filepath);
 			}
 			else if (parts[part] instanceof stream.Writable) {
-				promises.push(new Promise((resolve, reject) => {
+				promises.push(new Promise((resolve, reject) =&gt; {
 					try {
 						let reader = fs.createReadStream(filepath);
-						reader.on('error', (err) => {
+						reader.on(&apos;error&apos;, (err) =&gt; {
 							reject(err);
 						});
-						/* readers have 'end', writers have 'finish' */
-						reader.on('end', () => {
+						/* readers have &apos;end&apos;, writers have &apos;finish&apos; */
+						reader.on(&apos;end&apos;, () =&gt; {
 							resolve();
 						});
 						reader.pipe(parts[part]);
@@ -245,10 +286,10 @@ module.exports = class Record {
 				}));
 			}
 			else {
-				promises.push(new Promise((resolve, reject) => {
+				promises.push(new Promise((resolve, reject) =&gt; {
 					fs.readFile(
 						filepath,
-						(err, content) => {
+						(err, content) =&gt; {
 							if (err) {
 								reject(err);
 								return;
@@ -271,14 +312,14 @@ module.exports = class Record {
 	 * @param {(Buffer|string)} parts.__partname__ - contents to write
 	 * @param {stream.Readable} parts.__partname__ - pipe part contents from this stream
 	 * @param {bool true} parts.__partname__ - return {fs.WriteStream}
-	 * @returns {Promise<object>} results. Property name is part name. Property value is {bool true} or {fs.WriteStream}
+	 * @returns {Promise&lt;object&gt;} results. Property name is part name. Property value is {bool true} or {fs.WriteStream}
 	 */
 	async writeMultipleParts(parts) {
 		const
 			dir = await this.dir(),
 			path = this.store.path,
 			fs  = this.store.fs,
-			fileMode = this.store.option('fileMode'),
+			fileMode = this.store.option(&apos;fileMode&apos;),
 			flags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_SYNC
 		;
 		let promises = [];
@@ -295,7 +336,7 @@ module.exports = class Record {
 				);
 			}
 			else if (parts[part] instanceof stream.Readable) {
-				promises.push(new Promise((resolve, reject) => {
+				promises.push(new Promise((resolve, reject) =&gt; {
 					let writer = fs.createWriteStream(
 						filepath,
 						{
@@ -303,11 +344,11 @@ module.exports = class Record {
 							mode: fileMode
 						}
 					);
-					writer.on('error', (err) => {
+					writer.on(&apos;error&apos;, (err) =&gt; {
 						reject(err);
 					});
-					/* readers have 'end', writers have 'finish' */
-					writer.on('finish', () => {
+					/* readers have &apos;end&apos;, writers have &apos;finish&apos; */
+					writer.on(&apos;finish&apos;, () =&gt; {
 						resolve();
 					});
 					parts[part].pipe(writer);
@@ -315,7 +356,7 @@ module.exports = class Record {
 				}));
 			}
 			else {
-				promises.push(new Promise((resolve, reject) => {
+				promises.push(new Promise((resolve, reject) =&gt; {
 					fs.writeFile(
 						filepath,
 						parts[part],
@@ -323,7 +364,7 @@ module.exports = class Record {
 							flags: flags,
 							mode: fileMode
 						},
-						(err) => {
+						(err) =&gt; {
 							if (err) {
 								reject(err);
 								return;
@@ -345,7 +386,7 @@ module.exports = class Record {
 	 * Parts that do not exist are ignored (not treated as an error).
 	 *
 	 * @param {array} parts - part names to remove
-	 * @returns {Promise<array>} part names deleted
+	 * @returns {Promise&lt;array&gt;} part names deleted
 	 */
 	async deleteMultipleParts(parts) {
 		const
@@ -359,12 +400,12 @@ module.exports = class Record {
 		let promises = [];
 		let results = [];
 		for (let part of parts) {
-			promises.push(new Promise(async (resolve, reject) => {
+			promises.push(new Promise(async (resolve, reject) =&gt; {
 				fs.unlink(
 					path.join(dir, part),
-					(err) => {
+					(err) =&gt; {
 						if (err) {
-							if (err.code == 'ENOENT') {
+							if (err.code == &apos;ENOENT&apos;) {
 								resolve();
 								return;
 							}
@@ -378,11 +419,11 @@ module.exports = class Record {
 			}));
 		}
 		results.sort();
-		promises.push((async () => {
+		promises.push((async () =&gt; {
 			let removeDir = dir;
-			for (let i = 0; i < 6; i++) {
-				await new Promise((resolve) => {
-					fs.rmdir(removeDir, (err) => {
+			for (let i = 0; i &lt; 6; i++) {
+				await new Promise((resolve) =&gt; {
+					fs.rmdir(removeDir, (err) =&gt; {
 						if (err) {
 							i = 6;
 						}
@@ -400,15 +441,15 @@ module.exports = class Record {
 	 * Overwrite contents of multiple record parts
 	 *
 	 * @param {array} parts - part names to shred
-	 * @returns {Promise<void>}
+	 * @returns {Promise&lt;void&gt;}
 	 */
 	async shredMultipleParts(parts) {
 		const
 			dir = await this.dir(false),
 			path = this.store.path,
 			fs  = this.store.fs,
-			shred = this.store.option('shredFunction'),
-			fileMode = this.store.option('fileMode'),
+			shred = this.store.option(&apos;shredFunction&apos;),
+			fileMode = this.store.option(&apos;fileMode&apos;),
 			flags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_SYNC
 		;
 		if (!(parts instanceof Array)) {
@@ -416,11 +457,11 @@ module.exports = class Record {
 		}
 		let promises = [];
 		for (let part of parts) {
-			promises.push(new Promise(async (resolve, reject) => {
+			promises.push(new Promise(async (resolve, reject) =&gt; {
 				let filepath = path.join(dir, part);
 				fs.stat(
 					filepath,
-					(err, stat) => {
+					(err, stat) =&gt; {
 						if (err) {
 							reject(err);
 							return;
@@ -430,8 +471,8 @@ module.exports = class Record {
 							autoDestroy: true,
 							read(size) {
 								let go = true;
-								while(go && bytesRemaining) {
-									if (bytesRemaining <= size) {
+								while(go &amp;&amp; bytesRemaining) {
+									if (bytesRemaining &lt;= size) {
 										size = bytesRemaining;
 									}
 									go = this.push(shred(size));
@@ -449,10 +490,10 @@ module.exports = class Record {
 								mode: fileMode
 							}
 						);
-						writer.on('error', (err) => {
+						writer.on(&apos;error&apos;, (err) =&gt; {
 							reject(err);
 						});
-						writer.on('finish', () => {
+						writer.on(&apos;finish&apos;, () =&gt; {
 							resolve();
 						});
 						reader.pipe(writer);
@@ -470,20 +511,20 @@ module.exports = class Record {
 	 * Return file stat data for part
 	 *
 	 * @param {?string} part - name of part, or null for default part
-	 * @returns {Promise<fs.Stats>} stat results
+	 * @returns {Promise&lt;fs.Stats&gt;} stat results
 	 */
 	async statPart(part = null) {
-		return this._singlePartOperation('statMultipleParts', part, false);
+		return this._singlePartOperation(&apos;statMultipleParts&apos;, part, false);
 	}
 
 	/**
 	 * Read a record part into a buffer
 	 *
 	 * @param {?string} part - name of part, or null for default part
-	 * @returns {Promise<Buffer>} content
+	 * @returns {Promise&lt;Buffer&gt;} content
 	 */
 	async readBuffer(part = null) {
-		return this._singlePartOperation('readMultipleParts', part, false);
+		return this._singlePartOperation(&apos;readMultipleParts&apos;, part, false);
 	}
 
 	/**
@@ -491,46 +532,46 @@ module.exports = class Record {
 	 *
 	 * @param {?string} part - name of part, or null for default part
 	 * @param {(Buffer|string)} content - content to write to part
-	 * @returns {Promise<void>}
+	 * @returns {Promise&lt;void&gt;}
 	 */
 	async writeBuffer(part, content) {
-		return this._singlePartOperation('writeMultipleParts', part, content);
+		return this._singlePartOperation(&apos;writeMultipleParts&apos;, part, content);
 	}
 
 	/**
 	 * Get a stream reader for a record part
 	 *
 	 * @param {?string} part - name of part, or null for default part
-	 * @returns {Promise<fs.ReadStream>}
+	 * @returns {Promise&lt;fs.ReadStream&gt;}
 	 */
 	async readStream(part = null) {
-		return this._singlePartOperation('readMultipleParts', part, true);
+		return this._singlePartOperation(&apos;readMultipleParts&apos;, part, true);
 	}
 
 	/**
 	 * Get a stream writer for a record part
 	 *
 	 * @param {?string} part - name of part, or null for default part
-	 * @returns {Promise<fs.WriteStream>}
+	 * @returns {Promise&lt;fs.WriteStream&gt;}
 	 */
 	async writeStream(part = null) {
-		return this._singlePartOperation('writeMultipleParts', part, true);
+		return this._singlePartOperation(&apos;writeMultipleParts&apos;, part, true);
 	}
 
 	/**
 	 * Delete a record part
 	 *
 	 * @param {?string} part - name of part, or null for default part
-	 * @returns {Promise<bool>} true if part existed and was deleted, false if it did not exist
+	 * @returns {Promise&lt;bool&gt;} true if part existed and was deleted, false if it did not exist
 	 */
 	async deletePart(part = null) {
-		return this._singlePartOperation('deleteMultipleParts', part, null);
+		return this._singlePartOperation(&apos;deleteMultipleParts&apos;, part, null);
 	}
 
 	/**
 	 * Delete entire record (delete all record parts)
 	 *
-	 * @returns {Promise<array>} removed part names
+	 * @returns {Promise&lt;array&gt;} removed part names
 	 */
 	async deleteAll() {
 		return this.deleteMultipleParts(await this.listParts());
@@ -540,10 +581,10 @@ module.exports = class Record {
 	 * Overwrite part contents
 	 *
 	 * @param {?string} part - name of part, or null for default part
-	 * @returns {Promise<void>}
+	 * @returns {Promise&lt;void&gt;}
 	 */
 	async shredPart(part = null) {
-		return this._singlePartOperation('shredMultipleParts', part, null);
+		return this._singlePartOperation(&apos;shredMultipleParts&apos;, part, null);
 	}
 
 
@@ -554,16 +595,33 @@ module.exports = class Record {
 	 * @access private
 	 */
 	async _singlePartOperation(method, part, value) {
-		part = part || this.store.option('defaultPart');
+		part = part || this.store.option(&apos;defaultPart&apos;);
 		let parts = {};
 		parts[part] = value;
 		parts = await this[method](parts);
 		if (Array.isArray(parts)) {
 			return parts.length ? true : false;
 		}
-		if (typeof parts == 'object') {
+		if (typeof parts == &apos;object&apos;) {
 			return parts[part];
 		}
 		return null;
 	}
 };
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

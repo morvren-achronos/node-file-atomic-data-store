@@ -1,4 +1,45 @@
-/**
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">src/Store.js | fs-atomic-data-store</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="key-record store, allows any data, uses filesystem, supports transactions"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="fs-atomic-data-store"><meta property="twitter:description" content="key-record store, allows any data, uses filesystem, supports transactions"></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/Store.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
  * class Store
  */
 
@@ -10,10 +51,10 @@ module.exports = class Store {
 	 * Create new Store instance
 	 *
 	 * @param {object} options
-	 * @param {string} options.dirPath - root directory for this store. Default is subdirectory "store" in current working directory
+	 * @param {string} options.dirPath - root directory for this store. Default is subdirectory &quot;store&quot; in current working directory
 	 * @param {number} options.fileMode - octal file permission mode when creating files. Default 0o660
 	 * @param {number} options.dirMode - octal file permission mode when creating directories. Default 0o770
-	 * @param {string} options.defaultPart - default part name to use when none is specified. Default "r"
+	 * @param {string} options.defaultPart - default part name to use when none is specified. Default &quot;r&quot;
 	 * @param {module} options.fsModule - use this instead of Node.js builtin fs (filesystem) module
 	 * @param {module} options.pathModule- use this instead of Node.js buitin path (filepaths) module
 	 * @param {function} options.recordClass - use this instead of internal Record class
@@ -26,38 +67,38 @@ module.exports = class Store {
 		 * @access private
 		 */
 		this._options = {
-			rootDir: 'store',
+			rootDir: &apos;store&apos;,
 			fileMode: 0o660,
 			dirMode: 0o770,
-			defaultPart: 'r',
-			fsModule: 'fs',
-			pathModule: 'path',
-			recordClass: './Record',
-			collectionClass: './Collection',
-			lockClass: './Lock',
+			defaultPart: &apos;r&apos;,
+			fsModule: &apos;fs&apos;,
+			pathModule: &apos;path&apos;,
+			recordClass: &apos;./Record&apos;,
+			collectionClass: &apos;./Collection&apos;,
+			lockClass: &apos;./Lock&apos;,
 			shredFunction: null,
-			recordsDir: 'records',
-			locksDir: 'locks'
+			recordsDir: &apos;records&apos;,
+			locksDir: &apos;locks&apos;
 		};
 		/**
 		 * @access private
 		 */
 		this._collections = {};
 
-		if (typeof options == 'object') {
+		if (typeof options == &apos;object&apos;) {
 			for (let k in options) {
 				if (this._options[k] !== undefined) {
 					this._options[k] = options[k];
 				}
 			}
 		}
-		for (let k of ['fsModule', 'pathModule', 'recordClass', 'collectionClass', 'lockClass']) {
-			if (typeof this._options[k] == 'string') {
+		for (let k of [&apos;fsModule&apos;, &apos;pathModule&apos;, &apos;recordClass&apos;, &apos;collectionClass&apos;, &apos;lockClass&apos;]) {
+			if (typeof this._options[k] == &apos;string&apos;) {
 				this._options[k] = require(this._options[k]);
 			}
 		}
 		if (this._options.shredFunction == null) {
-			this._options.shredFunction = require('crypto').randomBytes;
+			this._options.shredFunction = require(&apos;crypto&apos;).randomBytes;
 		}
 	}
 
@@ -70,7 +111,7 @@ module.exports = class Store {
 	 * @type {module}
 	 */
 	get fs() {
-		return this.option('fsModule');
+		return this.option(&apos;fsModule&apos;);
 	}
 
 	/**
@@ -79,7 +120,7 @@ module.exports = class Store {
 	 * @type {module}
 	 */
 	get path() {
-		return this.option('pathModule');
+		return this.option(&apos;pathModule&apos;);
 	}
 
 	/**
@@ -95,28 +136,28 @@ module.exports = class Store {
 	/**
 	 * Get directory path within store
 	 *
-	 * Directory is created if it doesn't exist.
+	 * Directory is created if it doesn&apos;t exist.
 	 *
 	 * @param {array} dirParts - dir path components
 	 * @param {bool} create - true to create directory if it does not exist
-	 * @returns {Promise<s?tring>} dirpath
+	 * @returns {Promise&lt;s?tring&gt;} dirpath
 	 */
 	async dir(dirParts = [], create = true) {
 		const
 			path = this.path,
 			fs  = this.fs,
-			dir = path.resolve(this.option('rootDir'), ...dirParts)
+			dir = path.resolve(this.option(&apos;rootDir&apos;), ...dirParts)
 		;
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve, reject) =&gt; {
 			fs.access(
 				dir,
 				fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK,
-				(err) => {
+				(err) =&gt; {
 					if (!err) {
 						resolve(dir);
 						return;
 					}
-					if (err.code != 'ENOENT') {
+					if (err.code != &apos;ENOENT&apos;) {
 						reject(err);
 						return;
 					}
@@ -128,10 +169,10 @@ module.exports = class Store {
 						dir,
 						{
 							recursive: true,
-							mode: this.option('dirMode')
+							mode: this.option(&apos;dirMode&apos;)
 						},
-						(err) => {
-							if (err && err.code != 'EEXIST') {
+						(err) =&gt; {
+							if (err &amp;&amp; err.code != &apos;EEXIST&apos;) {
 								reject(err);
 								return;
 							}
@@ -155,7 +196,7 @@ module.exports = class Store {
 	collection(name) {
 		name = name.toLowerCase();
 		if (!this._collections[name]) {
-			this._collections[name] = new (this.option('collectionClass'))(this, name);
+			this._collections[name] = new (this.option(&apos;collectionClass&apos;))(this, name);
 		}
 		return this._collections[name];
 	}
@@ -178,7 +219,7 @@ module.exports = class Store {
 	 * @returns {Lock} locking instance
 	 */
 	lock(options = {}) {
-		return new (this.option('lockClass'))(this, options);
+		return new (this.option(&apos;lockClass&apos;))(this, options);
 	}
 
 
@@ -198,13 +239,13 @@ module.exports = class Store {
 	 * The maximum total transaction retry delay is specified by the `retryTimeout` option.
 	 *
 	 * @param {function} callback - perform operations; may be called multiple times, may be halted at any point where a lock is acquired
-	 *   Signature: `async function(lockObject, storeObject, tryCount): Promise<*>`
+	 *   Signature: `async function(lockObject, storeObject, tryCount): Promise&lt;*&gt;`
 	 * @param {object} options
 	 * @param {number} options.retryTimeout int maximum milliseconds to retry transaction until giving up, default 0 (no retry)
 	 * @param {number} options.retryWait int minimum milliseconds before first transaction retry, default 10 ms.
 	 * @param {number} options.lockTimeout int maximum milliseconds to retry each lock until giving up, default 0 (no retry)
 	 * @param {number} options.lockWait int minimum milliseconds before first lock retry, default 10 ms
-	 * @returns {Promise<*>} On success, resolves with result of callback function's promise. On failure due to lock conflict, rejects with code 'ELOCKED'
+	 * @returns {Promise&lt;*&gt;} On success, resolves with result of callback function&apos;s promise. On failure due to lock conflict, rejects with code &apos;ELOCKED&apos;
 	 */
 	async transaction(callback, options = {}) {
 		options.retryTimeout = parseInt(options.retryTimeout, 10) || 0;
@@ -217,15 +258,15 @@ module.exports = class Store {
 			wait: options.lockWait
 		});
 		return lock.runWithRetry(
-			(resolve, reject, retry, tryCount) => {
+			(resolve, reject, retry, tryCount) =&gt; {
 				callback(lock, this, tryCount)
-					.then((result) => {
+					.then((result) =&gt; {
 						lock.unlockAll();
 						resolve(result);
 					})
-					.catch((err) => {
+					.catch((err) =&gt; {
 						lock.unlockAll();
-						if (err.code != 'ELOCKED') {
+						if (err.code != &apos;ELOCKED&apos;) {
 							reject(err);
 							return;
 						}
@@ -233,10 +274,10 @@ module.exports = class Store {
 					})
 				;
 			},
-			(originalErr) => {
-				const err = new Error('Error: ELOCKED: unable to acquire locks');
-				err.code = 'ELOCKED';
-				err.lockType = 'transaction';
+			(originalErr) =&gt; {
+				const err = new Error(&apos;Error: ELOCKED: unable to acquire locks&apos;);
+				err.code = &apos;ELOCKED&apos;;
+				err.lockType = &apos;transaction&apos;;
 				err.cause = originalErr;
 				return err;
 			},
@@ -247,3 +288,20 @@ module.exports = class Store {
 		);
 	}
 };
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

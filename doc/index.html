@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl">
+  <title data-ice="title">Home | fs-atomic-data-store</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="key-record store, allows any data, uses filesystem, supports transactions"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="fs-atomic-data-store"><meta property="twitter:description" content="key-record store, allows any data, uses filesystem, supports transactions"></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h1 id="fs-atomic-data-store">fs-atomic-data-store</h1><p>key-record store, uses filesystem, allows any data, transactional</p>
+<h2 id="overview">Overview</h2><h3 id="features">Features</h3><ul>
+<li><p><strong>key-record store</strong><br>Persistent key-value database.<br>A store is a collection of records, each record has a unique key and one or more values.</p>
+</li>
+<li><p><strong>uses filesystem</strong><br>Plain files, nothing fancy.<br>No external applications or libraries, pure Node.js javascript.</p>
+</li>
+<li><p><strong>allows any data</strong><br>A record value can contain anything, no structure is imposed or supplied.<br>For example this is <em>not</em> a JSON database. You can store JSON if you want, or BSON or YAML or an octet-stream.</p>
+</li>
+<li><p><strong>transactional</strong><br>Supports atomic operations across one or multiple records.<br>You can read-then-write or read-then-delete with assurance that no other actor is operating simultaneously.</p>
+</li>
+</ul>
+<h3 id="design-goals">Design goals</h3><ul>
+<li>Self-contained. No fancy dependencies, no database engine.</li>
+<li>No assumptions about stored data. Values are binary buffers.</li>
+<li>Streaming.</li>
+<li>No constraints. Throughput and size limitations are provided by the system not the library. Caching is done elsewhere.</li>
+<li>Atomic locks across processes. OK for simultaneous requests to Node.js, multiple Node.js instances, network/shared filesystems, etc.</li>
+<li>POSIX-compliant.</li>
+</ul>
+<h3 id="why-use-it-">Why use it?</h3><ul>
+<li>If you need a persistent key-value store.</li>
+<li>If your dataset may be large.</li>
+<li>If individual entries may be large in size.</li>
+<li>If you need control over how data is serialized (e.g. not being coerced into JSON when you may sometimes need to store big binary files)</li>
+<li>If you need to guarantee that only one actor is working on a record at a time</li>
+<li>If you don&apos;t need (or will provide your own) automatic magic for caching, change observers, object persistence, etc.</li>
+</ul>
+<h3 id="why-build-it-">Why build it?</h3><ul>
+<li>We needed a simple storage solution.</li>
+<li>We didn&apos;t need indexes or foreign keys or anything like that, and we didn&apos;t want to rely on an external database system without a compelling reason.</li>
+<li>We need to support both <em>lots of little records</em> and <em>some records being huge binary files</em>, so storing as e.g. JSON is no good.</li>
+<li>Basically every module we could find was either tinker-toy or had a baked in record format like JSON. (Whereas we wanted BSON or MessagePack mostly, but sometimes just an octet-stream).</li>
+<li>So, we built one. Here it is.</li>
+</ul>
+<h3 id="environment">Environment</h3><ul>
+<li>Node v10+ series (uses ES6 syntax)</li>
+<li>Built for Mac and Linux. Any POSIX-compliant system <em>should</em> be fine. Windows should be ok in theory although this is completely untested (2019-03).</li>
+<li>Any filesystem is supported.</li>
+</ul>
+<h2 id="installation">Installation</h2><p>Install via npm:</p>
+<p> npm install --save fs-atomic-data-store</p>
+<h2 id="usage">Usage</h2><pre><code class="lang-javascript"><code class="source-code prettyprint">const fads = require(&apos;fs-atomic-data-store&apos;);
+
+// Access a store, provide store root directory. Store may or may not exist
+let mystore = new fads.Store(&apos;./path/to/my/store/dir&apos;);
+
+// Access a collection by name. Collection may or may not exist
+let mycollection = mystore.collection(&apos;foo&apos;);
+
+// Access a record by identifier. Record may or may not exist
+let myrecord = mycollection.record(&apos;bar&apos;);
+
+// Read record into Buffer
+myrecord.readBuffer().then((content) =&gt; {
+    console.log(&apos;foo.bar contains: &apos; + content.toString(&apos;utf8&apos;));
+});</code>
+</code></pre>
+<h2 id="notes">Notes</h2><h3 id="format">Format</h3><ul>
+<li>A store is a set of records stored within a directory on the filesystem.</li>
+<li>Stores are subdivided into named collections.</li>
+<li>Each collection has a string name.<br>Names should be 7-bit ASCII, suggested max size of 64 bytes.</li>
+<li>Each collection has zero or more records.</li>
+<li>Each record has a string identifier.<br>Identifiers should be 7-bit ASCII, suggested max size of 200 bytes.<br>For non-ASCII or binary identifiers, serialize first, e.g. by converting to hex (<code>mybufferkey.toString(&apos;hex&apos;)</code>).</li>
+<li>Each record has one or more content parts.</li>
+<li>Each part has a string key (7-bit ASCII, suggested max size 32 bytes).</li>
+<li>Each part has a binary (buffer) value.</li>
+</ul>
+<h3 id="locking-model">Locking model</h3><p>The use case this model is designed for is one where simultaneous access is expected to be uncommon, but must be absolutely guaranteed to never happen.</p>
+<ul>
+<li>Locks can be established at record level, collection level or &quot;globally&quot; at store level.</li>
+<li>Record locks are guaranteed exclusive and atomic.<br>No one record can be locked by multiple actors at the same time.<br>This includes different actors running within the same Node process.</li>
+<li>Store and collection locks are also guaranteed exclusive and atomic.<br>Once a global lock is established, no further record locks will be allowed.<br>To ensure exclusive access to enire store/collection, wait until all existing record locks have been unlocked.</li>
+<li>Locks are first-come-first-served, non-blocking, non-queued.<br>If a requested lock is unavailable, fail immediately (default) or retry with escalating delay.<br>Does not block.<br>Does not keep a lock request queue, so prioritization for highly-contested resources must be handled by the application.</li>
+</ul>
+<p>The default included locking system is a wrapper around <a href="https://www.npmjs.com/package/proper-lockfile">proper-lockfile</a>.</p>
+<h3 id="storage-on-filesystem">Storage on filesystem</h3><ul>
+<li>Each collection is a subdirectory within <code>$dataDir/records</code>.</li>
+<li>Each record is a nested subdirectory within the collection directory, path based on a hash of the record identifier.</li>
+<li>Each record part is stored in a separate plain file within the record directory.</li>
+<li>Lock data is stored in <code>$datadir/locks</code>.</li>
+</ul>
+<h3 id="backup-strategies">Backup strategies</h3><ul>
+<li>archive tool<ul>
+<li>if<ul>
+<li>write volume is low</li>
+<li>a point-in-time snapshot is not absolutely required</li>
+<li>you can live with the small chance of catching a record in the middle of a write</li>
+</ul>
+</li>
+<li>then<ul>
+<li>use <code>fsync</code> or <code>tar</code> or your favourite archiving utility</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>store-level lock plus archive tool<ul>
+<li>if<ul>
+<li>you need consistency and don&apos;t mind some downtime</li>
+</ul>
+</li>
+<li>then<ul>
+<li>establish a store-level lock, wait for other open locks to clear, use <code>fsync</code>/<code>tar</code>/etc., then remove the store-level lock</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>traversal script<ul>
+<li>if<ul>
+<li>downtime is no good</li>
+<li>even small chance of one corrupted record in archive is no good</li>
+<li>you don&apos;t need a point-in-time snapshot</li>
+</ul>
+</li>
+<li>then<ul>
+<li>write a program to traverse the store, for each record lock then copy/add to archive then unlock</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>snapshotting filesystem<ul>
+<li>if<ul>
+<li>you need a real point-in-time snapshot</li>
+<li>and no downtime</li>
+<li>and no corrupted records in archive from bad reads</li>
+<li>and a pony</li>
+</ul>
+</li>
+<li>then<ul>
+<li>use a snapshotting filesystem</li>
+<li>and the power of wishes</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

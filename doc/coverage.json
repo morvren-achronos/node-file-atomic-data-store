@@ -1,0 +1,27 @@
+{
+  "coverage": "100%",
+  "expectCount": 71,
+  "actualCount": 71,
+  "files": {
+    "src/Collection.js": {
+      "expectCount": 9,
+      "actualCount": 9,
+      "undocumentLines": []
+    },
+    "src/Lock.js": {
+      "expectCount": 23,
+      "actualCount": 23,
+      "undocumentLines": []
+    },
+    "src/Record.js": {
+      "expectCount": 27,
+      "actualCount": 27,
+      "undocumentLines": []
+    },
+    "src/Store.js": {
+      "expectCount": 12,
+      "actualCount": 12,
+      "undocumentLines": []
+    }
+  }
+}

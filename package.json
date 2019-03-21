@@ -1,10 +1,10 @@
 {
-  "name": "file-atomic-data-store",
+  "name": "fs-atomic-data-store",
   "version": "0.0.1",
-  "description": "key-record store, allows any data, uses filesystem, atomic operations",
+  "description": "key-record store, allows any data, uses filesystem, supports transactions",
   "repository": {
     "type": "git",
-    "url": "github:morvren-achronos/node-file-atomic-data-store"
+    "url": "github:morvren-achronos/node-fs-atomic-data-store"
   },
   "keywords": [
     "storage",
@@ -12,7 +12,8 @@
     "filesystem",
     "nosql",
     "key-store",
-    "atomic"
+    "atomic",
+    "transactional"
   ],
   "author": "Ky Patterson Morvren-Achronos <ky@morvren-achronos.com>",
   "license": "Apache-2.0",
@@ -24,21 +25,44 @@
   },
   "scripts": {
     "test": "mocha",
-    "generate-docs": "esdoc"
+    "doc": "esdoc",
+    "lint": "eslint ./src ./test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "node": "^10.10.0",
+    "proper-lockfile": "^4.0.0"
+  },
   "devDependencies": {
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "esdoc": "^1.1.0",
+    "esdoc-node": "^1.0.4",
     "esdoc-standard-plugin": "^1.0.0",
-    "mocha": "^5.2.0"
+    "eslint": "^5.15.2",
+    "mocha": "^5.2.0",
+    "rimraf": "^2.6.3"
   },
   "esdoc": {
     "source": "./src",
-    "destination": "./docs",
+    "destination": "./doc",
     "plugins": [
       {
-        "name": "esdoc-standard-plugin"
+        "name": "esdoc-standard-plugin",
+        "option": {
+          "test": {
+            "source": "./test/",
+            "interfaces": [
+              "describe",
+              "it",
+              "context",
+              "suite",
+              "test"
+            ]
+          }
+        }
+      },
+      {
+        "name": "esdoc-node"
       }
     ]
   }

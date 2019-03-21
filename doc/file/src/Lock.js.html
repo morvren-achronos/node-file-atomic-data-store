@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">src/Lock.js | fs-atomic-data-store</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  <script src="script/manual.js"></script>
+<meta name="description" content="key-record store, allows any data, uses filesystem, supports transactions"><meta property="twitter:card" content="summary"><meta property="twitter:title" content="fs-atomic-data-store"><meta property="twitter:description" content="key-record store, allows any data, uses filesystem, supports transactions"></head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/Lock.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+ * class Lock
+ */
+
+/**
+ * @typedef {Array&lt;{collection: ?string, identifier: ?string, type: &quot;record&quot;|&quot;collection&quot;|&quot;store&quot;, ours: ?bool}&gt;} LockInfo
+ */
+
+// Libraries
+const lockfile = require(&apos;proper-lockfile&apos;);
+
+// Constants
+/**
+ * @access private
+ */
+const
+	STORE_FILENAME = &apos;@@--store@@&apos;,
+	COLLECTION_FILENAME = &apos;@@--collection@@%s&apos;,
+	COLLECTION_FILENAME_REGEXP = new RegExp(&apos;^&apos; + COLLECTION_FILENAME.replace(/%s/, &apos;(.+)&apos;) + &apos;$&apos;),
+	RECORD_FILENAME = &apos;%s@@--record@@%s&apos;,
+	RECORD_FILENAME_REGEXP = new RegExp(&apos;^&apos; + RECORD_FILENAME.replace(/%s/g, &apos;(.+)&apos;) + &apos;$&apos;)
+;
+
+/**
+ * Lock resources for exclusive access
+ *
+ * Do not instantiate this class directly, use methods from class {Store}
+ */
+module.exports = class Lock {
+	/**
+	 * Get locking instance
+	 *
+	 * @param {Store} store - object
+	 * @param {object} options
+	 * @param {number} options.timeout - default max retry time in milliseconds
+	 * @param {number} options.wait - default min time in ms to wait before first retry
+	 */
+	constructor(store, options) {
+		/**
+		 * @access private
+		 */
+		this._store = store;
+		/**
+		 * @access private
+		 */
+		this._options = {
+			timeout: options.timeout || 0,
+			wait: options.wait || 10
+		};
+		/**
+		 * @access private
+		 */
+		this._locks = {};
+	}
+
+
+	// Utility methods
+
+	/**
+	 * Store instance for this collection
+	 *
+	 * @type Store
+	 */
+	get store() {
+		return this._store;
+	}
+
+	/**
+	 * Utility. Get filename for a lock
+	 *
+	 * For a record lock, pass string collection and identifier.
+	 * For a collection-level lock, pass string collection and null for identifier.
+	 * For a store-level lock, pass null for both parameters
+	 *
+	 * @param {?string} collection - collection name
+	 * @param {?string} identifier - identifier name
+	 * @returns {string} filename
+	 */
+	filename(collection, identifier) {
+		if (collection == null &amp;&amp; identifier == null) {
+			return STORE_FILENAME;
+		}
+		if (identifier == null) {
+			return COLLECTION_FILENAME.replace(/%s/, collection);
+		}
+		return RECORD_FILENAME.replace(/%s/, collection).replace(/%s/, identifier);
+	}
+
+	/**
+	 * Utility. Get lock info from lock filename
+	 *
+	 * @param {string} filename - lock filename
+	 * @return {LockInfo} lock info
+	 */
+	parseFilename(filename) {
+		if (filename == STORE_FILENAME) {
+			return {
+				collection: null,
+				identifier: null,
+				type: &apos;store&apos;,
+				ours: null
+			}
+		}
+		let m;
+		if ((m = COLLECTION_FILENAME_REGEXP.exec(filename))) {
+			return {
+				collection: m[1],
+				identifier: null,
+				type: &apos;collection&apos;,
+				ours: null
+			}
+		}
+		if ((m = RECORD_FILENAME_REGEXP.exec(filename))) {
+			return {
+				collection: m[1],
+				identifier: m[2],
+				type: &apos;record&apos;,
+				ours: null
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Utility. Return array of retry delay times
+	 *
+	 * @param {number} timeout - maximum retry delay time in milliseconds
+	 * @param {number} wait - minimum delay before first retry, in milliseconds
+	 * @returns {array} retry timer values, can be passed to setTimeout
+	 */
+	calcRetries(timeout, wait) {
+		let retries = [];
+		if (timeout &gt; 0) {
+			while (timeout &gt;= wait) {
+				retries.unshift(timeout);
+				timeout = Math.floor(timeout / 3);
+			}
+			for (let i = 1; i &lt; retries.length; i++) {
+				retries[i] -= retries[i - 1];
+			}
+		}
+		return retries;
+	}
+
+	/**
+	 * Utility. Perform an operation and retry it if first attempt(s) fail
+	 *
+	 * @param {function} operation - Signature: `function(resolve, reject, retry, tryCount): Promise&lt;void&gt;`
+	 * @param {function} onTimeout - On timeout, operation promise is rejected with value returned by this function
+	 * @param {object} options
+	 * @param {number} options.timeout - max retry time in milliseconds, default is as provided to Lock constructor
+	 * @param {number} options.wait - min time to wait before first retry, default is as provided to Lock constructor
+	 */
+	async runWithRetry(operation, onTimeout, options = {}) {
+		options.timeout = options.timeout || this._options.timeout;
+		options.wait = options.wait || this._options.wait;
+		return new Promise((resolve, reject) =&gt; {
+			let retries = this.calcRetries(options.timeout, options.wait);
+			let tryCount = 0;
+			function retry() {
+				if (retries.length == 0) {
+					reject(onTimeout());
+					return;
+				}
+				setTimeout(run, retries.shift());
+			}
+			function run() {
+				operation(resolve, reject, retry, tryCount++);
+			}
+			run();
+		});
+	}
+
+	/**
+	 * Utility. Get directory path for locks
+	 *
+	 * Directory is created if it doesn&apos;t exist.
+	 *
+	 * @param {bool} create - true to create directory if it does not exist
+	 * @returns {Promise&lt;string&gt;} dirpath
+	 */
+	async dir(create = true) {
+		return this.store.dir([this.store.option(&apos;locksDir&apos;)], create);
+	}
+
+
+	// Data operation methods
+
+	/**
+	 * Attempt to take an exclusive lock
+	 *
+	 * If the lock is free, it will be taken by this instance.
+	 * If the lock is already held by this instance, calling {lock} again will resolve ok.
+	 * If the lock is held by another instance or process, rejects with code &quot;ELOCKED&quot; and lockType &quot;record&quot;.
+	 * If the collection is locked (by this or any other instance), rejects with code &quot;ELOCKED&quot; and lockType &quot;collection&quot;.
+	 * If the store is locked (by this or any other instance), rejects with code &quot;ELOCKED&quot; and lockType &quot;store&quot;.
+	 *
+	 * @param {?string} collection - collection name, or null for store-level lock
+	 * @param {?string} identifier - record identifier, or null for collection-level lock
+	 * @param {object} options
+	 * @param {number} options.timeout - max retry time in milliseconds. Default is per options to constructor
+	 * @param {number} options.wait - min time in ms to wait before first retry. Default is per options to constructor
+	 * @returns {Promise&lt;void&gt;}
+	 */
+	async lock(collection, identifier, options = {}) {
+		const
+			dir = await this.dir(),
+			path = this.store.path,
+			filename = this.filename(collection, identifier),
+			filepath = path.join(dir, filename)
+		;
+
+		// Check whether this instance already holds lock
+		if (this._locks[filename]) {
+			// Confirm we really still have it
+			if (await this._lockOperation(&apos;check&apos;, filepath)) {
+				// We do
+				return;
+			}
+			// We don&apos;t... this is bad but nothing we can do about it here, unlock will throw
+		}
+
+		// Check for store-level lock
+		if (await this._lockOperation(&apos;check&apos;, path.join(dir, this.filename(null, null)))) {
+			// Store is locked
+			const err = new Error(&apos;Error: ELOCKED: store is locked&apos;);
+			err.code = &apos;ELOCKED&apos;;
+			err.lockType = &apos;store&apos;;
+			throw err;
+		}
+
+		// Check for collection lock
+		if (collection &amp;&amp; await this._lockOperation(&apos;check&apos;, path.join(dir, this.filename(collection, null)))) {
+			// Store is locked
+			const err = new Error(&apos;Error: ELOCKED: collection is locked&apos;);
+			err.code = &apos;ELOCKED&apos;;
+			err.lockType = &apos;collection&apos;;
+			throw err;
+		}
+
+		// Attempt to take lock
+		return this.runWithRetry(
+			(resolve, reject, retry) =&gt; {
+				this._lockOperation(&apos;lock&apos;, filepath)
+					.then((release) =&gt; {
+						this._locks[filename] = {
+							c: collection,
+							i: identifier,
+							r: release
+						};
+						resolve();
+					})
+					.catch((err) =&gt; {
+						if (err.code != &apos;ELOCKED&apos;) {
+							reject(err);
+							return;
+						}
+						retry();
+					})
+				;
+			},
+			() =&gt; {
+				const err = new Error(&apos;Error: ELOCKED: lock is held by another instance&apos;);
+				err.code = &apos;ELOCKED&apos;;
+				err.lockType = &apos;lock&apos;;
+				return err;
+			},
+			options
+		);
+	}
+
+	/**
+	 * Release a lock held by this instance
+	 *
+	 * If lock is not held by this instance, rejects with code &quot;ENOTACQUIRED&quot;.
+	 * If lock has been compromised, rejects with code &quot;ECOMPROMISED&quot;.
+	 *
+	 * @param {?string} collection - collection name, or null for store-level lock
+	 * @param {?string} identifier - record identifier, or null for collection-level lock
+	 * @returns {Promise&lt;void&gt;}
+	 */
+	async unlock(collection, identifier) {
+		const
+			path = this.store.path,
+			filename = this.filename(collection, identifier)
+		;
+
+		// Check whether this instance holds lock
+		if (!this._locks[filename]) {
+			let err = new Error(&apos;Error: ENOTACQUIRED: lock is not held by this instance&apos;);
+			err.code = &apos;ENOTACQUIRED&apos;;
+			throw err;
+		}
+
+		// Confirm we really still have it
+		let err;
+		if (await this._lockOperation(&apos;check&apos;, path.join(await this.dir(), filename)) == false) {
+			// We don&apos;t... throw error
+			err = new Error(&apos;Error: ECOMPROMISED: lock has been removed by another process, possible simultaneous data access&apos;);
+			err.code = &apos;ECOMPROMISED&apos;;
+		}
+
+		// Release lock
+		await this._locks[filename].r();
+		delete this._locks[filename];
+
+		// Throw error if present
+		if (err) {
+			throw err;
+		}
+	}
+
+	/**
+	 * Release all locks held by this instance
+	 *
+	 * @returns {Promise&lt;void&gt;}
+	 */
+	async unlockAll() {
+		for (let k of Object.keys(this._locks)) {
+			// Release lock
+			await this._locks[k].r();
+			delete this._locks[k];
+		}
+	}
+
+	/**
+	 * List locks currently held by this instance
+	 *
+	 * @return LockInfo[] held locks
+	 */
+	list() {
+		let locks = [];
+		for (let k in this._locks) {
+			locks.push({
+				collection: this._locks[k].c,
+				identifier: this._locks[k].i,
+				type:
+					(this._locks[k].c == null)
+					? &apos;store&apos;
+					: (
+						(this._locks[k].i == null)
+						? &apos;collection&apos;
+						: &apos;record&apos;
+					),
+				ours: true
+			});
+		}
+		this._sortLockList(locks);
+		return locks;
+	}
+
+	/**
+	 * List locks currently held by all actors (all processes, all instances)
+	 *
+	 * @return {LockInfo[]} held locks
+	 */
+	async listGlobal() {
+		const
+			dir = await this.dir(),
+			fs = this.store.fs
+		;
+		return new Promise((resolve, reject) =&gt; {
+			fs.readdir(
+				dir,
+				{
+					withFileTypes: true
+				},
+				(err, entries) =&gt; {
+					if (err) {
+						reject(err);
+						return;
+					}
+					let locks = [];
+					for (let ent of entries) {
+						if (ent.isDirectory()) {
+							let lockinfo = this.parseFilename(ent.name)
+							lockinfo.ours = (typeof this._locks[ent.name] == &apos;object&apos;);
+							locks.push(lockinfo);
+						}
+					}
+					this._sortLockList(locks);
+					resolve(locks);
+				}
+			);
+		});
+	}
+
+
+	// Convenience methods
+
+	/**
+	 * Attempt to take a collection-level lock (lock an entire collection)
+	 *
+	 * @param {string} collection - collection name
+	 * @returns {Promise&lt;void&gt;}
+	 */
+	async lockCollection(collection) {
+		return this.lock(collection, null);
+	}
+
+	/**
+	 * Attempt to take a store-level lock (lock the entire store)
+	 *
+	 * @returns {Promise&lt;void&gt;}
+	 */
+	async lockStore() {
+		return this.lock(null, null);
+	}
+
+	/**
+	 * Release a held colection-level lock
+	 *
+	 * @param {string} collection - collection name
+	 * @returns {Promise&lt;void&gt;}
+	 */
+	async unlockCollection(collection) {
+		return this.unlock(collection, null);
+	}
+
+	/**
+	 * Release held store-level lock
+	 */
+	async unlockStore() {
+		return this.unlock(null, null);
+	}
+
+
+	// Internal methods
+
+	/**
+	 * @access private
+	 */
+	_lockOperation(method, filepath) {
+		return lockfile[method](
+			filepath,
+			{
+				realpath: false,
+				lockfilePath: filepath
+			}
+		);
+	}
+
+	/**
+	 * @access private
+	 */
+	_sortLockList(locks) {
+		const typeSortMap = {
+			store: 0,
+			collection: 1,
+			record: 2
+		};
+		locks.sort((a, b) =&gt; {
+			let v = typeSortMap[a.type] - typeSortMap[b.type];
+			if (v) {
+				return v;
+			}
+			v = a.collection.localeCompare(b.collection);
+			if (v) {
+				return v;
+			}
+			return a.identifier.localeCompare(b.identifier);
+		});
+	}
+};
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(1.1.0)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
