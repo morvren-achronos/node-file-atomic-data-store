@@ -24,9 +24,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha",
     "doc": "esdoc",
-    "lint": "eslint ./src ./test"
+    "lint": "eslint ./src ./test",
+    "test": "mocha"
   },
   "dependencies": {
     "node": "^10.10.0",
