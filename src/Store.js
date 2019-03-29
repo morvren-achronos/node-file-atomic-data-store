@@ -10,7 +10,7 @@ module.exports = class Store {
 	 * Create new Store instance
 	 *
 	 * @param {object} options
-	 * @param {string} options.dirPath - root directory for this store. Default is subdirectory "store" in current working directory
+	 * @param {string} options.rootDir - root directory for this store. Default is subdirectory "store" in current working directory
 	 * @param {number} options.fileMode - octal file permission mode when creating files. Default 0o660
 	 * @param {number} options.dirMode - octal file permission mode when creating directories. Default 0o770
 	 * @param {string} options.defaultPart - default part name to use when none is specified. Default "r"
