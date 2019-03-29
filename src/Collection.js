@@ -5,7 +5,7 @@
 /**
  * Interact with a colection of records
  *
- * Do not instantiate this class directly, use methods from class {Store}
+ * Do not instantiate this class directly, use methods from class {@link Store}
  *
  * @access public
  */

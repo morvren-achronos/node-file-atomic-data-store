@@ -24,7 +24,7 @@ const
 /**
  * Lock resources for exclusive access
  *
- * Do not instantiate this class directly, use methods from class {Store}
+ * Do not instantiate this class directly, use methods from class {@link Store}
  */
 module.exports = class Lock {
 	/**
@@ -352,7 +352,7 @@ module.exports = class Lock {
 	/**
 	 * List locks currently held by all actors (all processes, all instances)
 	 *
-	 * @return {LockInfo[]} held locks
+	 * @return {Promise<LockInfo[]>} held locks
 	 */
 	async listGlobal() {
 		const

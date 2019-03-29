@@ -8,7 +8,7 @@
 /**
  * Interact with a record
  *
- * Do not instantiate this class directly, use methods from class {Store}
+ * Do not instantiate this class directly, use methods from class {@link Store}
  */
 module.exports = class Record {
 	/**
