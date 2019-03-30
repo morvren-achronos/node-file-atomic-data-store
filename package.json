@@ -19,12 +19,14 @@
   "license": "Apache-2.0",
   "main": "index.js",
   "directories": {
+    "bin": "bin",
     "lib": "src",
     "doc": "doc",
     "test": "test"
   },
   "scripts": {
     "doc": "esdoc",
+    "check-shred": "./bin/check-shred",
     "lint": "eslint ./src ./test",
     "test": "mocha"
   },

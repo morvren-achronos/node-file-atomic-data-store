@@ -1,0 +1,118 @@
+#!/usr/bin/env node
+
+// Libraries
+const
+	fsads = require('../index'),
+	child_process = require('child_process'),
+	crypto = require('crypto'),
+	fs = require('fs'),
+	os = require('os'),
+	path = require('path'),
+	rimraf = require('rimraf')
+;
+
+// Constants
+const RANDOM_SIZE = 16;
+const REPEAT_COUNT = 64; // 4096 bytes
+
+if (process.getuid() != 0) {
+	console.warn('You are not root. You will probably need to be root for this to work.');
+}
+
+let timer = setTimeout(
+	() => {
+		console.log('still running...');
+	},
+	10 * 1000
+);
+
+const rootDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), '/node-fs-atomic-data-store-check-shred-')));
+let devicefd;
+
+async function run() {
+	const pattern1 = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
+	const pattern2 = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
+	const store = new fsads.Store({rootDir: rootDir});
+	const record = store.record('testcol', 'testrec');
+
+	await record.writeBuffer('part1', pattern1.repeat(REPEAT_COUNT));
+	await record.writeBuffer('part2', pattern2.repeat(REPEAT_COUNT));
+	let buffer1 = await record.readBuffer('part1');
+	let buffer2 = await record.readBuffer('part2');
+	if (
+		buffer1.toString('utf8') != pattern1.repeat(REPEAT_COUNT)
+		|| buffer2.toString('utf8') != pattern2.repeat(REPEAT_COUNT)
+	) {
+		throw new Error('Something is wrong with fs-atomic-data-store, run tests!');
+	}
+
+	let filepath = await record.filepath('part1');
+	let stat = fs.statSync(filepath);
+	const blocksize = stat.blksize;
+
+	let m = /(\/dev\/[^\s]+)\s+(\d+)/.exec(child_process.execSync('BLOCKSIZE=' + blocksize + ' df ' + filepath, {encoding: 'utf8'}));	
+	const devpath = m[1];
+	const blockcount = parseInt(m[2]);
+
+	await record.deletePart('part1');
+	await record.shredPart('part2');
+
+	devicefd = fs.openSync(devpath, 'r');
+
+	buffer1 = Buffer.from(pattern1);
+	buffer2 = Buffer.from(pattern2);
+	let found1 = false;
+	let found2 = false;
+	let buf = Buffer.alloc(blocksize);
+	for (let i = 0; i < blockcount; i++) {
+		if (i % 20000 == 0) {
+			console.log('reading block ' + (i + 1) + ' of ' + blockcount + ' (' + (Math.round(i / blockcount)) + '%)');
+		}
+		fs.readSync(devicefd, buf, 0, blocksize, null);
+		if (!found1 && buf.indexOf(buffer1) != -1) {
+			foundDeleted = true;
+			console.log('Found deleted file');
+		}
+		if (!found2 && buf.indexOf(buffer2) != -1) {
+			foundDeleted = true;
+			console.log('Found shredded file');
+		}
+		if (found1 && found2) {
+			break;
+		}
+	}
+
+	console.log('Done scanning drive. Result:');
+	if (found1 && !found2) {
+		console.log('Pass. Found deleted file (as expected), did not find shredded file (good). This device ' + devpath + ' is good for secure deletion');
+	}
+	else if (!found1 && !found2) {
+		console.log('Maybe pass. Did not find shredded file but also didn\'t find deleted file. This device ' + devpath + ' is not behaving in an expected way, but we didn\'t find the shredded data so probably ok(?).')
+	}
+	else if (found1 && found2) {
+		console.log('Fail. Found deleted file (as expected) but also found shredded file (bad). This device ' + devpath + ' is NOT ok for secure deletion')
+	}
+	else if (!found1 && found2) {
+		console.log('Inconclusive. Found shredded file but not deleted file. Test failed to function correctly. This device ' + devpath + ' is probably NOT ok for secure deletion but we can\'t tell for sure.')
+	}
+}
+
+function cleanup() {
+	if (devicefd) {
+		fs.closeSync(devicefd);
+	}
+	rimraf.sync(rootDir);
+	clearTimeout(timer);
+	//console.debug('ran cleanup');
+}
+run()
+	.then(() => {
+		console.log('Complete, exiting.');
+	})
+	.catch((err) => {
+		console.error('Caught exception, exiting:', err);
+	})
+	.finally(() => {
+		cleanup();
+	})
+;
