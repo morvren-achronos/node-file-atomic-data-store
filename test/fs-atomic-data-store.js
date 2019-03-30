@@ -153,7 +153,7 @@ describe('class Store', function() {
 							throw err;
 						},
 						{
-							retryTimeout: 0
+							transactionTimeout: 0
 						}
 					),
 					'retry 0, throws'
@@ -170,8 +170,8 @@ describe('class Store', function() {
 							throw err;
 						},
 						{
-							retryTimeout: 30,
-							retryWait: 10
+							transactionTimeout: 30,
+							transactionWait: 10
 						}
 					),
 					'retry 10-30 ms, throws'
@@ -190,8 +190,8 @@ describe('class Store', function() {
 							throw err;
 						},
 						{
-							retryTimeout: 30,
-							retryWait: 10
+							transactionTimeout: 30,
+							transactionWait: 10
 						}
 					),
 					'throw during retry'
@@ -592,7 +592,7 @@ describe('class Record', function() {
 				for (let part of parts) {
 					fs.writeFileSync(await record.filepath(part), part);
 				}
-				await expect(record.deleteMultipleParts(parts)).to.eventually.be.an('array').lengthOf(3);
+				await expect(record.deleteMultipleParts(parts)).to.eventually.deep.equal(parts);
 				for (let part of parts) {
 					let path = await record.filepath(part, false);
 					expect(function() {
@@ -647,7 +647,7 @@ describe('class Record', function() {
 			});
 		});
 		describe('#shredMultipleParts', function() {
-			it('should overwrite parts and keep same size', async function() {
+			it('should overwrite part data (keeping same size) then remove parts', async function() {
 				let parts = [
 					'test1',
 					'test2',

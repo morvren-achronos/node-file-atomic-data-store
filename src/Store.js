@@ -14,6 +14,10 @@ module.exports = class Store {
 	 * @param {number} options.fileMode - octal file permission mode when creating files. Default 0o660
 	 * @param {number} options.dirMode - octal file permission mode when creating directories. Default 0o770
 	 * @param {string} options.defaultPart - default part name to use when none is specified. Default "r"
+	 * @param {number} options.transactionTimeout - transaction timeout option (see {@link transaction}, default 0 (no retry)
+	 * @param {number} options.transactionWait - transaction wait option (see {@link transaction}, default 10 ms
+	 * @param {number} options.lockTimeout - lock timeout option (see {@link lock}, default 0 (no retry)
+	 * @param {number} options.lockWait - lock wait option (see {@link lock}, default 10 ms
 	 * @param {module} options.fsModule - use this instead of Node.js builtin fs (filesystem) module
 	 * @param {module} options.pathModule- use this instead of Node.js buitin path (filepaths) module
 	 * @param {function} options.recordClass - use this instead of internal Record class
@@ -30,6 +34,10 @@ module.exports = class Store {
 			fileMode: 0o660,
 			dirMode: 0o770,
 			defaultPart: 'r',
+			transactionTimeout: 0,
+			transactionWait: 10,
+			lockTimeout: 0,
+			lockWait: 10,
 			fsModule: 'fs',
 			pathModule: 'path',
 			recordClass: './Record',
@@ -51,12 +59,22 @@ module.exports = class Store {
 				}
 			}
 		}
+		for (let k of ['fileMode', 'dirMode']) {
+			if (typeof this._options[k] != 'number') {
+				this._options[k] = parseInt(this._options[k], 8);
+			}
+		}
+		for (let k of ['transactionTimeout', 'transactionWait', 'lockTimeout', 'lockWait']) {
+			if (typeof this._options[k] != 'number') {
+				this._options[k] = parseInt(this._options[k], 10);
+			}
+		}
 		for (let k of ['fsModule', 'pathModule', 'recordClass', 'collectionClass', 'lockClass']) {
-			if (typeof this._options[k] == 'string') {
+			if (typeof this._options[k] != 'object') {
 				this._options[k] = require(this._options[k]);
 			}
 		}
-		if (this._options.shredFunction == null) {
+		if (typeof this._options.shredFunction != 'function') {
 			this._options.shredFunction = require('crypto').randomBytes;
 		}
 	}
@@ -174,10 +192,14 @@ module.exports = class Store {
 	/**
 	 * Return an object to perform exclusive access locking
 	 *
-	 * @param {object} options - see Lock class
+	 * @param {object} options
+	 * @param {number} options.timeout - default max retry time in milliseconds
+	 * @param {number} options.wait - default min time in ms to wait before first retry
 	 * @returns {Lock} locking instance
 	 */
 	lock(options = {}) {
+		options.timeout = parseInt(options.timeout, 10) || this.option('lockTimeout');
+		options.wait = parseInt(options.wait, 10) || this.option('lockWait');
 		return new (this.option('lockClass'))(this, options);
 	}
 
@@ -194,24 +216,24 @@ module.exports = class Store {
 	 * By default, no attempt is made to retry if a lock is not available.
 	 * Likewise, no attempt is made to retry the entire transaction if any lock is unavailable.
 	 * Both individual locks and the transaction as a whole can be configured to retry automatically after a delay.
-	 * The delay before the first transaction retry is specified by the `retryWait` option.
-	 * The maximum total transaction retry delay is specified by the `retryTimeout` option.
+	 * The delay before the first transaction retry is specified by the `transactionWait` option.
+	 * The maximum total transaction retry delay is specified by the `transactionTimeout` option.
 	 *
 	 * @param {function} callback - perform operations; may be called multiple times, may be halted at any point where a lock is acquired
 	 *   Signature: `async function(lockObject: Lock, storeObject: Store, tryCount: number): Promise<*>`
 	 * @param {object} options
-	 * @param {number} options.retryTimeout - maximum milliseconds to retry transaction until giving up, default 0 (no retry)
-	 * @param {number} options.retryWait - minimum milliseconds before first transaction retry, default 10 ms.
+	 * @param {number} options.transactionTimeout - maximum milliseconds to retry transaction until giving up, default 0 (no retry)
+	 * @param {number} options.transactionWait - minimum milliseconds before first transaction retry, default 10 ms.
 	 * @param {number} options.lockTimeout - maximum milliseconds to retry each lock until giving up, default 0 (no retry)
 	 * @param {number} options.lockWait - minimum milliseconds before first lock retry, default 10 ms
 	 * @param {Lock} options.lock - use this Lock instance, do not create or manage a lock for just this transaction. Note: if lock is provided then transaction() will NOT automatically release held locks before resolving
 	 * @returns {Promise<*>} On success, resolves with result of callback function's promise. On failure due to lock conflict, rejects with code 'ELOCKED'
 	 */
 	async transaction(callback, options = {}) {
-		options.retryTimeout = parseInt(options.retryTimeout, 10) || 0;
-		options.retryWait = parseInt(options.retryWait, 10) || 10;
-		options.lockTimeout = parseInt(options.lockTimeout, 10) || 0;
-		options.lockWait = parseInt(options.lockWait, 10) || 10;
+		options.transactionTimeout = parseInt(options.transactionTimeout, 10) || this.option('transactionTimeout');
+		options.transactionWait = parseInt(options.transactionWait, 10) || this.option('transactionWait');
+		options.lockTimeout = parseInt(options.lockTimeout, 10) || this.option('lockTimeout');
+		options.lockWait = parseInt(options.lockWait, 10) || this.option('lockWait');
 
 		let lock;
 		let clearLocks = true;
@@ -220,10 +242,13 @@ module.exports = class Store {
 			clearLocks = false;
 		}
 		else {
-			lock = this.lock(this, {
-				timeout: options.lockTimeout,
-				wait: options.lockWait
-			});
+			lock = this.lock(
+				this,
+				{
+					timeout: options.lockTimeout,
+					wait: options.lockWait
+				}
+			);
 		}
 
 		return lock.runWithRetry(
@@ -251,8 +276,8 @@ module.exports = class Store {
 				return err;
 			},
 			{
-				timeout: options.retryTimeout,
-				wait: options.retryWait
+				timeout: options.transactionTimeout,
+				wait: options.transactionWait
 			}
 		);
 	}
