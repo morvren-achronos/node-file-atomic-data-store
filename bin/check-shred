@@ -66,7 +66,7 @@ async function run() {
 	let buf = Buffer.alloc(blocksize);
 	for (let i = 0; i < blockcount; i++) {
 		if (i % 20000 == 0) {
-			console.log('reading block ' + (i + 1) + ' of ' + blockcount + ' (' + (Math.round(i / blockcount)) + '%)');
+			console.log('reading block ' + (i + 1) + ' of ' + blockcount + ' (' + (Math.round(100 * i / blockcount)) + '%)');
 		}
 		fs.readSync(devicefd, buf, 0, blocksize, null);
 		if (!found1 && buf.indexOf(buffer1) != -1) {
