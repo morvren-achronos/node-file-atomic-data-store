@@ -202,8 +202,43 @@ describe('class Store', function() {
 });
 
 describe('class Collection', function() {
+	async function makeTestDirs() {
+		const mkdirs = [
+			'a0/b0/c0/d0/testrec0',
+			'a0/b0/c0/d0/testrec1',
+			'a0/b0/c0/d1/testrec2',
+			'a0/b0/c0/d1/testrec3',
+			'a0/b0/c1/d0/testrec4',
+			'a0/b0/c1/d1/testrec5',
+			'a0/b1/c0/d0/testrec6',
+			'a1/b0/c0/d0/testrec7',
+			'a1/b0/c0/d0/testrec8',
+			'a1/b0/c1/d0/testrec9'
+		];
+		let baseDir = await collection.dir();
+		for (let dir of mkdirs) {
+			fs.mkdirSync(
+				path.join(baseDir, dir),
+				{
+					recursive: true
+				}
+			);
+		}
+		return [
+			'testrec0',
+			'testrec1',
+			'testrec2',
+			'testrec3',
+			'testrec4',
+			'testrec5',
+			'testrec6',
+			'testrec7',
+			'testrec8',
+			'testrec9'
+		];
+	}
 	let collection;
-	beforeEach(function() {
+	beforeEach(async function() {
 		store = new Store({
 			rootDir: rootDir,
 			defaultPart: 'test'
@@ -248,43 +283,14 @@ describe('class Collection', function() {
 	describe('Data operation methods', function() {
 		describe('#traverse', function() {
 			it('should execute callback once for each record in collection', async function() {
-				let baseDir = await collection.dir();
-				const mkdirs = [
-					'a0/b0/c0/d0/testrec_1',
-					'a0/b0/c0/d1/testrec_2',
-					'a0/b0/c0/d1/testrec_3',
-					'a0/b0/c1/d0/testrec_4',
-					'a0/b0/c1/d1/testrec_5',
-					'a0/b1/c0/d0/testrec_6',
-					'a1/b0/c0/d0/testrec_7',
-					'a1/b0/c0/d0/testrec_8',
-					'a1/b0/c1/d0/testrec_9',
-					'a1/b1/c0/d0/testrec_a'
-				];
-				const expectedIds = [
-					'testrec_1',
-					'testrec_2',
-					'testrec_3',
-					'testrec_4',
-					'testrec_5',
-					'testrec_6',
-					'testrec_7',
-					'testrec_8',
-					'testrec_9',
-					'testrec_a'
-				];
-				for (let dir of mkdirs) {
-					fs.mkdirSync(
-						path.join(baseDir, dir),
-						{
-							recursive: true
-						}
-					);
-				}
+				const expectedIds = await makeTestDirs();
 				let foundIds = [];
-				await expect(collection.traverse((identifier) => {
+				await expect(collection.traverse((identifier, recordIndex, collectionObj) => {
+					expect(identifier).to.be.a('string').lengthOf(8).match(/^testrec\d$/);
+					expect(recordIndex).to.be.a('number').equal(foundIds.length);
+					expect(collectionObj).to.equal(collection);
 					foundIds.push(identifier);
-				})).to.eventually.equal(expectedIds.length);
+				})).to.eventually.equal(10);
 				foundIds.sort();
 				expect(foundIds).to.deep.equal(expectedIds);
 			});
@@ -292,11 +298,22 @@ describe('class Collection', function() {
 				// triple-check that dir does not exist
 				let dir = await collection.dir([], false);
 				expect(function() {
-						return fs.statSync(dir);
+					return fs.statSync(dir);
 				}).to.throw('ENOENT');
 				await expect(collection.traverse(() => {
-					return;
+					throw new Error('callback should not be called');
 				})).to.eventually.equal(0);
+			});
+			it('should stop if callback returns bool false', async function() {
+				await makeTestDirs();
+				let foundIds = [];
+				await expect(collection.traverse((identifier, recordIndex, collectionObj) => {
+					foundIds.push(identifier);
+					if (recordIndex == 3) {
+						return false;
+					}
+				})).to.eventually.equal(4);
+				expect(foundIds).to.have.lengthOf(4);
 			});
 		});
 	});
