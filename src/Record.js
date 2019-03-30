@@ -279,7 +279,7 @@ module.exports = class Record {
 			path = this.store.path,
 			fs  = this.store.fs,
 			fileMode = this.store.option('fileMode'),
-			flags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_SYNC
+			flags = fs.constants.O_WRONLY | fs.constants.O_TRUNC | fs.constants.O_CREAT | fs.constants.O_DSYNC
 		;
 		let promises = [];
 		let results = {};
@@ -411,7 +411,7 @@ module.exports = class Record {
 			fs  = this.store.fs,
 			shred = this.store.option('shredFunction'),
 			fileMode = this.store.option('fileMode'),
-			flags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_SYNC
+			flags = fs.constants.O_WRONLY | fs.constants.O_DSYNC
 		;
 		if (!(parts instanceof Array)) {
 			parts = Object.keys(parts);
