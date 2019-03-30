@@ -377,7 +377,6 @@ module.exports = class Record {
 				);
 			}));
 		}
-		results.sort();
 		promises.push((async () => {
 			let removeDir = dir;
 			for (let i = 0; i < 6; i++) {
@@ -393,6 +392,7 @@ module.exports = class Record {
 			}
 		})());
 		await Promise.all(promises);
+		results.sort();
 		return results;
 	}
 
@@ -481,6 +481,7 @@ module.exports = class Record {
 			}));
 		}
 		await Promise.all(promises);
+		results.sort();
 		return results;
 	}
 
