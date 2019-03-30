@@ -397,7 +397,7 @@ module.exports = class Record {
 	}
 
 	/**
-	 * Overwrite contents of multiple record parts
+	 * Delete multiple record parts and make contents unrecoverable
 	 *
 	 * @param {array} parts - part names to shred
 	 * @returns {Promise<void>}
@@ -422,40 +422,51 @@ module.exports = class Record {
 					filepath,
 					(err, stat) => {
 						if (err) {
+							if (err.code == 'ENOENT') {
+								resolve();
+								return;
+							}
 							reject(err);
 							return;
 						}
-						let bytesRemaining = stat.size;
-						let reader = new stream.Readable({
-							autoDestroy: true,
-							read(size) {
-								let go = true;
-								while(go && bytesRemaining) {
-									if (bytesRemaining <= size) {
-										size = bytesRemaining;
-									}
-									go = this.push(shred(size));
-									bytesRemaining -= size;
-								}
-								if (bytesRemaining == 0) {
-									this.push(null);
-								}
-							}
-						});
-						let writer = fs.createWriteStream(
+						let newfilepath = path.join(dir, part + '.shred.' + Date.now().toString(16) + shred(8).toString('hex'));
+						fs.rename(
 							filepath,
-							{
-								flags: flags,
-								mode: fileMode
+							newfilepath,
+							(err) => {
+								let bytesRemaining = stat.size;
+								let reader = new stream.Readable({
+									autoDestroy: true,
+									read(size) {
+										let go = true;
+										while(go && bytesRemaining) {
+											if (bytesRemaining <= size) {
+												size = bytesRemaining;
+											}
+											go = this.push(shred(size));
+											bytesRemaining -= size;
+										}
+										if (bytesRemaining == 0) {
+											this.push(null);
+										}
+									}
+								});
+								let writer = fs.createWriteStream(
+									newfilepath,
+									{
+										flags: flags,
+										mode: fileMode
+									}
+								);
+								writer.on('error', (err) => {
+									reject(err);
+								});
+								writer.on('finish', () => {
+									resolve();
+								});
+								reader.pipe(writer);
 							}
 						);
-						writer.on('error', (err) => {
-							reject(err);
-						});
-						writer.on('finish', () => {
-							resolve();
-						});
-						reader.pipe(writer);
 					}
 				);
 			}));
@@ -528,6 +539,16 @@ module.exports = class Record {
 	}
 
 	/**
+	 * Delete a record part and make contents unrecoverable
+	 *
+	 * @param {?string} part - name of part, or null for default part
+	 * @returns {Promise<void>}
+	 */
+	async shredPart(part = null) {
+		return this._singlePartOperation('shredMultipleParts', part, null);
+	}
+
+	/**
 	 * Delete entire record (delete all record parts)
 	 *
 	 * @returns {Promise<array>} removed part names
@@ -537,13 +558,12 @@ module.exports = class Record {
 	}
 
 	/**
-	 * Overwrite part contents
+	 * Delete entire record (delete all record parts) and make contents unrecoverable
 	 *
-	 * @param {?string} part - name of part, or null for default part
-	 * @returns {Promise<void>}
+	 * @returns {Promise<array>} removed part names
 	 */
-	async shredPart(part = null) {
-		return this._singlePartOperation('shredMultipleParts', part, null);
+	async shredAll() {
+		return this.shredMultipleParts(await this.listParts());
 	}
 
 

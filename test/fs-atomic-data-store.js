@@ -654,11 +654,16 @@ describe('class Record', function() {
 					'test3'
 				];
 				for (let part of parts) {
-					fs.writeFileSync(await record.filepath(part), Buffer.from('0123456789abcdef'.repeat(1024)));
+					let filepath = await record.filepath(part);
+					fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(1024)));
+					fs.linkSync(filepath, filepath + '-copy');
 				}
 				await expect(record.shredMultipleParts(parts)).to.eventually.be.fulfilled;
 				for (let part of parts) {
-					let buf = fs.readFileSync(await record.filepath(part));
+					let filepath = await record.filepath(part);
+					expect(function() { return fs.statSync(filepath); }).to.throw();
+					let buf = fs.readFileSync(filepath + '-copy');
+					fs.unlinkSync(filepath + '-copy');
 					expect(buf).to.be.instanceof(Buffer).lengthOf(16 * 1024);
 					expect(buf.indexOf('0123456789abcdef')).to.equal(-1);
 				}
@@ -765,11 +770,10 @@ describe('class Record', function() {
 		});
 		describe('#shredPart', function() {
 			it('should overwrite single part', async function() {
-				fs.writeFileSync(await record.filepath('test1'), Buffer.from('0123456789abcdef'.repeat(1024)));
+				const filepath = await record.filepath('test1');
+				fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(1024)));
 				await expect(record.shredPart('test1')).to.eventually.be.fulfilled;
-				let buf = fs.readFileSync(await record.filepath('test1'));
-				expect(buf).to.be.instanceof(Buffer).lengthOf(16 * 1024);
-				expect(buf.indexOf('0123456789abcdef')).to.equal(-1);
+				expect(function() { return fs.statSync(filepath); }).to.throw();
 			});
 		});
 	});
