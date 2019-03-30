@@ -12,11 +12,13 @@ const
 	Collection = require('../src/Collection'),
 	Record = require('../src/Record'),
 	Lock = require('../src/Lock'),
+	child_process = require('child_process'),
+	crypto = require('crypto'),
+	fs = require('fs'),
+	os = require('os'),
+	path = require('path'),
 	chai = require('chai'),
 	chaiAsPromised = require('chai-as-promised'),
-	os = require('os'),
-	fs = require('fs'),
-	path = require('path'),
 	rimraf = require('rimraf')
 ;
 const expect = chai.expect;
@@ -776,6 +778,40 @@ describe('class Record', function() {
 				await expect(record.shredPart('test1')).to.eventually.be.fulfilled;
 				expect(function() { return fs.statSync(filepath); }).to.throw();
 			});
+		});
+	});
+	describe('Secure deletion', function() {
+		let devfd = null;
+		after(function() {
+			if (devfd) {
+				fs.closeSync(devfd);
+			}
+		});
+		it.only('shred should leave no trace of original data on device', async function() {
+			if (!process.env.SHRED_CHECK_DEVICE) {
+				this.skip();
+				return;
+			}
+			let pattern = 'fs-atomic-data-store' + crypto.randomBytes(6).toString('hex');
+			expect(pattern).to.be.lengthOf(32);
+			let filepath = await record.filepath('test1');
+			fs.writeFileSync(filepath, Buffer.from(pattern.repeat(1024)));
+			let stat = fs.statSync(filepath);
+			expect(stat.size).to.equal(32 * 1024);
+			let blocksize = stat.blksize;
+			let m = /(\/dev\/[^\s]+)\s+(\d+)/.exec(child_process.execSync('BLOCKSIZE=' + blocksize + ' df ' + filepath, {encoding: 'utf8'}));
+			let devpath = m[1];
+			let blockcount = parseInt(m[2]);
+			devfd = fs.openSync(devpath, 'r');
+			let patternbuf = Buffer.from(pattern);
+			let buf = Buffer.alloc(blocksize);
+			for (let i = 0; i < blockcount; i++) {
+				console.log('reading block ' + (i + 1) + ' of ' + blockcount);
+				let buf = fs.readSync(devfd, buf, 0, blocksize, null);
+				expect(buf.indexOf(patternbuf)).to.equal(-1);
+			}
+			// let device = stat.dev;
+			// await expect(record.shredMultipleParts(['test1'])).to.eventually.deep.equal(['test1']);
 		});
 	});
 });
