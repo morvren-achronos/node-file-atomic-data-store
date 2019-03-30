@@ -658,15 +658,16 @@ describe('class Record', function() {
 					fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(1024)));
 					fs.linkSync(filepath, filepath + '-copy');
 				}
-				await expect(record.shredMultipleParts(parts)).to.eventually.be.fulfilled;
+				await expect(record.shredMultipleParts(parts)).to.eventually.deep.equal(parts);
 				for (let part of parts) {
 					let filepath = await record.filepath(part);
 					expect(function() { return fs.statSync(filepath); }).to.throw();
 					let buf = fs.readFileSync(filepath + '-copy');
-					fs.unlinkSync(filepath + '-copy');
 					expect(buf).to.be.instanceof(Buffer).lengthOf(16 * 1024);
 					expect(buf.indexOf('0123456789abcdef')).to.equal(-1);
+					fs.unlinkSync(filepath + '-copy');
 				}
+				expect(fs.readdirSync(await record.dir(false))).to.be.an('array').lengthOf(0);
 			});
 		});
 	});

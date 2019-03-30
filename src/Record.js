@@ -399,8 +399,10 @@ module.exports = class Record {
 	/**
 	 * Delete multiple record parts and make contents unrecoverable
 	 *
+	 * Parts that do not exist are ignored (not treated as an error).
+	 *
 	 * @param {array} parts - part names to shred
-	 * @returns {Promise<void>}
+	 * @returns {Promise<array>} part names deleted
 	 */
 	async shredMultipleParts(parts) {
 		const
@@ -415,6 +417,7 @@ module.exports = class Record {
 			parts = Object.keys(parts);
 		}
 		let promises = [];
+		let results = [];
 		for (let part of parts) {
 			promises.push(new Promise(async (resolve, reject) => {
 				let filepath = path.join(dir, part);
@@ -462,7 +465,13 @@ module.exports = class Record {
 									reject(err);
 								});
 								writer.on('finish', () => {
-									resolve();
+									fs.unlink(
+										newfilepath,
+										(err) => {
+											results.push(part);
+											resolve();
+										}
+									);
 								});
 								reader.pipe(writer);
 							}
@@ -471,7 +480,8 @@ module.exports = class Record {
 				);
 			}));
 		}
-		return Promise.all(promises);
+		await Promise.all(promises);
+		return results;
 	}
 
 
