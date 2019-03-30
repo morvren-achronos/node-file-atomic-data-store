@@ -198,12 +198,13 @@ module.exports = class Store {
 	 * The maximum total transaction retry delay is specified by the `retryTimeout` option.
 	 *
 	 * @param {function} callback - perform operations; may be called multiple times, may be halted at any point where a lock is acquired
-	 *   Signature: `async function(lockObject, storeObject, tryCount): Promise<*>`
+	 *   Signature: `async function(lockObject: Lock, storeObject: Store, tryCount: number): Promise<*>`
 	 * @param {object} options
-	 * @param {number} options.retryTimeout int maximum milliseconds to retry transaction until giving up, default 0 (no retry)
-	 * @param {number} options.retryWait int minimum milliseconds before first transaction retry, default 10 ms.
-	 * @param {number} options.lockTimeout int maximum milliseconds to retry each lock until giving up, default 0 (no retry)
-	 * @param {number} options.lockWait int minimum milliseconds before first lock retry, default 10 ms
+	 * @param {number} options.retryTimeout - maximum milliseconds to retry transaction until giving up, default 0 (no retry)
+	 * @param {number} options.retryWait - minimum milliseconds before first transaction retry, default 10 ms.
+	 * @param {number} options.lockTimeout - maximum milliseconds to retry each lock until giving up, default 0 (no retry)
+	 * @param {number} options.lockWait - minimum milliseconds before first lock retry, default 10 ms
+	 * @param {Lock} options.lock - use this Lock instance, do not create or manage a lock for just this transaction. Note: if lock is provided then transaction() will NOT automatically release held locks before resolving
 	 * @returns {Promise<*>} On success, resolves with result of callback function's promise. On failure due to lock conflict, rejects with code 'ELOCKED'
 	 */
 	async transaction(callback, options = {}) {
@@ -212,19 +213,28 @@ module.exports = class Store {
 		options.lockTimeout = parseInt(options.lockTimeout, 10) || 0;
 		options.lockWait = parseInt(options.lockWait, 10) || 10;
 
-		const lock = this.lock(this, {
-			timeout: options.lockTimeout,
-			wait: options.lockWait
-		});
+		let lock;
+		let clearLocks = true;
+		if (options.lock) {
+			lock = options.lock;
+			clearLocks = false;
+		}
+		else {
+			lock = this.lock(this, {
+				timeout: options.lockTimeout,
+				wait: options.lockWait
+			});
+		}
+
 		return lock.runWithRetry(
 			(resolve, reject, retry, tryCount) => {
 				callback(lock, this, tryCount)
 					.then((result) => {
-						lock.unlockAll();
+						clearLocks && lock.unlockAll();
 						resolve(result);
 					})
 					.catch((err) => {
-						lock.unlockAll();
+						clearLocks && lock.unlockAll();
 						if (err.code != 'ELOCKED') {
 							reject(err);
 							return;
