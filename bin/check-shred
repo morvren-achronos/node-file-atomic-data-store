@@ -30,18 +30,21 @@ const rootDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), '/node-fs-
 let devicefd;
 
 async function run() {
-	const pattern1 = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
-	const pattern2 = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
+	const patternExists = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
+	const patternDeleted = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
+	const patternShredded = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
 	const store = new fsads.Store({rootDir: rootDir});
 	const record = store.record('testcol', 'testrec');
 
-	await record.writeBuffer('part1', pattern1.repeat(REPEAT_COUNT));
-	await record.writeBuffer('part2', pattern2.repeat(REPEAT_COUNT));
-	let buffer1 = await record.readBuffer('part1');
-	let buffer2 = await record.readBuffer('part2');
+	await record.writeBuffer('partExists', patternExists.repeat(REPEAT_COUNT));
+	await record.writeBuffer('partDeleted', patternDeleted.repeat(REPEAT_COUNT));
+	await record.writeBuffer('partShredded', patternShredded.repeat(REPEAT_COUNT));
+	let bufferDeleted = await record.readBuffer('part1');
+	let bufferShredded = await record.readBuffer('part2');
 	if (
-		buffer1.toString('utf8') != pattern1.repeat(REPEAT_COUNT)
-		|| buffer2.toString('utf8') != pattern2.repeat(REPEAT_COUNT)
+		bufferExists.toString('utf8') != patternExists.repeat(REPEAT_COUNT)
+		|| bufferDeleted.toString('utf8') != patternDeleted.repeat(REPEAT_COUNT)
+		|| bufferShredded.toString('utf8') != patternShredded.repeat(REPEAT_COUNT)
 	) {
 		throw new Error('Something is wrong with fs-atomic-data-store, run tests!');
 	}
@@ -54,46 +57,65 @@ async function run() {
 	const devpath = m[1];
 	const blockcount = parseInt(m[2]);
 
-	await record.deletePart('part1');
-	await record.shredPart('part2');
+	await record.deletePart('partDeleted');
+	await record.shredPart('partShredded');
 
 	devicefd = fs.openSync(devpath, 'r');
 
-	buffer1 = Buffer.from(pattern1);
-	buffer2 = Buffer.from(pattern2);
-	let found1 = false;
-	let found2 = false;
+	bufferExists = Buffer.from(patternExists);
+	bufferDeleted = Buffer.from(patternDeleted);
+	bufferShredded = Buffer.from(patternShredded);
+	let foundExists = false;
+	let foundDeleted = false;
+	let foundShredded = false;
 	let buf = Buffer.alloc(blocksize);
-	for (let i = 0; i < blockcount; i++) {
-		if (i % 20000 == 0) {
-			console.log('reading block ' + (i + 1) + ' of ' + blockcount + ' (' + (Math.round(100 * i / blockcount)) + '%)');
+	for (let i = 1; i <= blockcount; i++) {
+		if (i % 50000 == 0) {
+			console.log('reading block ' + i + ' of ' + blockcount + ' (' + Math.floor(100 * i / blockcount) + '%)');
 		}
 		fs.readSync(devicefd, buf, 0, blocksize, null);
-		if (!found1 && buf.indexOf(buffer1) != -1) {
+		if (!foundExists && buf.indexOf(bufferExists) != -1) {
+			foundExists = true;
+			console.log('Found existing file');
+		}
+		if (!foundDeleted && buf.indexOf(bufferDeleted) != -1) {
 			foundDeleted = true;
 			console.log('Found deleted file');
 		}
-		if (!found2 && buf.indexOf(buffer2) != -1) {
+		if (!foundShredded && buf.indexOf(bufferShredded) != -1) {
 			foundDeleted = true;
 			console.log('Found shredded file');
 		}
-		if (found1 && found2) {
+		if (foundExists && foundDeleted && foundShredded) {
+			console.log('Found everything, stopping early');
 			break;
 		}
 	}
 
-	console.log('Done scanning drive. Result:');
-	if (found1 && !found2) {
-		console.log('Pass. Found deleted file (as expected), did not find shredded file (good). This device ' + devpath + ' is good for secure deletion');
+	console.log('Done scanning drive.');
+	console.log('Tested device: ' + devpath);
+	console.log('Found existing file (want yes): ' + (foundExisting ? 'yes' : 'NO'));
+	console.log('Found deleted file (want yes): ' + (foundDeleted ? 'yes' : 'NO'));
+	console.log('Found shredded file (want no): ' + (foundExisting ? 'YES' : 'no'));
+	if (!foundExisting) {
+		console.log('Conclusion: Did not even find existing file. Test failed to function correctly. Either the device is good at hiding files, or this test is garbage.');
+		console.log('Result: Inconclusive');
 	}
-	else if (!found1 && !found2) {
-		console.log('Maybe pass. Did not find shredded file but also didn\'t find deleted file. This device ' + devpath + ' is not behaving in an expected way, but we didn\'t find the shredded data so probably ok(?).')
+	else if (foundDeleted && !foundShredded) {
+		console.log('Conclusion: Found deleted file (as expected), did not find shredded file (good). Shred will help provide secure deletion on this device.');
+		console.log('Result: Pass');
 	}
-	else if (found1 && found2) {
-		console.log('Fail. Found deleted file (as expected) but also found shredded file (bad). This device ' + devpath + ' is NOT ok for secure deletion')
+	else if (!foundDeleted && !foundShredded) {
+		console.log('Conclusion: Did not find shredded file but also didn\'t find deleted file. The device appears to good at handling all deleted files; shred will also help provide greater security against physical recovery.');
+		console.log('Result: Pass');
 	}
-	else if (!found1 && found2) {
-		console.log('Inconclusive. Found shredded file but not deleted file. Test failed to function correctly. This device ' + devpath + ' is probably NOT ok for secure deletion but we can\'t tell for sure.')
+	else if (foundDeleted && foundShredded) {
+		console.log('Conclusion: Found shredded file (bad). This device is NOT ok for secure deletion. Shred will not help.');
+		console.log('Result: Fail');
+	}
+	else if (!foundDeleted && foundShredded) {
+		console.log('Conclusion: Found shredded file but not deleted file. Test failed to function correctly. This device is probably NOT ok for secure deletion, and shred probably will not help.')
+		console.log('Result: Fail');
 	}
 }
 
