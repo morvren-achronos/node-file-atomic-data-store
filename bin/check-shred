@@ -69,22 +69,26 @@ async function run() {
 	let foundExists = false;
 	let foundDeleted = false;
 	let foundShredded = false;
+	let foundCount = 0;
 	let buf = Buffer.alloc(blocksize);
 	for (let i = 1; i <= blockcount; i++) {
 		if (i % 50000 == 0) {
-			console.log('reading block ' + i + ' of ' + blockcount + ' (' + Math.floor(100 * i / blockcount) + '%)');
+			console.log('reading block ' + i + ' of ' + blockcount + ' (' + (100 * i / blockcount).toFixed(1) + '%) - found ' + foundCount);
 		}
 		fs.readSync(devicefd, buf, 0, blocksize, null);
 		if (!foundExists && buf.indexOf(bufferExists) != -1) {
 			foundExists = true;
+			foundCount++;
 			console.log('Found existing file');
 		}
 		if (!foundDeleted && buf.indexOf(bufferDeleted) != -1) {
 			foundDeleted = true;
+			foundCount++;
 			console.log('Found deleted file');
 		}
 		if (!foundShredded && buf.indexOf(bufferShredded) != -1) {
 			foundDeleted = true;
+			foundCount++;
 			console.log('Found shredded file');
 		}
 		if (foundExists && foundDeleted && foundShredded) {
@@ -95,10 +99,10 @@ async function run() {
 
 	console.log('Done scanning drive.');
 	console.log('Tested device: ' + devpath);
-	console.log('Found existing file (want yes): ' + (foundExisting ? 'yes' : 'NO'));
+	console.log('Found existing file (want yes): ' + (foundExists ? 'yes' : 'NO'));
 	console.log('Found deleted file (want yes): ' + (foundDeleted ? 'yes' : 'NO'));
-	console.log('Found shredded file (want no): ' + (foundExisting ? 'YES' : 'no'));
-	if (!foundExisting) {
+	console.log('Found shredded file (want no): ' + (foundShredded ? 'YES' : 'no'));
+	if (!foundExists) {
 		console.log('Conclusion: Did not even find existing file. Test failed to function correctly. Either the device is good at hiding files, or this test is garbage.');
 		console.log('Result: Inconclusive');
 	}
