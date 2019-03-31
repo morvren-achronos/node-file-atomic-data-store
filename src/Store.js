@@ -161,6 +161,45 @@ module.exports = class Store {
 		});
 	}
 
+	/**
+	 * Perform an operation and retry it if first attempt(s) fail
+	 *
+	 * @param {function} operation - Signature: `function(resolve: function, reject: function, retry: function, tryCount: number): Promise<void>`
+	 * @param {function} onTimeout - On timeout, operation promise is rejected with value returned by this function
+	 * @param {number} timeout - max retry time in milliseconds, default is as provided to Lock constructor
+	 * @param {number} wait - min time to wait before first retry, default is as provided to Lock constructor
+	 */
+	async runWithRetry(operation, onTimeout, timeout, wait) {
+		function calcRetries(timeout, wait) {
+			let retries = [];
+			if (timeout > 0) {
+				while (timeout >= wait) {
+					retries.unshift(timeout);
+					timeout = Math.floor(timeout / 3);
+				}
+				for (let i = 1; i < retries.length; i++) {
+					retries[i] -= retries[i - 1];
+				}
+			}
+			return retries;
+		}
+		return new Promise((resolve, reject) => {
+			let retries = calcRetries(timeout, wait);
+			let tryCount = 0;
+			function retry() {
+				if (retries.length == 0) {
+					reject(onTimeout());
+					return;
+				}
+				setTimeout(run, retries.shift());
+			}
+			function run() {
+				operation(resolve, reject, retry, tryCount++);
+			}
+			run();
+		});
+	}
+
 
 	// Factory methods
 
@@ -251,7 +290,7 @@ module.exports = class Store {
 			);
 		}
 
-		return lock.runWithRetry(
+		return this.runWithRetry(
 			(resolve, reject, retry, tryCount) => {
 				callback(lock, this, tryCount)
 					.then((result) => {
@@ -275,10 +314,8 @@ module.exports = class Store {
 				err.cause = originalErr;
 				return err;
 			},
-			{
-				timeout: options.transactionTimeout,
-				wait: options.transactionWait
-			}
+			options.transactionTimeout,
+			options.transactionWait
 		);
 	}
 };

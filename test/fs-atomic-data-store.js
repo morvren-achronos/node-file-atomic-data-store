@@ -91,6 +91,62 @@ describe('class Store', function() {
 				}).to.throw('ENOENT');
 			});
 		});
+		describe('#runWithRetry', function() {
+			it('should retry according to provided timeout and wait', async function() {
+				let testTryCount;
+				async function testRetry(timeout, wait, retries, work) {
+					testTryCount = 0;
+					return store.runWithRetry(
+						(resolve, reject, retry, tryCount) => {
+							testTryCount++;
+							if (tryCount < retries) {
+								retry();
+								return;
+							}
+							if (work) {
+								resolve('good');
+								return;
+							}
+							reject(new Error('bad'));
+						},
+						() => {
+							return new Error('timeout');
+						},
+						timeout,
+						wait
+					);
+				}
+				// no time
+				await expect(testRetry(0, 0, 0, true)).to.eventually.be.fulfilled;
+				expect(testTryCount).to.equal(1);
+				await expect(testRetry(0, 0, 0, false)).to.eventually.be.rejectedWith('bad');
+				expect(testTryCount).to.equal(1);
+
+				// lots of time but operation does not use
+				await expect(testRetry(500, 10, 0, true)).to.eventually.be.fulfilled;
+				expect(testTryCount).to.equal(1);
+				await expect(testRetry(500, 10, 0, false)).to.eventually.be.rejectedWith('bad');
+				expect(testTryCount).to.equal(1);
+
+				// lots of time, operation uses only some
+				await expect(testRetry(500, 10, 2, true)).to.eventually.be.fulfilled;
+				expect(testTryCount).to.equal(3);
+				await expect(testRetry(500, 10, 2, false)).to.eventually.be.rejectedWith('bad');
+				expect(testTryCount).to.equal(3);
+
+				// time for one retry, operation goes forever
+				await expect(testRetry(10, 10, 99, true)).to.eventually.be.rejectedWith('timeout');
+				expect(testTryCount).to.equal(2);
+				await expect(testRetry(10, 10, 99, false)).to.eventually.be.rejectedWith('timeout');
+				expect(testTryCount).to.equal(2);
+
+				// time for some retries, operation goes forever
+				await expect(testRetry(100, 10, 99, true)).to.eventually.be.rejectedWith('timeout');
+				expect(testTryCount).to.equal(4);
+				await expect(testRetry(100, 10, 99, false)).to.eventually.be.rejectedWith('timeout');
+				expect(testTryCount).to.equal(4);
+			});
+		});
 	});
 	describe('Factory methods', function() {
 		describe('#collection', function() {
@@ -848,12 +904,6 @@ describe('class Lock', function() {
 					ours: null
 				});
 			});
-		});
-		describe('#calcRetries', function() {
-			it('should calculate delay times according to provided timeout and wait');
-		});
-		describe('#runWithRetry', function() {
-			it('should retry according to provided timeout and wait');
 		});
 		describe('#dir', function() {
 			it('should create and return lock directory', async function() {

@@ -44,8 +44,8 @@ module.exports = class Lock {
 		 * @access private
 		 */
 		this._options = {
-			timeout: options.timeout || 0,
-			wait: options.wait || 10
+			timeout: parseInt(options.timeout, 10) || 0,
+			wait: parseInt(options.wait, 10) || 10
 		};
 		/**
 		 * @access private
@@ -122,56 +122,6 @@ module.exports = class Lock {
 	}
 
 	/**
-	 * Utility. Return array of retry delay times
-	 *
-	 * @param {number} timeout - maximum retry delay time in milliseconds
-	 * @param {number} wait - minimum delay before first retry, in milliseconds
-	 * @returns {array} retry timer values, can be passed to setTimeout
-	 */
-	calcRetries(timeout, wait) {
-		let retries = [];
-		if (timeout > 0) {
-			while (timeout >= wait) {
-				retries.unshift(timeout);
-				timeout = Math.floor(timeout / 3);
-			}
-			for (let i = 1; i < retries.length; i++) {
-				retries[i] -= retries[i - 1];
-			}
-		}
-		return retries;
-	}
-
-	/**
-	 * Utility. Perform an operation and retry it if first attempt(s) fail
-	 *
-	 * @param {function} operation - Signature: `function(resolve, reject, retry, tryCount): Promise<void>`
-	 * @param {function} onTimeout - On timeout, operation promise is rejected with value returned by this function
-	 * @param {object} options
-	 * @param {number} options.timeout - max retry time in milliseconds, default is as provided to Lock constructor
-	 * @param {number} options.wait - min time to wait before first retry, default is as provided to Lock constructor
-	 */
-	async runWithRetry(operation, onTimeout, options = {}) {
-		options.timeout = options.timeout || this._options.timeout;
-		options.wait = options.wait || this._options.wait;
-		return new Promise((resolve, reject) => {
-			let retries = this.calcRetries(options.timeout, options.wait);
-			let tryCount = 0;
-			function retry() {
-				if (retries.length == 0) {
-					reject(onTimeout());
-					return;
-				}
-				setTimeout(run, retries.shift());
-			}
-			function run() {
-				operation(resolve, reject, retry, tryCount++);
-			}
-			run();
-		});
-	}
-
-	/**
 	 * Utility. Get directory path for locks
 	 *
 	 * Directory is created if it doesn't exist.
@@ -209,6 +159,8 @@ module.exports = class Lock {
 			filename = this.filename(collection, identifier),
 			filepath = path.join(dir, filename)
 		;
+		options.timeout = parseInt(options.timeout, 10) || this._options.timeout;
+		options.wait = parseInt(options.wait, 10) || this._options.wait;
 
 		// Check whether this instance already holds lock
 		if (this._locks[filename]) {
@@ -239,7 +191,7 @@ module.exports = class Lock {
 		}
 
 		// Attempt to take lock
-		return this.runWithRetry(
+		return this.store.runWithRetry(
 			(resolve, reject, retry) => {
 				this._lockOperation('lock', filepath)
 					.then((release) => {
@@ -265,7 +217,8 @@ module.exports = class Lock {
 				err.lockType = 'lock';
 				return err;
 			},
-			options
+			options.timeout,
+			options.wait
 		);
 	}
 
