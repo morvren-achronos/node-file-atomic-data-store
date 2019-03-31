@@ -39,8 +39,9 @@ async function run() {
 	await record.writeBuffer('partExists', patternExists.repeat(REPEAT_COUNT));
 	await record.writeBuffer('partDeleted', patternDeleted.repeat(REPEAT_COUNT));
 	await record.writeBuffer('partShredded', patternShredded.repeat(REPEAT_COUNT));
-	let bufferDeleted = await record.readBuffer('part1');
-	let bufferShredded = await record.readBuffer('part2');
+	let bufferExists = await record.readBuffer('partExists');
+	let bufferDeleted = await record.readBuffer('partDeleted');
+	let bufferShredded = await record.readBuffer('partShredded');
 	if (
 		bufferExists.toString('utf8') != patternExists.repeat(REPEAT_COUNT)
 		|| bufferDeleted.toString('utf8') != patternDeleted.repeat(REPEAT_COUNT)
@@ -49,7 +50,7 @@ async function run() {
 		throw new Error('Something is wrong with fs-atomic-data-store, run tests!');
 	}
 
-	let filepath = await record.filepath('part1');
+	let filepath = await record.filepath('partExists');
 	let stat = fs.statSync(filepath);
 	const blocksize = stat.blksize;
 
