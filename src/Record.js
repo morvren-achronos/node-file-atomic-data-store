@@ -316,22 +316,37 @@ module.exports = class Record {
 			}
 			else {
 				promises.push(new Promise((resolve, reject) => {
-					fs.writeFile(
-						filepath,
-						parts[part],
-						{
-							flags: flags,
-							mode: fileMode
-						},
-						(err) => {
+					fs.open(filepath, flags, fileMode, (err, fd) => {
+						if (err) {
+							if (fd) {
+								fs.close(fd);
+							}
+							reject(err);
+							return;
+						}
+						fs.writeFile(fd, parts[part], (err) => {
 							if (err) {
+								fs.close(fd);
 								reject(err);
 								return;
 							}
-							results[part] = true;
-							resolve();
-						}
-					);
+							fs.fdatasync(fd, (err) => {
+								if (err) {
+									fs.close(fd);
+									reject(err);
+									return;
+								}
+								fs.close(fd, (err) => {
+									if (err) {
+										reject(err);
+										return;
+									}
+									results[part] = true;
+									resolve();
+								});
+							});
+						});
+					});
 				}));
 			}
 		}
@@ -465,6 +480,7 @@ module.exports = class Record {
 									reject(err);
 								});
 								writer.on('finish', () => {
+
 									fs.unlink(
 										newfilepath,
 										(err) => {
