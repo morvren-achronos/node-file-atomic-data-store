@@ -90,33 +90,31 @@ module.exports = class Collection {
 		const
 			rootDir = await this.dir([], false),
 			path = this.store.path,
-			fs  = this.store.fs
+			fsop  = this.store.fsop
 		;
-		function getDirectoriesInDir(dir) {
-			return new Promise((resolve, reject) => {
-				fs.readdir(
+		async function getDirectoriesInDir(dir) {
+			let entries;
+			try {
+				entries = await fsop.readdir(
 					dir,
 					{
 						withFileTypes: true
 					},
-					(err, entries) => {
-						if (err) {
-							if (err.code == 'ENOENT') {
-								resolve([]);
-							}
-							reject(err);
-							return;
-						}
-						let dirs = [];
-						for (let ent of entries) {
-							if (ent.isDirectory()) {
-								dirs.push(ent.name);
-							}
-						}
-						resolve(dirs);
-					}
 				);
-			});
+			}
+			catch (err) {
+				if (err.code == 'ENOENT') {
+					return [];
+				}
+				throw err;
+			}
+			let dirs = [];
+			for (let ent of entries) {
+				if (ent.isDirectory()) {
+					dirs.push(ent.name);
+				}
+			}
+			return dirs;
 		}
 		let stack = [
 			[rootDir, await getDirectoriesInDir(rootDir)]

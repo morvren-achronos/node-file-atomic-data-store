@@ -310,32 +310,33 @@ module.exports = class Lock {
 	async listGlobal() {
 		const
 			dir = await this.dir(),
-			fs = this.store.fs
+			fsop = this.store.fsop
 		;
-		return new Promise((resolve, reject) => {
-			fs.readdir(
+		let entries;
+		try {
+			entries = await fsop.readdir(
 				dir,
 				{
 					withFileTypes: true
 				},
-				(err, entries) => {
-					if (err) {
-						reject(err);
-						return;
-					}
-					let locks = [];
-					for (let ent of entries) {
-						if (ent.isDirectory()) {
-							let lockinfo = this.parseFilename(ent.name)
-							lockinfo.ours = (typeof this._locks[ent.name] == 'object');
-							locks.push(lockinfo);
-						}
-					}
-					this._sortLockList(locks);
-					resolve(locks);
-				}
 			);
-		});
+		}
+		catch (err) {
+			if (err.code == 'ENOENT') {
+				return [];
+			}
+			throw err;
+		}
+		let locks = [];
+		for (let ent of entries) {
+			if (ent.isDirectory()) {
+				let lockinfo = this.parseFilename(ent.name)
+				lockinfo.ours = (typeof this._locks[ent.name] == 'object');
+				locks.push(lockinfo);
+			}
+		}
+		this._sortLockList(locks);
+		return locks;
 	}
 
 

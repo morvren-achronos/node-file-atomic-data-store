@@ -131,33 +131,31 @@ module.exports = class Record {
 	async listParts() {
 		const
 			dir = await this.dir(false),
-			fs = this.store.fs
+			fsop = this.store.fsop
 		;
-		return new Promise((resolve, reject) => {
-			fs.readdir(
+		let entries;
+		try {
+			entries = await fsop.readdir(
 				dir,
 				{
 					withFileTypes: true
 				},
-				(err, entries) => {
-					if (err) {
-						if (err.code == 'ENOENT') {
-							resolve([]);
-						}
-						reject(err);
-						return;
-					}
-					let files = [];
-					for (let ent of entries) {
-						if (ent.isFile()) {
-							files.push(ent.name);
-						}
-					}
-					files.sort();
-					resolve(files);
-				}
 			);
-		});
+		}
+		catch (err) {
+			if (err.code == 'ENOENT') {
+				return [];
+			}
+			throw err;
+		}
+		let files = [];
+		for (let ent of entries) {
+			if (ent.isFile()) {
+				files.push(ent.name);
+			}
+		}
+		files.sort();
+		return files;
 	}
 
 	/**
@@ -170,7 +168,7 @@ module.exports = class Record {
 		const
 			dir = await this.dir(false),
 			path = this.store.path,
-			fs  = this.store.fs
+			fsop  = this.store.fsop
 		;
 		if (!(parts instanceof Array)) {
 			parts = Object.keys(parts);
@@ -178,19 +176,12 @@ module.exports = class Record {
 		let promises = [];
 		let results = {};
 		for (let part of parts) {
-			promises.push(new Promise(async (resolve, reject) => {
-				fs.stat(
-					path.join(dir, part),
-					(err, stat) => {
-						if (err) {
-							reject(err);
-							return;
-						}
+			promises.push(
+				fsop.stat(path.join(dir, part))
+					.then((stat) => {
 						results[part] = stat;
-						resolve();
-					}
-				);
-			}));
+					})
+			);
 		}
 		await Promise.all(promises);
 		return results;
@@ -209,7 +200,8 @@ module.exports = class Record {
 		const
 			dir = await this.dir(false),
 			path = this.store.path,
-			fs  = this.store.fs
+			fs  = this.store.fs,
+			fsop  = this.store.fsop
 		;
 		if (Array.isArray(parts)) {
 			let p = {};
@@ -234,10 +226,10 @@ module.exports = class Record {
 						});
 						/* readers have 'end', writers have 'finish' */
 						reader.on('end', () => {
+							results[part] = true;
 							resolve();
 						});
 						reader.pipe(parts[part]);
-						results[part] = true;
 					}
 					catch (err) {
 						reject(err);
@@ -245,19 +237,9 @@ module.exports = class Record {
 				}));
 			}
 			else {
-				promises.push(new Promise((resolve, reject) => {
-					fs.readFile(
-						filepath,
-						(err, content) => {
-							if (err) {
-								reject(err);
-								return;
-							}
-							results[part] = content;
-							resolve();
-						}
-					);
-				}));
+				promises.push((async () => {
+					results[part] = await fsop.readFile(filepath);
+				})());
 			}
 		}
 		await Promise.all(promises);
@@ -278,8 +260,9 @@ module.exports = class Record {
 			dir = await this.dir(),
 			path = this.store.path,
 			fs  = this.store.fs,
+			fsop  = this.store.fsop,
 			fileMode = this.store.option('fileMode'),
-			flags = fs.constants.O_WRONLY | fs.constants.O_TRUNC | fs.constants.O_CREAT | fs.constants.O_DSYNC
+			flags = fs.constants.O_WRONLY | fs.constants.O_TRUNC | fs.constants.O_CREAT
 		;
 		let promises = [];
 		let results = {};
@@ -315,39 +298,22 @@ module.exports = class Record {
 				}));
 			}
 			else {
-				promises.push(new Promise((resolve, reject) => {
-					fs.open(filepath, flags, fileMode, (err, fd) => {
-						if (err) {
-							if (fd) {
-								fs.close(fd);
-							}
-							reject(err);
-							return;
+				promises.push((async () => {
+					let fd;
+					try {
+						fd = await fsop.open(filepath, flags, fileMode);
+						await fsop.writeFile(fd, parts[part]);
+						await fsop.fdatasync(fd);
+						await fsop.close(fd);
+					}
+					catch (err) {
+						if (fd) {
+							fs.close(fd);
 						}
-						fs.writeFile(fd, parts[part], (err) => {
-							if (err) {
-								fs.close(fd);
-								reject(err);
-								return;
-							}
-							fs.fdatasync(fd, (err) => {
-								if (err) {
-									fs.close(fd);
-									reject(err);
-									return;
-								}
-								fs.close(fd, (err) => {
-									if (err) {
-										reject(err);
-										return;
-									}
-									results[part] = true;
-									resolve();
-								});
-							});
-						});
-					});
-				}));
+						throw err;
+					}
+					results[part] = true;
+				})());
 			}
 		}
 		await Promise.all(promises);
@@ -366,7 +332,7 @@ module.exports = class Record {
 		const
 			dir = await this.dir(false),
 			path = this.store.path,
-			fs  = this.store.fs
+			fsop  = this.store.fsop
 		;
 		if (!(parts instanceof Array)) {
 			parts = Object.keys(parts);
@@ -374,39 +340,21 @@ module.exports = class Record {
 		let promises = [];
 		let results = [];
 		for (let part of parts) {
-			promises.push(new Promise(async (resolve, reject) => {
-				fs.unlink(
-					path.join(dir, part),
-					(err) => {
-						if (err) {
-							if (err.code == 'ENOENT') {
-								resolve();
-								return;
-							}
-							reject(err);
-							return;
-						}
-						results.push(part);
-						resolve();
+			promises.push((async () => {
+				try {
+					await fsop.unlink(path.join(dir, part));
+				}
+				catch (err) {
+					if (err.code == 'ENOENT') {
+						return;
 					}
-				);
-			}));
+					throw err;
+				}
+				results.push(part);
+			})());
 		}
-		promises.push((async () => {
-			let removeDir = dir;
-			for (let i = 0; i < 6; i++) {
-				await new Promise((resolve) => {
-					fs.rmdir(removeDir, (err) => {
-						if (err) {
-							i = 6;
-						}
-						resolve();
-					});
-				});
-				removeDir = path.dirname(removeDir);
-			}
-		})());
 		await Promise.all(promises);
+		await this._cleanupDirs();
 		results.sort();
 		return results;
 	}
@@ -424,9 +372,11 @@ module.exports = class Record {
 			dir = await this.dir(false),
 			path = this.store.path,
 			fs  = this.store.fs,
+			fsop  = this.store.fsop,
 			shred = this.store.option('shredFunction'),
 			fileMode = this.store.option('fileMode'),
-			flags = fs.constants.O_WRONLY | fs.constants.O_DSYNC
+			flags = fs.constants.O_WRONLY | fs.constants.O_APPEND,
+			passCount = this.store.option('shredPassCount')
 		;
 		if (!(parts instanceof Array)) {
 			parts = Object.keys(parts);
@@ -434,69 +384,39 @@ module.exports = class Record {
 		let promises = [];
 		let results = [];
 		for (let part of parts) {
-			promises.push(new Promise(async (resolve, reject) => {
+			promises.push((async () => {
 				let filepath = path.join(dir, part);
-				fs.stat(
-					filepath,
-					(err, stat) => {
-						if (err) {
-							if (err.code == 'ENOENT') {
-								resolve();
-								return;
-							}
-							reject(err);
-							return;
-						}
-						let newfilepath = path.join(dir, part + '.shred.' + Date.now().toString(16) + shred(8).toString('hex'));
-						fs.rename(
-							filepath,
-							newfilepath,
-							(err) => {
-								let bytesRemaining = stat.size;
-								let reader = new stream.Readable({
-									autoDestroy: true,
-									read(size) {
-										let go = true;
-										while(go && bytesRemaining) {
-											if (bytesRemaining <= size) {
-												size = bytesRemaining;
-											}
-											go = this.push(shred(size));
-											bytesRemaining -= size;
-										}
-										if (bytesRemaining == 0) {
-											this.push(null);
-										}
-									}
-								});
-								let writer = fs.createWriteStream(
-									newfilepath,
-									{
-										flags: flags,
-										mode: fileMode
-									}
-								);
-								writer.on('error', (err) => {
-									reject(err);
-								});
-								writer.on('finish', () => {
-
-									fs.unlink(
-										newfilepath,
-										(err) => {
-											results.push(part);
-											resolve();
-										}
-									);
-								});
-								reader.pipe(writer);
-							}
-						);
+				let stat;
+				try {
+					stat = await fsop.stat(filepath);
+				}
+				catch (err) {
+					if (err.code == 'ENOENT') {
+						return;
 					}
-				);
-			}));
+					throw err;
+				}
+				let newfilepath = path.join(dir, part + '.shred.' + Date.now().toString(16) + shred(8).toString('hex'));
+				await fsop.rename(filepath, newfilepath);
+				let fd = await fsop.open(newfilepath, flags);
+				for (let pass = 0; pass < passCount; pass++) {
+					await fsop.ftruncate(fd);
+					let bytesRemaining = stat.size;
+					while (bytesRemaining > 0) {;
+						await fsop.write(fd, shred(stat.blksize));
+						bytesRemaining -= stat.blksize;
+					}
+					await fsop.fdatasync(fd);
+				}
+				await fsop.ftruncate(fd);
+				await fsop.fsync(fd);
+				await fsop.close(fd);
+				await fsop.unlink(newfilepath);
+				results.push(part);
+			})());
 		}
 		await Promise.all(promises);
+		await this._cleanupDirs();
 		results.sort();
 		return results;
 	}
@@ -612,5 +532,21 @@ module.exports = class Record {
 			return parts[part];
 		}
 		return null;
+	}
+
+	// Remove empty record storage directories
+	async _cleanupDirs() {
+		const
+			fsop  = this.store.fsop,
+			path = this.store.path
+		;
+		let removeDir = await this.dir(false);
+		try {
+			for (let i = 0; i < 6; i++) {
+				await fsop.rmdir(removeDir);
+				removeDir = path.dirname(removeDir);
+			}
+		}
+		catch (err) {}
 	}
 };

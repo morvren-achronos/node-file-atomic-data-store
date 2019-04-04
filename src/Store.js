@@ -2,6 +2,9 @@
  * class Store
  */
 
+// Libraries
+const util = require('util');
+
 /**
  * Interact with a datastore
  */
@@ -18,14 +21,16 @@ module.exports = class Store {
 	 * @param {number} options.transactionWait - transaction wait option (see {@link transaction}, default 10 ms
 	 * @param {number} options.lockTimeout - lock timeout option (see {@link lock}, default 0 (no retry)
 	 * @param {number} options.lockWait - lock wait option (see {@link lock}, default 10 ms
+	 * @param {number} options.shredPassCount - number of times to overwrite data when shredding record parts. Default 3
 	 * @param {module} options.fsModule - use this instead of Node.js builtin fs (filesystem) module
-	 * @param {module} options.pathModule- use this instead of Node.js buitin path (filepaths) module
+	 * @param {module} options.pathModule - use this instead of Node.js buitin path (filepaths) module
 	 * @param {function} options.recordClass - use this instead of internal Record class
 	 * @param {function} options.collectionClass -  use this instead of internal Collection class
 	 * @param {function} options.lockClass - use this instead of internal Lock class
 	 * @param {function} options.shredFunction - use this to generate overwrite data when shredding record parts. Default is crypto.randomBytes. Signature: `function(size): Buffer`
 	 */
 	constructor(options = {}) {
+		// Define state vars
 		/**
 		 * @access private
 		 */
@@ -38,6 +43,7 @@ module.exports = class Store {
 			transactionWait: 10,
 			lockTimeout: 0,
 			lockWait: 10,
+			shredPassCount: 3,
 			fsModule: 'fs',
 			pathModule: 'path',
 			recordClass: './Record',
@@ -51,7 +57,12 @@ module.exports = class Store {
 		 * @access private
 		 */
 		this._collections = {};
+		/**
+		 * @access private
+		 */
+		this._fsop = {};
 
+		// Finalize options
 		if (typeof options == 'object') {
 			for (let k in options) {
 				if (this._options[k] !== undefined) {
@@ -77,6 +88,12 @@ module.exports = class Store {
 		if (typeof this._options.shredFunction != 'function') {
 			this._options.shredFunction = require('crypto').randomBytes;
 		}
+
+		// Promisify fs methods
+		let fs = this.fs;
+		for (let k of ['access', 'close', 'fdatasync', 'fsync', 'ftruncate', 'mkdir', 'open', 'readdir', 'readFile', 'rename', 'rmdir', 'stat', 'unlink', 'write', 'writeFile']) {
+			this._fsop[k] = util.promisify(fs[k]);
+		}
 	}
 
 
@@ -98,6 +115,13 @@ module.exports = class Store {
 	 */
 	get path() {
 		return this.option('pathModule');
+	}
+
+	/**
+	 * Object with promisified fs operation methods
+	 */
+	get fsop() {
+		return this._fsop;
 	}
 
 	/**
@@ -125,40 +149,31 @@ module.exports = class Store {
 			fs  = this.fs,
 			dir = path.resolve(this.option('rootDir'), ...dirParts)
 		;
-		return new Promise((resolve, reject) => {
-			fs.access(
-				dir,
-				fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK,
-				(err) => {
-					if (!err) {
-						resolve(dir);
-						return;
-					}
-					if (err.code != 'ENOENT') {
-						reject(err);
-						return;
-					}
-					if (!create) {
-						resolve(dir);
-						return;
-					}
-					fs.mkdir(
+		try {
+			await this.fsop.access(dir, fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK);
+		}
+		catch (err) {
+			if (err.code != 'ENOENT') {
+				throw err;
+			}
+			if (create) {
+				try {
+					await this.fsop.mkdir(
 						dir,
 						{
 							recursive: true,
 							mode: this.option('dirMode')
-						},
-						(err) => {
-							if (err && err.code != 'EEXIST') {
-								reject(err);
-								return;
-							}
-							resolve(dir);
 						}
 					);
 				}
-			);
-		});
+				catch (err) {
+					if (err.code != 'EEXIST') {
+						throw err;
+					}
+				}
+			}
+		}
+		return dir;
 	}
 
 	/**

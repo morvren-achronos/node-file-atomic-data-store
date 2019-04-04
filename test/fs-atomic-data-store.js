@@ -532,6 +532,7 @@ describe('classes', function() {
 						expect(partContents[part])
 							.instanceof(Buffer)
 							.lengthOf(20)
+							.deep.equal(Buffer.from(part.repeat(4)))
 						;
 					}
 				});
@@ -721,7 +722,7 @@ describe('classes', function() {
 				});
 			});
 			describe('#shredMultipleParts', function() {
-				it('should overwrite part data (keeping same size) then remove parts', async function() {
+				it('should overwrite part data then remove parts', async function() {
 					let parts = [
 						'test1',
 						'test2',
@@ -732,14 +733,36 @@ describe('classes', function() {
 						fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(1024)));
 						fs.linkSync(filepath, filepath + '-copy');
 					}
+
+					let shredFdFilenameMap = {};
+					const fs_open = store._fsop.open;
+					store._fsop.open = async (...args) => {
+						let fd = await fs_open(...args);
+						shredFdFilenameMap[fd] = args[0];
+						return fd;
+					};
+					let contentBeforeUnlink = {};
+					const fs_ftruncate = store._fsop.ftruncate;
+					store._fsop.ftruncate = async (fd) => {
+						let filename = shredFdFilenameMap[fd];
+						let part = /(test\d)\.shred/.exec(filename)[1];
+						contentBeforeUnlink[part] = fs.readFileSync(filename);
+						return fs_ftruncate(fd);
+					};
+					
 					await expect(record.shredMultipleParts(parts)).to.eventually.deep.equal(parts);
+					
 					for (let part of parts) {
 						let filepath = await record.filepath(part);
+
 						expect(function() { return fs.statSync(filepath); }).to.throw();
-						let buf = fs.readFileSync(filepath + '-copy');
-						expect(buf).to.be.instanceof(Buffer).lengthOf(16 * 1024);
-						expect(buf.indexOf('0123456789abcdef')).to.equal(-1);
+						
+						let stat = fs.statSync(filepath + '-copy');
+						expect(stat.size).to.equal(0);
 						fs.unlinkSync(filepath + '-copy');
+						
+						expect(contentBeforeUnlink[part]).to.be.instanceof(Buffer).lengthOf(16 * 1024);
+						expect(contentBeforeUnlink[part].indexOf(Buffer.from('0123456789abcdef'))).to.equal(-1);
 					}
 					expect(fs.readdirSync(await record.dir(false))).to.be.an('array').lengthOf(0);
 				});
