@@ -28,4 +28,5 @@ sleep 2
 
 # run check-shred
 echo "Running check-shred utility..."
-./check-shred $DEVICE
+
+`dirname $0`/check-shred $DEVICE
