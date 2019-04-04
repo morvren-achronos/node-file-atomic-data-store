@@ -1,0 +1,31 @@
+#!/bin/bash
+
+usage() {
+	echo 'Usage:' `basename $0` '<device> <fs-type>'
+	echo 'Erase and format a partition, then run test deletion/shred security on it.'
+	echo 'You must be root to use this utility.'
+	echo
+	echo 'Options:'
+	echo '    <device>   block device e.g. /dev/hda1'
+	echo '    <fs-type>  filesystem type e.g. ext3'
+	exit
+}
+
+if [ "$1" = '' -o "$2" = '' -o "$1" = '-h' -o "$1" = '--help' -o `whoami` != 'root' ]
+then
+	usage
+fi
+
+DEVICE=$1
+FSTYPE=$2
+
+# prepare device
+echo "Erasing device..."
+dd if=/dev/zero of=$DEVICE 2>/dev/null
+echo "Formatting device with filesystem $FSTYPE..."
+mkfs -t $FSTYPE $DEVICE >/dev/null
+sleep 2
+
+# run check-shred
+echo "Running check-shred utility..."
+./check-shred $DEVICE

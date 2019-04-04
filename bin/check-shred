@@ -12,57 +12,167 @@ const
 ;
 
 // Constants
-const RANDOM_SIZE = 16;
-const REPEAT_COUNT = 64; // 4096 bytes
+const FILE_SIZE = 64 * 1024; // 64K
+const PATTERN_LENGTH = 64;
+const PATTERN_REPEAT = FILE_SIZE / PATTERN_LENGTH;
+const PATTERN_BASE = 'fs-atomic-data-store-check-shred-FSTATE-';
+const PATTERN_RANDOM_SIZE = (PATTERN_LENGTH - PATTERN_BASE.length) / 2;
 
-if (process.getuid() != 0) {
-	console.warn('You are not root. You will probably need to be root for this to work.');
-}
+// Run script
+let deviceInfo;
+let rootDir;
+let mounted;
+let deviceFd;
+let timer;
+run()
+	.then(() => {
+	})
+	.catch((err) => {
+		console.error('Caught exception, exiting:', err);
+	})
+	.finally(() => {
+		cleanup();
+	})
+;
+return;
 
-let timer = setTimeout(
-	() => {
-		console.log('still running...');
-	},
-	10 * 1000
-);
-
-const rootDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), '/node-fs-atomic-data-store-check-shred-')));
-let devicefd;
-
+// Functions
 async function run() {
-	const patternExists = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
-	const patternDeleted = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
-	const patternShredded = 'fs-atomic-data-store-check-shred' + crypto.randomBytes(RANDOM_SIZE).toString('hex');
+	timer = setTimeout(
+		() => {
+			// console.log('still running...');
+		},
+		10 * 1000
+	);
+
+	if (process.argv.length <= 2) {
+		usage();
+		return;
+	}
+	const filepath = process.argv[2];
+	if (['', '-h', '--help', 'help'].indexOf(filepath) != -1) {
+		usage();
+		return;
+	}
+
+	if (process.getuid() != 0) {
+		console.warn("You are not root. You must be root to use this utility.\n");
+		return;
+	}
+
+	deviceInfo = {
+		devicePath: null,
+		deviceIsPartition: null,
+		deviceSize: null,
+		deviceBlockSize: null,
+		deviceBlockCount: null,
+		fsType: null,
+		fsSize: null,
+		fsBlockSize: null,
+		fsBlockCount: null,
+		fsMountPath: null,
+		fsIsReadOnly: null
+	};
+	let stat = fs.statSync(filepath);
+	if (stat.isBlockDevice()) {
+		deviceInfo.devicePath = filepath;
+	}
+	else {
+		let s = shell('df ' + filepath);
+		let m = /(\/dev\/[^\s]+)\s+(\d+)/.exec(s);
+		deviceInfo.devicePath = m[1];
+	}
+	let s = shell('lsblk --bytes --paths --pairs --output NAME,FSTYPE,RO,SIZE,TYPE,MOUNTPOINT');
+	let m = (new RegExp('^NAME="' + deviceInfo.devicePath + '" (.+)$', 'm')).exec(s);
+	let r = /([A-Z]+)="([^"]*)"/g;
+	let n;
+	while (n = r.exec(m[1])) {
+		switch (n[1]) {
+			case 'FSTYPE':
+				deviceInfo.fsType = n[2] ? n[2] : false;
+				break;
+			case 'RO':
+				deviceInfo.fsIsReadOnly = parseInt(n[2]) ? true : false;
+				break;
+			case 'SIZE':
+				deviceInfo.deviceSize = parseInt(n[2]);
+				break;
+			case 'TYPE':
+				deviceInfo.deviceIsPartition = (n[2] === 'part');
+				break;
+			case 'MOUNTPOINT':
+				deviceInfo.fsMountPath = n[2] ? n[2] : false;
+				break;
+		}
+	}
+	deviceInfo.deviceBlockSize = parseInt(shell('blockdev --getbsz ' + deviceInfo.devicePath));
+	deviceInfo.deviceBlockCount = deviceInfo.deviceSize / deviceInfo.deviceBlockSize;
+
+	if (!deviceInfo.deviceIsPartition) {
+		console.error('Error: device is not a partition, run fdisk.');
+		return;
+	}
+	if (!deviceInfo.fsType) {
+		console.error('Error: device has no filesystem, run mkfs.');
+		return;
+	}
+	if (deviceInfo.fsMountPath && deviceInfo.fsIsReadOnly) {
+		console.error('Error: device is mounted readonly.');
+		return;
+	}
+
+	if (deviceInfo.fsMountPath) {
+		rootDir = fs.realpathSync(fs.mkdtempSync(path.join(deviceInfo.fsMountPath, '/temp-node-fs-atomic-data-store-check-shred-')));
+		console.log('Device is mounted, using path ' + rootDir);
+	}
+	else {
+		rootDir = fs.realpathSync(fs.mkdtempSync(path.join('/mnt/temp-node-fs-atomic-data-store-check-shred-')));
+		shell('mount ' + deviceInfo.devicePath + ' ' + rootDir);
+		mounted = true;
+		console.log('Device is not mounted, mounting temporarily, using path' + rootDir);
+	}
+
+	s = shell('df --block-size=1024 ' + deviceInfo.devicePath);
+	m = /^\/dev[^ ]+\s+(\d+)/m.exec(s);
+	deviceInfo.fsSize = 1024 * parseInt(m[1]);
+	stat = fs.statSync(rootDir);
+	deviceInfo.fsBlockSize = stat.blksize;
+	deviceInfo.fsBlockCount = deviceInfo.fsSize / deviceInfo.fsBlockSize;
+	//console.debug(deviceInfo);
+
+	const patternExists = PATTERN_BASE.replace('-FSTATE-', '-EXISTS-') + crypto.randomBytes(PATTERN_RANDOM_SIZE).toString('hex');
+	const patternDeleted = PATTERN_BASE.replace('-FSTATE-', '-DELETE-') + crypto.randomBytes(PATTERN_RANDOM_SIZE).toString('hex');
+	const patternShredded = PATTERN_BASE.replace('-FSTATE-', '-SHREDD-') + crypto.randomBytes(PATTERN_RANDOM_SIZE).toString('hex');
 	const store = new fsads.Store({rootDir: rootDir});
 	const record = store.record('testcol', 'testrec');
 
-	await record.writeBuffer('partExists', patternExists.repeat(REPEAT_COUNT));
-	await record.writeBuffer('partDeleted', patternDeleted.repeat(REPEAT_COUNT));
-	await record.writeBuffer('partShredded', patternShredded.repeat(REPEAT_COUNT));
+	await record.writeBuffer('partExists', patternExists.repeat(PATTERN_REPEAT));
+	await record.writeBuffer('partDeleted', patternDeleted.repeat(PATTERN_REPEAT));
+	await record.writeBuffer('partShredded', patternShredded.repeat(PATTERN_REPEAT));
+
 	let bufferExists = await record.readBuffer('partExists');
 	let bufferDeleted = await record.readBuffer('partDeleted');
 	let bufferShredded = await record.readBuffer('partShredded');
 	if (
-		bufferExists.toString('utf8') != patternExists.repeat(REPEAT_COUNT)
-		|| bufferDeleted.toString('utf8') != patternDeleted.repeat(REPEAT_COUNT)
-		|| bufferShredded.toString('utf8') != patternShredded.repeat(REPEAT_COUNT)
+		bufferExists.toString('utf8') != patternExists.repeat(PATTERN_REPEAT)
+		|| bufferDeleted.toString('utf8') != patternDeleted.repeat(PATTERN_REPEAT)
+		|| bufferShredded.toString('utf8') != patternShredded.repeat(PATTERN_REPEAT)
 	) {
 		throw new Error('Something is wrong with fs-atomic-data-store, run tests!');
 	}
 
-	let filepath = await record.filepath('partExists');
-	let stat = fs.statSync(filepath);
-	const blocksize = stat.blksize;
-
-	let m = /(\/dev\/[^\s]+)\s+(\d+)/.exec(child_process.execSync('BLOCKSIZE=' + blocksize + ' df ' + filepath, {encoding: 'utf8'}));	
-	const devpath = m[1];
-	const blockcount = parseInt(m[2]);
-
-	await record.deletePart('partDeleted');
+	fs.unlinkSync(await record.filepath('partDeleted'));	
 	await record.shredPart('partShredded');
 
-	devicefd = fs.openSync(devpath, 'r');
+	if (!deviceInfo.fsMountPath) {
+		shell('umount ' + rootDir);
+		mounted = false;
+		console.log('Remounting device readonly');
+		shell('mount --read-only ' + deviceInfo.devicePath + ' ' + rootDir);
+		mounted = true;
+	}
 
+	deviceFd = fs.openSync(deviceInfo.devicePath, 'r');
 	bufferExists = Buffer.from(patternExists);
 	bufferDeleted = Buffer.from(patternDeleted);
 	bufferShredded = Buffer.from(patternShredded);
@@ -70,12 +180,13 @@ async function run() {
 	let foundDeleted = false;
 	let foundShredded = false;
 	let foundCount = 0;
-	let buf = Buffer.alloc(blocksize);
-	for (let i = 1; i <= blockcount; i++) {
-		if (i % 50000 == 0) {
-			console.log('reading block ' + i + ' of ' + blockcount + ' (' + (100 * i / blockcount).toFixed(1) + '%) - found ' + foundCount);
+	let buf = Buffer.alloc(deviceInfo.deviceBlockSize);
+	let progressBlocks = Math.min(100000, Math.max(10000, Math.floor(deviceInfo.deviceBlockSize / 5000)));
+	for (let i = 1; i <= deviceInfo.deviceBlockCount; i++) {
+		if (i % progressBlocks == 0) {
+			console.log('reading block ' + i + ' of ' + deviceInfo.deviceBlockCount + ' (' + (100 * i / deviceInfo.deviceBlockCount).toFixed(1) + '%) - found ' + foundCount);
 		}
-		fs.readSync(devicefd, buf, 0, blocksize, null);
+		fs.readSync(deviceFd, buf, 0, deviceInfo.deviceBlockSize, null);
 		if (!foundExists && buf.indexOf(bufferExists) != -1) {
 			foundExists = true;
 			foundCount++;
@@ -87,7 +198,7 @@ async function run() {
 			console.log('Found deleted file');
 		}
 		if (!foundShredded && buf.indexOf(bufferShredded) != -1) {
-			foundDeleted = true;
+			foundShredded = true;
 			foundCount++;
 			console.log('Found shredded file');
 		}
@@ -96,50 +207,80 @@ async function run() {
 			break;
 		}
 	}
-
+	fs.closeSync(deviceFd);
+	deviceFd = null;
 	console.log('Done scanning drive.');
-	console.log('Tested device: ' + devpath);
-	console.log('Found existing file (want yes): ' + (foundExists ? 'yes' : 'NO'));
-	console.log('Found deleted file (want yes): ' + (foundDeleted ? 'yes' : 'NO'));
-	console.log('Found shredded file (want no): ' + (foundShredded ? 'YES' : 'no'));
+
+	if (!deviceInfo.fsMountPath) {
+		shell('umount ' + rootDir);
+		mounted = false;
+		console.log('Unmounting device');
+	}
+
+	console.log('');
+	console.log('Tested device:       ' + deviceInfo.devicePath);
+	console.log('Filesystem type:     ' + deviceInfo.fsType);
+	console.log('Found existing file: ' + (foundExists ? 'yes' : 'NO'));
+	console.log('Found deleted file:  ' + (foundDeleted ? 'yes' : 'NO'));
+	console.log('Found shredded file: ' + (foundShredded ? 'YES' : 'no'));
 	if (!foundExists) {
-		console.log('Conclusion: Did not even find existing file. Test failed to function correctly. Either the device is good at hiding files, or this test is garbage.');
-		console.log('Result: Inconclusive');
+		console.log('Result:              Inconclusive');
+		console.log('Conclusion:          Did not even find existing file. Test failed to function correctly.');
+		console.log('                     Either the device is good at hiding files, or this test is garbage.');
 	}
 	else if (foundDeleted && !foundShredded) {
-		console.log('Conclusion: Found deleted file (as expected), did not find shredded file (good). Shred will help provide secure deletion on this device.');
-		console.log('Result: Pass');
+		console.log('Result:              Pass');
+		console.log('Conclusion:          Found deleted file (as expected), did not find shredded file (good).');
+		console.log('                     Shred will help provide secure deletion on this device.');
 	}
 	else if (!foundDeleted && !foundShredded) {
-		console.log('Conclusion: Did not find shredded file but also didn\'t find deleted file. The device appears to good at handling all deleted files; shred will also help provide greater security against physical recovery.');
-		console.log('Result: Pass');
+		console.log('Result:              Pass');
+		console.log('Conclusion:          Did not find shredded file, also didn\'t find deleted file.');
+		console.log('                     This device appears to good at handling all deleted files.');
+		console.log('                     Shred will also help provide greater security against physical');
+		console.log('                     recovery.');
 	}
 	else if (foundDeleted && foundShredded) {
-		console.log('Conclusion: Found shredded file (bad). This device is NOT ok for secure deletion. Shred will not help.');
-		console.log('Result: Fail');
+		console.log('Result:              FAIL');
+		console.log('Conclusion:          Found shredded file (bad).');
+		console.log('                     This device is NOT ok for secure deletion. Shred will not help.');
 	}
 	else if (!foundDeleted && foundShredded) {
-		console.log('Conclusion: Found shredded file but not deleted file. Test failed to function correctly. This device is probably NOT ok for secure deletion, and shred probably will not help.')
-		console.log('Result: Fail');
+		console.log('Result:              FAIL');
+		console.log('Conclusion:          Found shredded file but not deleted file.');
+		console.log('                     Test failed to function correctly. This device is probably NOT ok for');
+		console.log('                     secure deletion, and shred probably will not help.');
 	}
 }
 
 function cleanup() {
-	if (devicefd) {
-		fs.closeSync(devicefd);
+	if (deviceFd) {
+		fs.closeSync(deviceFd);
 	}
-	rimraf.sync(rootDir);
-	clearTimeout(timer);
-	//console.debug('ran cleanup');
+	if (rootDir) {
+		rimraf.sync(rootDir + '/*');
+	}
+	if (mounted) {
+		shell('umount ' + rootDir);
+	}
+	if (rootDir) {
+		rimraf.sync(rootDir);
+	}
+	if (timer) {
+		clearTimeout(timer);
+	}
 }
-run()
-	.then(() => {
-		console.log('Complete, exiting.');
-	})
-	.catch((err) => {
-		console.error('Caught exception, exiting:', err);
-	})
-	.finally(() => {
-		cleanup();
-	})
-;
+
+function usage() {
+	console.log(
+		"npm run check-shred <file>\n"
+		+ "  Test shred on the filesystem which contains <file>.\n"
+		+ "npm run check-shred <device>\n"
+		+ "  Test shred on the existing filesystem of <device>.\n"
+		+ "  If device is unmounted, it will be temporarily mounted.\n"
+	);
+}
+
+function shell(cmd) {
+	return child_process.execSync(cmd, {encoding: 'utf8'})
+}
