@@ -51,7 +51,7 @@ key-record store, uses filesystem, allows any data, transactional
 ### Environment
 
 * Node v10+ series (uses ES6 syntax)
-* Built for Mac and Linux. Any POSIX-compliant system *should* be fine. Windows should be ok in theory although this is completely untested (2019-03).
+* Built for Mac and Linux. Any POSIX-compliant system *should* be fine. Windows should be ok in theory although this is completely untested (as of 2019-04).
 * Any filesystem is supported.
 
 ## Installation
@@ -68,15 +68,22 @@ const fads = require('fs-atomic-data-store');
 // Access a store, provide store root directory. Store may or may not exist
 let mystore = new fads.Store('./path/to/my/store/dir');
 
-// Access a collection by name. Collection may or may not exist
-let mycollection = mystore.collection('foo');
-
 // Access a record by identifier. Record may or may not exist
-let myrecord = mycollection.record('bar');
+let myrecord = mystore.record('myrecord');
+
+// Write record from Buffer
+myrecord.writeBuffer(Buffer.from('some content!')).then(() => {
+	console.log('updated myrecord');
+});
 
 // Read record into Buffer
 myrecord.readBuffer().then((content) => {
-	console.log('foo.bar contains: ' + content.toString('utf8'));
+	console.log('myrecord contains: ' + content.toString('utf8'));
+});
+
+// Iterate over all records
+mystore.traverse('@all', (identifier) => {
+	console.log('found record identifier ' + identifier);
 });
 ```
 ## Notes
@@ -84,30 +91,36 @@ myrecord.readBuffer().then((content) => {
 ### Format
 
 * A store is a set of records stored within a directory on the filesystem.
-* Stores are subdivided into named collections.
-* Each collection has a string name.  
-  Names should be 7-bit ASCII, suggested max size of 64 bytes.
-* Each collection has zero or more records.
 * Each record has a string identifier.  
-  Identifiers should be 7-bit ASCII, suggested max size of 200 bytes.  
-  For non-ASCII or binary identifiers, serialize first, e.g. by converting to hex (`mybufferkey.toString('hex')`).
+  Identifiers should be 7-bit ASCII, suggested max size of 100 bytes.  
+  Identifiers should not begin with a dot (`.`) or at-sign (`@`).  
+  For non-ASCII or binary identifiers, serialize first, e.g. by converting to hex (`mybufferidentifier.toString('hex')`).
 * Each record has one or more content parts.
-* Each part has a string key (7-bit ASCII, suggested max size 32 bytes).
+* Each part has a string name.  
+  Part names should be 7-bit ASCII, suggested max size 50 bytes.  
+  Part names should not begin with a dot (`.`) or at-sign (`@`).
 * Each part has a binary (buffer) value.
+* Records may belong to collections.
+* Each collection has a string name.  
+  Collection names should be 7-bit ASCII, suggested max size of 50 bytes.
+  Collection names should not begin with a dot (`.`) or at-sign (`@`).
+* All records belong to the special collection "@all".
+* Records can belong to zero or more other collections.
 
 ### Locking model
 
 The use case this model is designed for is one where simultaneous access is expected to be uncommon, but must be absolutely guaranteed to never happen.
 
-* Locks can be established at record level, collection level or "globally" at store level.
+* Locks can be established at record level or "globally" at store level.
 * Record locks are guaranteed exclusive and atomic.  
   No one record can be locked by multiple actors at the same time.  
-  This includes different actors running within the same Node process.
-* Store and collection locks are also guaranteed exclusive and atomic.  
-  Once a global lock is established, no further record locks will be allowed.  
-  To ensure exclusive access to enire store/collection, wait until all existing record locks have been unlocked.
+  This includes different actors running within the same Node process, and actors running within other Node processes utilizing the same physical store.
+* Store locks are also guaranteed exclusive and atomic.  
+  Once a store lock is established, no further locks will be allowed.  
+  Existing record locks are not cancelled.  
+  To ensure exclusive access, wait until all existing record locks have been unlocked.
 * Locks are first-come-first-served, non-blocking, non-queued.  
-  If a requested lock is unavailable, fail immediately (default) or retry with escalating delay.  
+  If a requested lock is unavailable, fail immediately (default) or retry with escalating delay (up to a specified maximum amount of time).  
   Does not block.  
   Does not keep a lock request queue, so prioritization for highly-contested resources must be handled by the application.
 
@@ -115,9 +128,10 @@ The default included locking system is a wrapper around [proper-lockfile](https:
 
 ### Storage on filesystem
 
-* Each collection is a subdirectory within `$dataDir/records`.
-* Each record is a nested subdirectory within the collection directory, path based on a hash of the record identifier.
+* Each record is a nested subdirectory within `$dataDir/records/`, path based on a hash of the record identifier.
 * Each record part is stored in a separate plain file within the record directory.
+* Each collection is a subdirectory within `$dataDir/collections`.
+* Each record belonging to a collection is an empty nested subdirectory within the collection, path based on a hash of the record identifier.
 * Lock data is stored in `$datadir/locks`.
 
 ### Backup strategies

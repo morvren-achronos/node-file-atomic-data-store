@@ -5,6 +5,9 @@
 // Libraries
 const util = require('util');
 
+// Constants
+const TRAVERSE_DEPTH = 3; // .../01/02/03/04/...
+
 /**
  * Interact with a datastore
  */
@@ -25,7 +28,6 @@ module.exports = class Store {
 	 * @param {module} options.fsModule - use this instead of Node.js builtin fs (filesystem) module
 	 * @param {module} options.pathModule - use this instead of Node.js buitin path (filepaths) module
 	 * @param {function} options.recordClass - use this instead of internal Record class
-	 * @param {function} options.collectionClass -  use this instead of internal Collection class
 	 * @param {function} options.lockClass - use this instead of internal Lock class
 	 * @param {function} options.shredFunction - use this to generate overwrite data when shredding record parts. Default is crypto.randomBytes. Signature: `function(size): Buffer`
 	 */
@@ -47,16 +49,13 @@ module.exports = class Store {
 			fsModule: 'fs',
 			pathModule: 'path',
 			recordClass: './Record',
-			collectionClass: './Collection',
 			lockClass: './Lock',
 			shredFunction: null,
 			recordsDir: 'records',
-			locksDir: 'locks'
+			locksDir: 'locks',
+			collectionsDir: 'collections',
+			allCollection: '@all'
 		};
-		/**
-		 * @access private
-		 */
-		this._collections = {};
 		/**
 		 * @access private
 		 */
@@ -80,7 +79,7 @@ module.exports = class Store {
 				this._options[k] = parseInt(this._options[k], 10);
 			}
 		}
-		for (let k of ['fsModule', 'pathModule', 'recordClass', 'collectionClass', 'lockClass']) {
+		for (let k of ['fsModule', 'pathModule', 'recordClass', 'lockClass']) {
 			if (typeof this._options[k] != 'object') {
 				this._options[k] = require(this._options[k]);
 			}
@@ -119,6 +118,8 @@ module.exports = class Store {
 
 	/**
 	 * Object with promisified fs operation methods
+	 *
+	 * @type {object<string,function>}
 	 */
 	get fsop() {
 		return this._fsop;
@@ -137,13 +138,13 @@ module.exports = class Store {
 	/**
 	 * Get directory path within store
 	 *
-	 * Directory is created if it doesn't exist.
+	 * Utility function, normally there is no need to call this directly.
 	 *
 	 * @param {array} dirParts - dir path components
 	 * @param {bool} create - true to create directory if it does not exist
-	 * @returns {Promise<s?tring>} dirpath
+	 * @returns {Promise<string>} dirpath
 	 */
-	async dir(dirParts = [], create = true) {
+	async dir(dirParts, create) {
 		const
 			path = this.path,
 			fs  = this.fs,
@@ -177,7 +178,45 @@ module.exports = class Store {
 	}
 
 	/**
+	 * Return subdirectories in directory
+	 *
+	 * Utility function, normally there is no need to call this directly.
+	 *
+	 * @param {string} directory path
+	 * @return {Promise<array<string>} subdirectory names
+	 */
+	async listDirectoriesInDir(dirpath) {
+		const
+			fsop  = this.fsop
+		;
+		let entries;
+		try {
+			entries = await fsop.readdir(
+				dirpath,
+				{
+					withFileTypes: true
+				},
+			);
+		}
+		catch (err) {
+			if (err.code == 'ENOENT') {
+				return [];
+			}
+			throw err;
+		}
+		let dirs = [];
+		for (let ent of entries) {
+			if (ent.isDirectory()) {
+				dirs.push(ent.name);
+			}
+		}
+		return dirs;
+	}
+
+	/**
 	 * Perform an operation and retry it if first attempt(s) fail
+	 *
+	 * Utility function, normally there is no need to call this directly.
 	 *
 	 * @param {function} operation - Signature: `function(resolve: function, reject: function, retry: function, tryCount: number): Promise<void>`
 	 * @param {function} onTimeout - On timeout, operation promise is rejected with value returned by this function
@@ -198,7 +237,7 @@ module.exports = class Store {
 			}
 			return retries;
 		}
-		return new Promise((resolve, reject) => {
+		return /* await */ new Promise((resolve, reject) => {
 			let retries = calcRetries(timeout, wait);
 			let tryCount = 0;
 			function retry() {
@@ -219,28 +258,13 @@ module.exports = class Store {
 	// Factory methods
 
 	/**
-	 * Return an object to interact with a named collection of records
-	 *
-	 * @param {string} name - collection name
-	 * @returns {Collection} collection object
-	 */
-	collection(name) {
-		name = name.toLowerCase();
-		if (!this._collections[name]) {
-			this._collections[name] = new (this.option('collectionClass'))(this, name);
-		}
-		return this._collections[name];
-	}
-
-	/**
 	 * Return an object to interact with a record
 	 *
-	 * @param {string} collection - collection name
 	 * @param {string} identifier - record identifier
 	 * @returns {Record} record object
 	 */
-	record(collection, identifier) {
-		return this.collection(collection).record(identifier);
+	record(identifier) {
+		return new (this.option('recordClass'))(this, identifier);
 	}
 
 	/**
@@ -305,7 +329,7 @@ module.exports = class Store {
 			);
 		}
 
-		return this.runWithRetry(
+		return /* await */ this.runWithRetry(
 			(resolve, reject, retry, tryCount) => {
 				callback(lock, this, tryCount)
 					.then((result) => {
@@ -332,5 +356,67 @@ module.exports = class Store {
 			options.transactionTimeout,
 			options.transactionWait
 		);
+	}
+
+	/**
+	 * Return list of named collections
+	 *
+	 * Returned collections always have at least one record. (Empty collections are automatically deleted.)
+	 *
+	 * Special collection "@all" is not included in the returned list.
+	 *
+	 * @return {array<string>} named collections
+	 */
+	async collections() {
+		let collections = await this.listDirectoriesInDir(await this.dir([this.option('collectionsDir')], false));
+		collections.sort();
+		return collections;
+	}
+
+	/**
+	 * Iterate over records in a collection
+	 *
+	 * @param {string} collection - name of collection, or "@all" to traverse all records in store
+	 * @param {function} callback - called for each record found
+	 *   Signature: `function(identifier, recordIndex): {(void|bool}}`
+	 *   If callback returns bool false, traversal is halted
+	 * @returns {Promise<number>} total records traversed
+	 */
+	async traverse(collection, callback) {
+		const path = this.path;
+		let rootDir;
+		if (collection == this.option('allCollection')) {
+			rootDir = await this.dir([this.option('recordsDir')], false);
+		}
+		else {
+			rootDir = await this.dir([this.option('collectionsDir'), collection], false);
+		}
+		let stack = [
+			[rootDir, await this.listDirectoriesInDir(rootDir)]
+		];
+		let recordCount = 0;
+		while (stack.length) {
+			let level = stack.length - 1;
+			if (!stack[level][1].length) {
+				stack.pop();
+				continue;
+			}
+			let dir = path.join(stack[level][0], stack[level][1].pop());
+			let subdirs = await this.listDirectoriesInDir(dir);
+			if (!subdirs.length) {
+				continue;
+			}
+			if (level < TRAVERSE_DEPTH) {
+				stack.push([dir, subdirs]);
+				continue;
+			}
+			for (let identifier of subdirs) {
+				if (callback(identifier, recordCount++, this) === false) {
+					stack = [];
+					break;
+				}
+			}
+		}
+		return recordCount;
 	}
 };

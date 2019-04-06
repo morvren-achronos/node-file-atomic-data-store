@@ -9,7 +9,6 @@
 // Libraries
 const
 	Store = require('../src/Store'),
-	Collection = require('../src/Collection'),
 	Record = require('../src/Record'),
 	Lock = require('../src/Lock'),
 	fs = require('fs'),
@@ -26,6 +25,18 @@ let
 	rootDir,
 	store
 ;
+
+async function makeDirs(mkdirs) {
+	for (let dir of mkdirs) {
+		fs.mkdirSync(
+			path.join(rootDir, dir),
+			{
+				recursive: true
+			}
+		);
+	}
+}
+
 beforeEach(function() {
 	rootDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), '/node-fs-atomic-data-store-test-')));
 });
@@ -44,7 +55,6 @@ describe('entrypoint script', function() {
 	it('should return the four public classes', function() {
 		const index = require('../index');
 		expect(index.Store, 'class Store').to.equal(Store);
-		expect(index.Collection, 'class Collection').to.equal(Collection);
 		expect(index.Record, 'class Record').to.equal(Record);
 		expect(index.Lock, 'class Lock').to.equal(Lock);
 	});
@@ -78,7 +88,7 @@ describe('classes', function() {
 				it('should create directory if it does not exist', async function() {
 					const relativeDir = ['test', 'creating', 'directories'];
 					const expectedDir = path.join(rootDir, ...relativeDir);
-					expect(await store.dir(relativeDir)).to.equal(expectedDir);
+					expect(await store.dir(relativeDir, true)).to.equal(expectedDir);
 					expect(function() {
 						fs.statSync(expectedDir);
 					}).to.not.throw();
@@ -90,6 +100,21 @@ describe('classes', function() {
 					expect(function() {
 						fs.statSync(expectedDir);
 					}).to.throw('ENOENT');
+				});
+			});
+			describe('#listDirectoriesInDir', function() {
+				it('should list only directories within dir', async function() {
+					const mkdirs = [
+						'foo/bar',
+						'foo/baz',
+						'foo/bat'
+					];
+					await makeDirs(mkdirs);
+					fs.writeFileSync(path.join(await store.dir(['foo'], false), 'a-file'), 'file content');
+					await expect(store.listDirectoriesInDir(await store.dir(['foo'], false))).to.eventually.be.an('array').lengthOf(3);
+				});
+				it('should resolve ok if dir does not exist', async function() {
+					await expect(store.listDirectoriesInDir(await store.dir(['does-not-exist'], false))).to.eventually.be.an('array').lengthOf(0);
 				});
 			});
 			describe('#runWithRetry', function() {
@@ -150,14 +175,9 @@ describe('classes', function() {
 			});
 		});
 		describe('Factory methods', function() {
-			describe('#collection', function() {
-				it('should return an instance of Collection', function() {
-					expect(store.collection('testcol')).to.be.instanceof(Collection);
-				});
-			});
 			describe('#record', function() {
 				it('should return an instance of Record', function() {
-					expect(store.record('testcol', 'testrec')).to.be.instanceof(Record);
+					expect(store.record('testrec')).to.be.instanceof(Record);
 				});
 			});
 			describe('#lock', function() {
@@ -255,145 +275,125 @@ describe('classes', function() {
 					).to.be.rejectedWith('test error');
 				});
 			});
-		});
-	});
-
-	describe('class Collection', function() {
-		async function makeTestDirs() {
-			const mkdirs = [
-				'a0/b0/c0/d0/testrec0',
-				'a0/b0/c0/d0/testrec1',
-				'a0/b0/c0/d1/testrec2',
-				'a0/b0/c0/d1/testrec3',
-				'a0/b0/c1/d0/testrec4',
-				'a0/b0/c1/d1/testrec5',
-				'a0/b1/c0/d0/testrec6',
-				'a1/b0/c0/d0/testrec7',
-				'a1/b0/c0/d0/testrec8',
-				'a1/b0/c1/d0/testrec9'
-			];
-			let baseDir = await collection.dir();
-			for (let dir of mkdirs) {
-				fs.mkdirSync(
-					path.join(baseDir, dir),
-					{
-						recursive: true
-					}
-				);
-			}
-			return [
-				'testrec0',
-				'testrec1',
-				'testrec2',
-				'testrec3',
-				'testrec4',
-				'testrec5',
-				'testrec6',
-				'testrec7',
-				'testrec8',
-				'testrec9'
-			];
-		}
-		let collection;
-		beforeEach(async function() {
-			store = new Store({
-				rootDir: rootDir,
-				defaultPart: 'test'
-			});
-			collection = store.collection('testcol');
-		});
-		describe('Utility methods', function() {
-			describe('#store', function() {
-				it('should return Store instance', function() {
-					expect(collection.store).to.equal(store);
+			describe('#collections', function() {
+				it('should return list of collections', async function() {
+					const mkdirs = [
+						'collections/testcol1',
+						'collections/testcol2',
+						'collections/testcol3'
+					];
+					await makeDirs(mkdirs);
+					await expect(store.collections()).is.eventually.an('array').lengthOf(3).deep.equal(['testcol1', 'testcol2', 'testcol3']);
+				});
+				it('should return ok when store is empty', async function() {
+					await expect(store.collections()).is.eventually.an('array').lengthOf(0);
 				});
 			});
-			describe('#name', function() {
-				it('should return collection name', function() {
-					expect(collection.name).to.equal('testcol');
-				});
-			});
-			describe('#dir', function() {
-				it('should create and return collection root directory', async function() {
-					let expectedDir = path.join(rootDir, 'records', 'testcol');
-					await expect(collection.dir()).to.eventually.equal(expectedDir);
-					expect(function() {
-						fs.statSync(expectedDir);
-					}).to.not.throw();
-				});
-				it('should return collection dir without creating when create=false', async function() {
-					let expectedDir = path.join(rootDir, 'records', 'testcol');
-					await expect(collection.dir([], false)).to.eventually.equal(expectedDir);
-					expect(function() {
-						fs.statSync(expectedDir);
-					}).to.throw('ENOENT');
-				});
-			});
-		});
-		describe('Factory methods', function() {
-			describe('#record', function() {
-				it('should return Record instance', function() {
-					expect(collection.record('testrec')).to.be.instanceof(Record);
-				});
-			});
-		});
-		describe('Data operation methods', function() {
 			describe('#traverse', function() {
+				const mkdirs = [
+					'records/a0/b0/c0/d0/testrec0',
+					'collections/testcol1/a0/b0/c0/d0/testrec0',
+					'collections/testcol2/a0/b0/c0/d0/testrec0',
+					'records/a0/b0/c0/d0/testrec1',
+					'collections/testcol1/a0/b0/c0/d0/testrec1',
+					'collections/testcol2/a0/b0/c0/d0/testrec1',
+					'records/a0/b0/c0/d1/testrec2',
+					'collections/testcol1/a0/b0/c0/d1/testrec2',
+					'collections/testcol2/a0/b0/c0/d1/testrec2',
+					'records/a0/b0/c0/d1/testrec3',
+					'collections/testcol2/a0/b0/c0/d1/testrec3',
+					'records/a0/b0/c1/d0/testrec4',
+					'collections/testcol2/a0/b0/c1/d0/testrec4',
+					'records/a0/b0/c1/d1/testrec5',
+					'collections/testcol2/a0/b0/c1/d1/testrec5',
+					'collections/testcol3/a0/b0/c1/d1/testrec5',
+					'records/a0/b1/c0/d0/testrec6',
+					'collections/testcol3/a0/b1/c0/d0/testrec6',
+					'records/a1/b0/c0/d0/testrec7',
+					'collections/testcol3/a1/b0/c0/d0/testrec7',
+					'records/a1/b0/c0/d0/testrec8',
+					'records/a1/b0/c1/d0/testrec9',
+				];
+				const testrecs = {
+					'@all': [
+						'testrec0',
+						'testrec1',
+						'testrec2',
+						'testrec3',
+						'testrec4',
+						'testrec5',
+						'testrec6',
+						'testrec7',
+						'testrec8',
+						'testrec9'
+					],
+					testcol1: [
+						'testrec0',
+						'testrec1',
+						'testrec2'
+					],
+					testcol2: [
+						'testrec0',
+						'testrec1',
+						'testrec2',
+						'testrec3',
+						'testrec4',
+						'testrec5'
+					],
+					testcol3: [
+						'testrec5',
+						'testrec6',
+						'testrec7'
+					]
+				};
 				it('should execute callback once for each record in collection', async function() {
-					const expectedIds = await makeTestDirs();
-					let foundIds = [];
-					await expect(collection.traverse((identifier, recordIndex, collectionObj) => {
-						expect(identifier).to.be.a('string').lengthOf(8).match(/^testrec\d$/);
-						expect(recordIndex).to.be.a('number').equal(foundIds.length);
-						expect(collectionObj).to.equal(collection);
-						foundIds.push(identifier);
-					})).to.eventually.equal(10);
-					foundIds.sort();
-					expect(foundIds).to.deep.equal(expectedIds);
+					await makeDirs(mkdirs);
+					for (let colname in testrecs) {
+						const testids = testrecs[colname];
+						let foundids = [];
+						await expect(store.traverse(colname, (identifier, recordIndex) => {
+							expect(identifier).to.be.a('string').lengthOf(8).match(/^testrec\d$/);
+							expect(recordIndex).to.be.a('number').equal(foundids.length);
+							foundids.push(identifier);
+						})).to.eventually.equal(testids.length);
+						foundids.sort();
+						expect(foundids).to.deep.equal(testids);
+					}
 				});
 				it('should return ok if collection does not exist', async function() {
-					// triple-check that dir does not exist
-					let dir = await collection.dir([], false);
-					expect(function() {
-						return fs.statSync(dir);
-					}).to.throw('ENOENT');
-					await expect(collection.traverse(() => {
+					await expect(store.traverse('does-not-exist', () => {
 						throw new Error('callback should not be called');
 					})).to.eventually.equal(0);
 				});
 				it('should stop if callback returns bool false', async function() {
-					await makeTestDirs();
-					let foundIds = [];
-					await expect(collection.traverse((identifier, recordIndex, collectionObj) => {
-						foundIds.push(identifier);
+					await makeDirs(mkdirs);
+					let foundids = [];
+					await expect(store.traverse('@all', (identifier, recordIndex) => {
+						foundids.push(identifier);
 						if (recordIndex == 3) {
 							return false;
 						}
 					})).to.eventually.equal(4);
-					expect(foundIds).to.have.lengthOf(4);
+					expect(foundids).to.have.lengthOf(4);
 				});
 			});
 		});
 	});
 
 	describe('class Record', function() {
-		let record;
-		beforeEach(function() {
+		let record, recorddir;
+		beforeEach(async function() {
 			store = new Store({
 				rootDir: rootDir,
 				defaultPart: 'test'
 			});
-			record = store.record('testcol', 'testrec');
+			record = store.record('testrec');
+			recorddir = await record.dir(true);
 		});
 		describe('Utility methods', function() {
 			describe('#store', function() {
 				it('should return store instance', function() {
 					expect(record.store).to.equal(store);
-				});
-			});
-			describe('#collection', function() {
-				it('should return collection instance', function() {
-					expect(record.collection).to.be.instanceof(Collection);
 				});
 			});
 			describe('#identifier', function() {
@@ -420,7 +420,7 @@ describe('classes', function() {
 					];
 					let hashes = {};
 					for (let identifier of identifiers) {
-						let temprec = store.record('testcol', identifier);
+						let temprec = store.record(identifier);
 						let hash = temprec.generateHash();
 						expect(hashes).to.not.have.property(hash);
 						hashes[hash] = true;
@@ -434,32 +434,27 @@ describe('classes', function() {
 					for (let i = 0; i < 8; i += 2) {
 						hashparts.push(hash.slice(i, i + 2));
 					}
-					let expectedDir = path.join(rootDir, 'records', 'testcol', ...hashparts, 'testrec');
-					await expect(record.dir()).to.eventually.equal(expectedDir);
+					let expectedDir = path.join(rootDir, 'records', ...hashparts, 'testrec');
+					await expect(record.dir(true)).to.eventually.equal(expectedDir);
 					expect(function() {
 						fs.statSync(expectedDir);
 					}).to.not.throw();
 				});
 				it('should return record dir without creating when create=false', async function() {
+					try {
+						fs.rmdirSync(recorddir);
+					}
+					catch(err) {}
 					let hash = record.generateHash();
 					let hashparts = [];
 					for (let i = 0; i < 8; i += 2) {
 						hashparts.push(hash.slice(i, i + 2));
 					}
-					let expectedDir = path.join(rootDir, 'records', 'testcol', ...hashparts, 'testrec');
+					let expectedDir = path.join(rootDir, 'records', ...hashparts, 'testrec');
 					await expect(record.dir(false)).to.eventually.equal(expectedDir);
 					expect(function() {
 						fs.statSync(expectedDir);
 					}).to.throw('ENOENT');
-				});
-			});
-			describe('#filepath', function() {
-				it('should return part filepath and create record dir if needed', async function() {
-					let expectedPath = path.join(await record.dir(), 'testpart');
-					await expect(record.filepath('testpart')).to.eventually.equal(expectedPath);
-					expect(function() {
-						fs.statSync(path.dirname(expectedPath));
-					}).to.not.throw();
 				});
 			});
 		});
@@ -472,18 +467,17 @@ describe('classes', function() {
 						'test3'
 					];
 					for (let part of expectedParts) {
-						fs.writeFileSync(await record.filepath(part), part.repeat(4));
+						fs.writeFileSync(path.join(recorddir, part), part.repeat(4));
 					}
 					let parts = await record.listParts();
 					parts.sort();
 					expect(parts).to.deep.equal(expectedParts);
 				});
 				it('should return ok if record does not exist', async function() {
-					// triple-check that dir does not exist
-					let dir = await record.dir(false);
-					expect(function() {
-							return fs.statSync(dir);
-					}).to.throw('ENOENT');
+					try {
+						fs.rmdirSync(recorddir);
+					}
+					catch(err) {}
 					await expect(record.listParts()).to.eventually.be.an('array').lengthOf(0);
 				});
 			});
@@ -495,7 +489,7 @@ describe('classes', function() {
 						'test3'
 					];
 					for (let part of parts) {
-						fs.writeFileSync(await record.filepath(part), part.repeat(4));
+						fs.writeFileSync(path.join(recorddir, part), part.repeat(4));
 					}
 					let partStats = await record.statMultipleParts(parts);
 					expect(partStats).is.an('object');
@@ -510,7 +504,7 @@ describe('classes', function() {
 						'test3'
 					];
 					for (let part of parts) {
-						fs.writeFileSync(await record.filepath(part), part.repeat(4));
+						fs.writeFileSync(path.join(recorddir, part), part.repeat(4));
 					}
 					parts.push('test4');
 					await expect(record.statMultipleParts(parts)).to.be.rejected;
@@ -524,7 +518,7 @@ describe('classes', function() {
 						'test3'
 					];
 					for (let part of parts) {
-						fs.writeFileSync(await record.filepath(part), part.repeat(4));
+						fs.writeFileSync(path.join(recorddir, part), part.repeat(4));
 					}
 					let partContents = await record.readMultipleParts(parts);
 					expect(partContents).is.an('object');
@@ -543,7 +537,7 @@ describe('classes', function() {
 						'test3'
 					];
 					for (let part of parts) {
-						fs.writeFileSync(await record.filepath(part), part.repeat(4));
+						fs.writeFileSync(path.join(recorddir, part), part.repeat(4));
 					}
 					parts.push('test4');
 					await expect(record.readMultipleParts(parts)).to.be.rejected;
@@ -562,7 +556,7 @@ describe('classes', function() {
 						test3: fs.createWriteStream(path.join(tempDir, 'test3'))
 					};
 					for (let part in parts) {
-						fs.writeFileSync(await record.filepath(part), '0123456789abcdef'.repeat(1024));
+						fs.writeFileSync(path.join(recorddir, part), '0123456789abcdef'.repeat(1024));
 					}
 					let partContents = await record.readMultipleParts(parts);
 					expect(partContents).is.an('object');
@@ -609,9 +603,9 @@ describe('classes', function() {
 						test2: Buffer.from('0123456789abcdef'.repeat(1024)),
 						test3: '0123456789abcdef'.repeat(1024)
 					};
-					await record.writeMultipleParts(parts);
+					await expect(record.writeMultipleParts(parts)).to.eventually.be.fulfilled;
 					for (let part in parts) {
-						expect(fs.readFileSync(await record.filepath(part))).to.be.lengthOf(16 * 1024);
+						expect(fs.readFileSync(path.join(recorddir, part))).to.be.lengthOf(16 * 1024);
 					}
 				});
 				it('should throw if any part cannot be written', async function() {
@@ -620,7 +614,7 @@ describe('classes', function() {
 						test2: Buffer.from('0123456789abcdef'.repeat(1024)),
 						test3: '0123456789abcdef'.repeat(1024)
 					};
-					fs.mkdirSync(await record.filepath('test3'));
+					fs.mkdirSync(path.join(recorddir, 'test3'));
 					await expect(record.writeMultipleParts(parts)).to.be.rejected;
 				});
 				it('should return WriteStream or read from ReadStream when requested', async function() {
@@ -653,7 +647,7 @@ describe('classes', function() {
 					})).to.be.fulfilled;
 					expect(results.test3).to.equal(true);
 					for (let part in parts) {
-						expect(fs.readFileSync(await record.filepath(part))).to.be.lengthOf(16 * 1024);
+						expect(fs.readFileSync(path.join(recorddir, part))).to.be.lengthOf(16 * 1024);
 					}
 				});
 			});
@@ -665,13 +659,13 @@ describe('classes', function() {
 						'test3'
 					];
 					for (let part of parts) {
-						fs.writeFileSync(await record.filepath(part), part);
+						fs.writeFileSync(path.join(recorddir, part), part);
 					}
 					await expect(record.deleteMultipleParts(parts)).to.eventually.deep.equal(parts);
 					for (let part of parts) {
-						let path = await record.filepath(part, false);
+						let filepath = path.join(recorddir, part);
 						expect(function() {
-							fs.statSync(path);
+							fs.statSync(filepath);
 						}).to.throw('ENOENT');
 					}
 				});
@@ -681,23 +675,22 @@ describe('classes', function() {
 						'test2'
 					];
 					for (let part of parts) {
-						fs.writeFileSync(await record.filepath(part), part);
+						fs.writeFileSync(path.join(recorddir, part), part);
 					}
 					parts.push('test3');
 					await expect(record.deleteMultipleParts(parts)).to.eventually.be.an('array').lengthOf(2);
 					for (let part of parts) {
-						let path = await record.filepath(part, false);
+						let filepath = path.join(recorddir, part);
 						expect(function() {
-							fs.statSync(path)
+							fs.statSync(filepath)
 						}).to.throw('ENOENT');
 					}
 				});
 				it('should return ok if record does not exist', async function() {
-					// triple-check that dir does not exist
-					let dir = await record.dir(false);
-					expect(function() {
-							return fs.statSync(dir);
-					}).to.throw('ENOENT');
+					try {
+						fs.rmdirSync(recorddir);
+					}
+					catch(err) {}
 					let parts = [
 						'test1',
 						'test2'
@@ -713,27 +706,9 @@ describe('classes', function() {
 					];
 					await expect(record.deleteMultipleParts(parts)).to.eventually.be.an('array').lengthOf(0);
 				});
-				it('should clean up empty directories', async function() {
-					let dir = record.dir();
-					fs.writeFileSync(await record.filepath('test1'), 'test1');
-					await record.deleteMultipleParts(['test1']);
-					// base records directory should exist but be empty (no collection, no subdirs)
-					expect(fs.readdirSync(path.join(rootDir, 'records'))).to.be.an('array').lengthOf(0);
-				});
 			});
 			describe('#shredMultipleParts', function() {
-				it('should overwrite part data then remove parts', async function() {
-					let parts = [
-						'test1',
-						'test2',
-						'test3'
-					];
-					for (let part of parts) {
-						let filepath = await record.filepath(part);
-						fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(1024)));
-						fs.linkSync(filepath, filepath + '-copy');
-					}
-
+				async function shredCaptureContent(parts) {
 					let shredFdFilenameMap = {};
 					const fs_open = store._fsop.open;
 					store._fsop.open = async (...args) => {
@@ -749,11 +724,23 @@ describe('classes', function() {
 						contentBeforeUnlink[part] = fs.readFileSync(filename);
 						return fs_ftruncate(fd);
 					};
-					
 					await expect(record.shredMultipleParts(parts)).to.eventually.deep.equal(parts);
-					
+					return contentBeforeUnlink;
+				}
+				it('should overwrite part data then remove parts', async function() {
+					let parts = [
+						'test1',
+						'test2',
+						'test3'
+					];
 					for (let part of parts) {
-						let filepath = await record.filepath(part);
+						let filepath = path.join(recorddir, part);
+						fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(1024))); // 16K
+						fs.linkSync(filepath, filepath + '-copy');
+					}
+					let contentBeforeUnlink = await shredCaptureContent(parts);
+					for (let part of parts) {
+						let filepath = path.join(recorddir, part);
 
 						expect(function() { return fs.statSync(filepath); }).to.throw();
 						
@@ -766,12 +753,160 @@ describe('classes', function() {
 					}
 					expect(fs.readdirSync(await record.dir(false))).to.be.an('array').lengthOf(0);
 				});
+				it('should overwrite part data to an even kilobyte', async function() {
+					let filepath = path.join(recorddir, 'test1');
+					fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(1025))); // 16K plus 16 btyes
+					let contentBeforeUnlink = await shredCaptureContent(['test1']);
+					expect(contentBeforeUnlink.test1).to.be.instanceof(Buffer).lengthOf(17 * 1024);
+					expect(contentBeforeUnlink.test1.indexOf(Buffer.from('0123456789abcdef'))).to.equal(-1);
+				});
+				it('should overwrite all of large parts', async function() {
+					let filepath = path.join(recorddir, 'test1');
+					fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(512 * 1024 + 1))); // 8M plus 16 bytes
+					let contentBeforeUnlink = await shredCaptureContent(['test1']);
+					expect(contentBeforeUnlink.test1).to.be.instanceof(Buffer).lengthOf(16 * 512 * 1024 + 1024);
+					expect(contentBeforeUnlink.test1.indexOf(Buffer.from('0123456789abcdef'))).to.equal(-1);
+				});
+			});
+			describe('#listCollections', function() {
+				it('should list collections the record belongs to', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol1/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol2/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol3/'),
+					];
+					await makeDirs(mkdirs);
+					await expect(record.listCollections()).to.eventually.deep.equal(['testcol1', 'testcol2', 'testcol3']);
+				});
+				it('should not list collections the record does not belong to', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol1/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol2/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol3/'),
+					];
+					await makeDirs(mkdirs);
+					await store.dir(['collections/testcol4/00/01/02/03/foobar'], true)
+					await store.dir(['collections/testcol5/00/01/02/03/foobar'], true)
+					await expect(record.listCollections()).to.eventually.deep.equal(['testcol1', 'testcol2', 'testcol3']);
+				});
+				it('should resolve ok if the record does not belong to any collections', async function() {
+					const mkdirs = [
+						await store.dir(['collections/testcol1/00/01/02/03/foobar'], true),
+						await store.dir(['collections/testcol2'], true)
+					];
+					await expect(record.listCollections()).to.eventually.deep.equal([]);
+				});
+				it('should resolve ok if there are no collections', async function() {
+					await expect(record.listCollections()).to.eventually.deep.equal([]);
+				});
+			});
+			describe('#addMultipleCollections', function() {
+				it('should add to the collections the record belongs to', async function() {
+					const collections = ['testcol1', 'testcol2', 'testcol3'];
+					await expect(record.addMultipleCollections(collections)).to.eventually.deep.equal(collections);
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol1/'));
+					}).to.not.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol2/'));
+					}).to.not.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol3/'));
+					}).to.not.throw();
+				});
+				it('should return only added collections', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', '/collections/testcol2/'),
+						recorddir.replace(rootDir + '/records/', '/collections/testcol3/')
+					];
+					await makeDirs(mkdirs);
+					const collections = ['testcol1', 'testcol2', 'testcol3', 'testcol4'];
+					await expect(record.addMultipleCollections(collections)).to.eventually.deep.equal(['testcol1', 'testcol4']);
+				});
+			});
+			describe('#removeMultipleCollections', function() {
+				it('should remove from the collections the record belongs to', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol1/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol2/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol3/')
+					];
+					await makeDirs(mkdirs);
+					await expect(record.removeMultipleCollections(['testcol1', 'testcol2'])).to.eventually.deep.equal(['testcol1', 'testcol2']);
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol1/'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol2/'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol3/'));
+					}).to.not.throw();
+				});
+				it('should return removed collections', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol1/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol2/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol3/')
+					];
+					await makeDirs(mkdirs);
+					await expect(record.removeMultipleCollections(['testcol3', 'testcol4'])).to.eventually.deep.equal(['testcol3']);
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol1/'));
+					}).to.not.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol2/'));
+					}).to.not.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol3/'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol4/'));
+					}).to.throw();
+				});
+				it('should clean up empty directories', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol1/')
+					];
+					await makeDirs(mkdirs);
+					await expect(record.removeMultipleCollections(['testcol1'])).to.eventually.deep.equal(['testcol1']);
+					expect(function() {
+						fs.statSync(store.dir(['collections']));
+					}).to.throw();
+				});
+			});
+			describe('#deleteRecord', function() {
+				it('should remove record parts, record directory and collections', async function() {
+					fs.writeFileSync(path.join(recorddir, 'test1'), 'test1');
+					fs.writeFileSync(path.join(recorddir, 'test2'), 'test2');
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol1/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol2/')
+					];
+					await makeDirs(mkdirs);
+					await expect(record.deleteRecord()).to.eventually.be.fulfilled;
+					expect(function() {
+						fs.readFileSync(path.join(recorddir, 'test1'));
+					}).to.throw();
+					expect(function() {
+						fs.readFileSync(path.join(recorddir, 'test2'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol1/'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol2/'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(store.dir(['records']));
+					}).to.throw();
+				});
 			});
 		});
 		describe('Convenience methods', function() {
 			describe('#statPart', function() {
 				it('should return file stat data for part', async function() {
-					fs.writeFileSync(await record.filepath('test1'), 'test1');
+					fs.writeFileSync(path.join(recorddir, 'test1'), 'test1');
 					await expect(record.statPart('test1')).to.eventually.be.instanceof(fs.Stats);
 				});
 				it('should throw if part does not exist', async function() {
@@ -780,7 +915,7 @@ describe('classes', function() {
 			});
 			describe('#readBuffer', function() {
 				it('should return single part in Buffer', async function() {
-					fs.writeFileSync(await record.filepath('test1'), 'test1');
+					fs.writeFileSync(path.join(recorddir, 'test1'), 'test1');
 					await expect(record.readBuffer('test1')).to.eventually.be.instanceof(Buffer).lengthOf(5).deep.equal(Buffer.from('test1'));
 				});
 				it('should throw if part does not exist', async function() {
@@ -802,7 +937,7 @@ describe('classes', function() {
 						}
 					);
 					let tempFile = path.join(tempDir, 'test-data');
-					fs.writeFileSync(await record.filepath('test1'), Buffer.from('0123456789abcdef'.repeat(1024)));
+					fs.writeFileSync(path.join(recorddir, 'test1'), Buffer.from('0123456789abcdef'.repeat(1024)));
 					let reader = await record.readStream('test1');
 					expect(reader).is.instanceof(fs.ReadStream);
 					await expect(new Promise((resolve, reject) => {
@@ -841,19 +976,19 @@ describe('classes', function() {
 						});
 						reader.pipe(writer);
 					})).to.be.fulfilled;
-					await expect(fs.readFileSync(await record.filepath('test1'))).to.be.instanceof(Buffer).lengthOf(16 * 1024);
+					await expect(fs.readFileSync(path.join(recorddir, 'test1'))).to.be.instanceof(Buffer).lengthOf(16 * 1024);
 				});
 			});
 			describe('#deletePart', function() {
 				it('should remove single part', async function() {
-					fs.writeFileSync(await record.filepath('test1'), 'test1');
+					fs.writeFileSync(path.join(recorddir, 'test1'), 'test1');
 					await expect(record.deletePart('test1')).to.eventually.equal(true);
 				});
 				it('should return false if part does not exist', async function() {
 					await expect(record.deletePart('test1')).to.eventually.equal(false);
 				});
 			});
-			describe('#deleteAll', function() {
+			describe('#deleteAllParts', function() {
 				it('should remove entire record', async function() {
 					let parts = [
 						'test1',
@@ -861,38 +996,116 @@ describe('classes', function() {
 						'test3'
 					];
 					for (let part of parts) {
-						fs.writeFileSync(await record.filepath(part), Buffer.from('0123456789abcdef'.repeat(1024)));
+						fs.writeFileSync(path.join(recorddir, part), Buffer.from('0123456789abcdef'.repeat(1024)));
 					}
-					await expect(record.deleteAll()).to.eventually.deep.equal(parts);
+					await expect(record.deleteAllParts()).to.eventually.deep.equal(parts);
 				});
 			});
 			describe('#shredPart', function() {
 				it('should overwrite single part', async function() {
-					const filepath = await record.filepath('test1');
+					const filepath = path.join(recorddir, 'test1');
 					fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(1024)));
 					await expect(record.shredPart('test1')).to.eventually.be.fulfilled;
 					expect(function() { return fs.statSync(filepath); }).to.throw();
+				});
+			});
+			describe('#addCollection', function() {
+				it('should add to the collections the record belongs to', async function() {
+					await expect(record.addCollection('testcol')).to.eventually.equal(true);
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol/'));
+					}).to.not.throw();
+				});
+				it('should return whether the collection was added', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol/')
+					];
+					await makeDirs(mkdirs);
+					await expect(record.addCollection('testcol')).to.eventually.equal(false);
+				});
+			});
+			describe('#removeCollection', function() {
+				it('should remove from the collections the record belongs to', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol/')
+					];
+					await makeDirs(mkdirs);
+					await expect(record.removeCollection('testcol')).to.eventually.equal(true);
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol/'));
+					}).to.throw();
+				});
+				it('should return whether the collection was removed', async function() {
+					await expect(record.removeCollection('testcol')).to.eventually.equal(false);
+				});
+				it('should clean up empty directories', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol/')
+					];
+					await makeDirs(mkdirs);
+					await expect(record.removeCollection('testcol')).to.eventually.equal(true);
+					expect(function() {
+						fs.statSync(store.dir(['collections']));
+					}).to.throw();
+				});
+			});
+			describe('#removeAllCollections', function() {
+				it('should remove all collections the record belongs to, and clean up empty directories', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol1/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol2/')
+					];
+					await makeDirs(mkdirs);
+					await expect(record.removeAllCollections()).to.eventually.deep.equal(['testcol1', 'testcol2']);
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol1/'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol2/'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(store.dir(['collections']));
+					}).to.throw();
+				});
+			});
+			describe('#setCollections', function() {
+				it('should add to and remove from the collections the record belongs to', async function() {
+					const mkdirs = [
+						recorddir.replace(rootDir + '/records/', 'collections/testcol1/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol2/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol3/')
+					];
+					await makeDirs(mkdirs);
+					await expect(record.setCollections(['testcol1', 'testcol4', 'testcol5'])).to.eventually.be.fulfilled;
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol1/'));
+					}).to.not.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol2/'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol3/'));
+					}).to.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol4/'));
+					}).to.not.throw();
+					expect(function() {
+						fs.statSync(recorddir.replace('records/', 'collections/testcol5/'));
+					}).to.not.throw();
 				});
 			});
 		});
 	});
 
 	describe('class Lock', function() {
-		let lock;
-		beforeEach(function() {
+		let lock, lockdir;
+		beforeEach(async function() {
 			store = new Store({
 				rootDir: rootDir,
 				defaultPart: 'test'
 			});
 			lock = store.lock();
-		});
-		afterEach(async function() {
-			let dir = await lock.dir();
-			return new Promise((resolve) => {
-				rimraf(dir, () => {
-					resolve();
-				});
-			});
+			lockdir = await store.dir([store.option('locksDir')], true);
 		});
 		describe('Utility methods', function() {
 			describe('#store', function() {
@@ -900,96 +1113,39 @@ describe('classes', function() {
 					expect(lock.store).to.equal(store);
 				});
 			});
-			describe('#filename', function() {
-				it('should return filename for all lock types', function() {
-					expect(lock.filename('testcol', 'testrec')).to.equal('testcol@@--record@@testrec');
-					expect(lock.filename('testcol', null)).to.equal('@@--collection@@testcol');
-					expect(lock.filename(null, null)).to.equal('@@--store@@');
-				});
-			});
-			describe('#parseFilename', function() {
-				it('should return lock info for all lock types', function() {
-					expect(lock.parseFilename('testcol@@--record@@testrec')).to.deep.equal({
-						collection: 'testcol',
-						identifier: 'testrec',
-						type: 'record',
-						ours: null
-					});
-					expect(lock.parseFilename('@@--collection@@testcol')).to.deep.equal({
-						collection: 'testcol',
-						identifier: null,
-						type: 'collection',
-						ours: null
-					});
-					expect(lock.parseFilename('@@--store@@')).to.deep.equal({
-						collection: null,
-						identifier: null,
-						type: 'store',
-						ours: null
-					});
-				});
-			});
-			describe('#dir', function() {
-				it('should create and return lock directory', async function() {
-					let expectedDir = path.join(rootDir, 'locks');
-					await expect(lock.dir()).to.eventually.equal(expectedDir);
-					expect(function() {
-						fs.statSync(expectedDir);
-					}).to.not.throw();
-				});
-				it('should return record dir without creating when create=false', async function() {
-					let expectedDir = path.join(rootDir, 'locks');
-					await expect(lock.dir(false)).to.eventually.equal(expectedDir);
-					expect(function() {
-						fs.statSync(expectedDir);
-					}).to.throw('ENOENT');
-				});
-			});
 		});
 		describe('Data operation methods', function() {
 			describe('#lock', function() {
 				it('should take lock if available', async function() {
-					await expect(lock.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
-					expect(fs.statSync(path.join(await lock.dir(), 'testcol@@--record@@testrec'))).to.be.instanceof(fs.Stats);
-					await expect(lock.lock('testcol', null)).to.eventually.be.fulfilled;
-					expect(fs.statSync(path.join(await lock.dir(), '@@--collection@@testcol'))).to.be.instanceof(fs.Stats);
-					await expect(lock.lock(null, null)).to.eventually.be.fulfilled;
-					expect(fs.statSync(path.join(await lock.dir(), '@@--store@@'))).to.be.instanceof(fs.Stats);
+					await expect(lock.lock('testrec')).to.eventually.be.fulfilled;
+					expect(fs.statSync(path.join(lockdir, 'testrec'))).to.be.instanceof(fs.Stats);
+					await expect(lock.lock('@store')).to.eventually.be.fulfilled;
+					expect(fs.statSync(path.join(lockdir, '@store'))).to.be.instanceof(fs.Stats);
 				});
 				it('should return ok if lock already held by same instance', async function() {
-					await expect(lock.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
-					await expect(lock.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
-					await expect(lock.lock('testcol', null)).to.eventually.be.fulfilled;
-					await expect(lock.lock('testcol', null)).to.eventually.be.fulfilled;
-					await expect(lock.lock(null, null)).to.eventually.be.fulfilled;
-					await expect(lock.lock(null, null)).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec')).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec')).to.eventually.be.fulfilled;
+					await expect(lock.lock('@store')).to.eventually.be.fulfilled;
+					await expect(lock.lock('@store')).to.eventually.be.fulfilled;
 				});
 				it('should fail if lock already held by other instance', async function() {
 					let lock2 = store.lock();
-					await expect(lock.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
-					await expect(lock2.lock('testcol', 'testrec')).to.be.rejectedWith('ELOCKED');
-				});
-				it('should fail on record or collection lock if collection locked', async function() {
-					let lock2 = store.lock();
-					await expect(lock.lock('testcol', null)).to.eventually.be.fulfilled;
-					await expect(lock.lock('testcol', 'testrec')).to.be.rejectedWith('ELOCKED');
-					await expect(lock2.lock('testcol', 'testrec')).to.be.rejectedWith('ELOCKED');
-					await expect(lock2.lock('testcol', null)).to.be.rejectedWith('ELOCKED');
-					await expect(lock2.lock(null, null)).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec')).to.eventually.be.fulfilled;
+					await expect(lock2.lock('testrec')).to.be.rejectedWith('ELOCKED');
+					await expect(lock.lock('@store')).to.eventually.be.fulfilled;
+					await expect(lock2.lock('@store')).to.be.rejectedWith('ELOCKED');
 				});
 				it('should fail always if store locked', async function() {
 					let lock2 = store.lock();
-					await expect(lock.lock(null, null)).to.eventually.be.fulfilled;
-					await expect(lock.lock('testcol', null)).to.be.rejectedWith('ELOCKED');
-					await expect(lock.lock('testcol', 'testrec')).to.be.rejectedWith('ELOCKED');
-					await expect(lock2.lock('testcol', 'testrec')).to.be.rejectedWith('ELOCKED');
-					await expect(lock2.lock('testcol', null)).to.be.rejectedWith('ELOCKED');
-					await expect(lock2.lock(null, null)).to.be.rejectedWith('ELOCKED');
+					await expect(lock.lock('@store')).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec')).to.be.rejectedWith('ELOCKED');
+					await expect(lock2.lock('testrec2')).to.be.rejectedWith('ELOCKED');
+					await expect(lock2.lock('@store')).to.be.rejectedWith('ELOCKED');
 				});
 				it('should retry for up to configured maximum delay', async function() {
-					let lockpath = path.join(await lock.dir(), lock.filename('testcol', 'testrec'));
+					let lockpath = path.join(lockdir, 'testrec');
 					let lock2 = store.lock();
-					await expect(lock.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec')).to.eventually.be.fulfilled;
 					setTimeout(
 						() => {
 							expect(() => {
@@ -998,16 +1154,14 @@ describe('classes', function() {
 						},
 						100
 					);
-					await expect(lock2.lock('testcol', 'testrec')).to.be.rejectedWith('ELOCKED');
+					await expect(lock2.lock('testrec')).to.be.rejectedWith('ELOCKED');
 					await expect(lock2.lock(
-						'testcol',
 						'testrec',
 						{
 							timeout: 20
 						}
 					)).to.be.rejectedWith('ELOCKED');
 					await expect(lock2.lock(
-						'testcol',
 						'testrec',
 						{
 							timeout: 200
@@ -1017,156 +1171,97 @@ describe('classes', function() {
 			});
 			describe('#unlock', function() {
 				it('should unlock held lock', async function() {
-					let lockpath = path.join(await lock.dir(), lock.filename('testcol', 'testrec'));
+					let lockpath = path.join(lockdir, 'testrec');
 					let lock2 = store.lock();
-					await expect(lock.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
-					await expect(lock2.lock('testcol', 'testrec')).to.be.rejectedWith('ELOCKED');
-					await expect(lock.unlock('testcol', 'testrec')).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec')).to.eventually.be.fulfilled;
+					await expect(lock2.lock('testrec')).to.be.rejectedWith('ELOCKED');
+					await expect(lock.unlock('testrec')).to.eventually.be.fulfilled;
 					expect(() => {
 						fs.statSync(lockpath);
 					}).to.throw();
-					await expect(lock2.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
+					await expect(lock2.lock('testrec')).to.eventually.be.fulfilled;
 				});
 				it('should fail if lock not held by instance', async function() {
 					let lock2 = store.lock();
-					await expect(lock.unlock('testcol', 'testrec')).to.be.rejectedWith('ENOTACQUIRED');
-					await expect(lock2.unlock('testcol', 'testrec')).to.be.rejectedWith('ENOTACQUIRED');
-					await expect(lock.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
-					await expect(lock2.unlock('testcol', 'testrec')).to.be.rejectedWith('ENOTACQUIRED');
+					await expect(lock.unlock('testrec')).to.be.rejectedWith('ENOTACQUIRED');
+					await expect(lock2.unlock('testrec')).to.be.rejectedWith('ENOTACQUIRED');
+					await expect(lock.lock('testrec')).to.eventually.be.fulfilled;
+					await expect(lock2.unlock('testrec')).to.be.rejectedWith('ENOTACQUIRED');
 				});
 				it('should fail if lock has been compromised', async function() {
-					let lockpath = path.join(await lock.dir(), lock.filename('testcol', 'testrec'));
-					await expect(lock.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
+					let lockpath = path.join(lockdir, 'testrec');
+					await expect(lock.lock('testrec')).to.eventually.be.fulfilled;
 					expect(() => {
 						return fs.rmdirSync(lockpath);
 					}).to.not.throw();
-					await expect(lock.unlock('testcol', 'testrec')).to.be.rejectedWith('ECOMPROMISED');
+					await expect(lock.unlock('testrec')).to.be.rejectedWith('ECOMPROMISED');
 				});
 			});
 			describe('#unlockAll', function() {
 				it('should unlock all locks held by instance', async function() {
-					let dir = await lock.dir();
-					await expect(lock.lock('testcol', 'testrec1')).to.eventually.be.fulfilled;
-					await expect(lock.lock('testcol', 'testrec2')).to.eventually.be.fulfilled;
-					await expect(lock.lock('testcol', 'testrec3')).to.eventually.be.fulfilled;
+					let dir = lockdir;
+					await expect(lock.lock('testrec1')).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec2')).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec3')).to.eventually.be.fulfilled;
 					expect(fs.readdirSync(dir)).to.be.an('array').lengthOf(3);
 					await expect(lock.unlockAll()).to.eventually.be.fulfilled;
 					expect(fs.readdirSync(dir)).to.be.an('array').lengthOf(0);
 				});
 				it('should return ok if no locks are held', async function() {
-					let dir = await lock.dir();
+					let dir = lockdir;
 					await expect(lock.unlockAll()).to.eventually.be.fulfilled;
 				});
 				it('should return ok if lock directory does not exist', async function() {
-					let dir = await lock.dir(false);
+					try{
+						fs.rmdirSync(lockdir);
+					}
+					catch (err) {}
 					await expect(lock.unlockAll()).to.eventually.be.fulfilled;
 				});
 			});
 			describe('#list', function() {
-				it('should list held locks with info', async function() {
-					await expect(lock.lock('testcol', 'testrec')).to.eventually.be.fulfilled;
-					await expect(lock.lock('testcol', null)).to.eventually.be.fulfilled;
-					await expect(lock.lock(null, null)).to.eventually.be.fulfilled;
-					expect(lock.list()).to.be.an('array').lengthOf(3).deep.equal([
-						{
-							collection: null,
-							identifier: null,
-							type: 'store',
-							ours: true
-						},
-						{
-							collection: 'testcol',
-							identifier: null,
-							type: 'collection',
-							ours: true
-						},
-						{
-							collection: 'testcol',
-							identifier: 'testrec',
-							type: 'record',
-							ours: true
-						}
-					]);
+				it('should list held locks', async function() {
+					await expect(lock.lock('testrec1')).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec2')).to.eventually.be.fulfilled;
+					await expect(lock.lock('@store')).to.eventually.be.fulfilled;
+					expect(lock.list()).to.be.an('array').lengthOf(3).deep.equal(['@store', 'testrec1', 'testrec2']);
 				});
 				it('should return ok if no locks are held', async function() {
-					let dir = await lock.dir();
 					expect(lock.list()).to.be.an('array').lengthOf(0);
 				});
 				it('should return ok if lock directory does not exist', async function() {
-					let dir = await lock.dir(false);
+					try{
+						fs.rmdirSync(lockdir);
+					}
+					catch (err) {}
 					expect(lock.list()).to.be.an('array').lengthOf(0);
 				});
 			});
 			describe('#listGlobal', function() {
 				it('should list all locks held by all processes/instances', async function() {
-					await expect(lock.lock('testcol', 'testrec1')).to.eventually.be.fulfilled;
+					await expect(lock.lock('testrec1')).to.eventually.be.fulfilled;
 					let lock2 = store.lock();
-					await expect(lock2.lock('testcol', 'testrec2')).to.eventually.be.fulfilled;
-					await expect(lock2.lock('testcol', null)).to.eventually.be.fulfilled;
-					await expect(lock2.lock(null, null)).to.eventually.be.fulfilled;
-					await expect(lock.listGlobal()).to.eventually.be.an('array').lengthOf(4).deep.equal([
-						{
-							collection: null,
-							identifier: null,
-							type: 'store',
-							ours: false
-						},
-						{
-							collection: 'testcol',
-							identifier: null,
-							type: 'collection',
-							ours: false
-						},
-						{
-							collection: 'testcol',
-							identifier: 'testrec1',
-							type: 'record',
-							ours: true
-						},
-						{
-							collection: 'testcol',
-							identifier: 'testrec2',
-							type: 'record',
-							ours: false
-						}
-					]);
+					await expect(lock2.lock('testrec2')).to.eventually.be.fulfilled;
+					await expect(lock2.lock('@store')).to.eventually.be.fulfilled;
+					await expect(lock.listGlobal()).to.eventually.be.an('array').lengthOf(3).deep.equal(['@store', 'testrec1', 'testrec2']);
 				});
 				it('should return ok if no locks are held by anything', async function() {
-					let dir = await lock.dir();
 					await expect(lock.listGlobal()).to.eventually.be.an('array').lengthOf(0);
 				});
 				it('should return ok if lock directory does not exist', async function() {
-					let dir = await lock.dir(false);
+					try{
+						fs.rmdirSync(lockdir);
+					}
+					catch (err) {}
 					await expect(lock.listGlobal()).to.eventually.be.an('array').lengthOf(0);
 				});
 			});
 		});
 		describe('Convenience methods', function() {
-			describe('#lockCollection', function() {
-				it('should lock collection', async function() {
-					await expect(lock.lockCollection('testcol')).to.eventually.be.fulfilled;
-					expect(fs.statSync(path.join(await lock.dir(), '@@--collection@@testcol'))).to.be.instanceof(fs.Stats);
-				});
-				it('should return ok if lock already held by same instance', async function() {
-					await expect(lock.lockCollection('testcol')).to.eventually.be.fulfilled;
-					await expect(lock.lockCollection('testcol')).to.eventually.be.fulfilled;
-				});
-				it('should fail if lock already held by other instance', async function() {
-					let lock2 = store.lock();
-					await expect(lock.lockCollection('testcol')).to.eventually.be.fulfilled;
-					await expect(lock2.lockCollection('testcol')).to.be.rejectedWith('ELOCKED');
-				});
-				it('should fail always if store locked', async function() {
-					let lock2 = store.lock();
-					await expect(lock.lock(null, null)).to.eventually.be.fulfilled;
-					await expect(lock.lockCollection('testcol')).to.be.rejectedWith('ELOCKED');
-					await expect(lock2.lockCollection('testcol')).to.be.rejectedWith('ELOCKED');
-				});
-			});
 			describe('#lockStore', function() {
 				it('should lock store', async function() {
 					await expect(lock.lockStore()).to.eventually.be.fulfilled;
-					expect(fs.statSync(path.join(await lock.dir(), '@@--store@@'))).to.be.instanceof(fs.Stats);
+					expect(fs.statSync(path.join(lockdir, '@store'))).to.be.instanceof(fs.Stats);
 				});
 				it('should return ok if lock already held by same instance', async function() {
 					await expect(lock.lockStore()).to.eventually.be.fulfilled;
@@ -1178,29 +1273,9 @@ describe('classes', function() {
 					await expect(lock2.lockStore()).to.be.rejectedWith('ELOCKED');
 				});
 			});
-			describe('#unlockCollection', function() {
-				it('should unlock held collection lock', async function() {
-					let lockpath = path.join(await lock.dir(), lock.filename('testcol', null));
-					let lock2 = store.lock();
-					await expect(lock.lockCollection('testcol')).to.eventually.be.fulfilled;
-					await expect(lock2.lockCollection('testcol')).to.be.rejectedWith('ELOCKED');
-					await expect(lock.unlockCollection('testcol')).to.eventually.be.fulfilled;
-					expect(() => {
-						fs.statSync(lockpath);
-					}).to.throw();
-					await expect(lock2.lockCollection('testcol')).to.eventually.be.fulfilled;
-				});
-				it('should fail if lock not held by instance', async function() {
-					let lock2 = store.lock();
-					await expect(lock.unlockCollection('testcol')).to.be.rejectedWith('ENOTACQUIRED');
-					await expect(lock2.unlockCollection('testcol')).to.be.rejectedWith('ENOTACQUIRED');
-					await expect(lock.lockCollection('testcol')).to.eventually.be.fulfilled;
-					await expect(lock2.unlockCollection('testcol')).to.be.rejectedWith('ENOTACQUIRED');
-				});
-			});
 			describe('#unlockStore', function() {
 				it('should unlock held store lock', async function() {
-					let lockpath = path.join(await lock.dir(), lock.filename(null, null));
+					let lockpath = path.join(lockdir, '@store');
 					let lock2 = store.lock();
 					await expect(lock.lockStore()).to.eventually.be.fulfilled;
 					await expect(lock2.lockStore()).to.be.rejectedWith('ELOCKED');
