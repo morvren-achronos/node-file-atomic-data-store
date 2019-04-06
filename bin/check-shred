@@ -67,9 +67,6 @@ async function run() {
 		deviceBlockSize: null,
 		deviceBlockCount: null,
 		fsType: null,
-		fsSize: null,
-		fsBlockSize: null,
-		fsBlockCount: null,
 		fsMountPath: null,
 		fsIsReadOnly: null
 	};
@@ -131,13 +128,6 @@ async function run() {
 		mounted = true;
 		console.log('Device is not mounted, mounting temporarily, using path' + rootDir);
 	}
-
-	s = shell('df --block-size=1024 ' + deviceInfo.devicePath);
-	m = /^\/dev[^ ]+\s+(\d+)/m.exec(s);
-	deviceInfo.fsSize = 1024 * parseInt(m[1]);
-	stat = fs.statSync(rootDir);
-	deviceInfo.fsBlockSize = stat.blksize;
-	deviceInfo.fsBlockCount = deviceInfo.fsSize / deviceInfo.fsBlockSize;
 	//console.debug(deviceInfo);
 
 	const patternExists = PATTERN_BASE.replace('-FSTATE-', '-EXISTS-') + crypto.randomBytes(PATTERN_RANDOM_SIZE).toString('hex');
