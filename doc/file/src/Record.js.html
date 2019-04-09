@@ -29,11 +29,10 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-store">store</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -43,23 +42,33 @@
  * class Record
  */
 
- // Libraries
- const stream = require(&apos;stream&apos;);
+// Libraries
+const stream = require(&apos;stream&apos;);
+
+// Constants
+const
+	HASH_SIZE = 8,
+	RECORD_DEPTH = 6, // records/01/02/03/04/testrec
+	COLLECTION_DEPTH = 7 // collections/colname/
+;
 
 /**
  * Interact with a record
  *
- * Do not instantiate this class directly, use methods from class {Store}
+ * Do not instantiate this class directly, use method {@link Store.record}
  */
 module.exports = class Record {
 	/**
 	 * Get record interaction instance
 	 *
+	 * Do not instantiate this class directly, use method {@link Store.record}
+	 *
 	 * @param {Store} store - object
 	 * @param {Collection} collection - object
 	 * @param {string} identifier - record identifier
+	 * @internal
 	 */
-	constructor(store, collection, identifier) {
+	constructor(store, identifier) {
 		/**
 		 * @access private
 		 */
@@ -67,11 +76,11 @@ module.exports = class Record {
 		/**
 		 * @access private
 		 */
-		this._col = collection;
+		this._id = identifier;
 		/**
 		 * @access private
 		 */
-		this._id = identifier;
+		this._dirParts = null;
 	}
 
 
@@ -87,15 +96,6 @@ module.exports = class Record {
 	}
 
 	/**
-	 * Collection instance for this record
-	 *
-	 * @type {Collection}
-	 */
-	get collection() {
-		return this._col;
-	}
-
-	/**
 	 * Identifier for this record
 	 *
 	 * @type {string}
@@ -106,6 +106,8 @@ module.exports = class Record {
 
 	/**
 	 * Return hex-encoded 32-bit unsigned integer hash of record identifier
+	 *
+	 * Utility function, normally there is no need to call this directly.
 	 *
 	 * Based on npm module string-hash (https://github.com/darkskyapp/string-hash) by The Dark Sky Company, LLC
 	 * That code is licensed under CC0-1.0
@@ -122,8 +124,8 @@ module.exports = class Record {
 			hash = (hash * 33) ^ id.charCodeAt(--i);
 		}
 		hash = (hash &gt;&gt;&gt; 0).toString(16);
-		if (hash.length &lt; 8) {
-			hash = &apos;0&apos;.repeat(8 - hash.length) + hash;
+		if (hash.length &lt; HASH_SIZE) {
+			hash = &apos;0&apos;.repeat(HASH_SIZE - hash.length) + hash;
 		}
 		return hash;
 	}
@@ -131,33 +133,19 @@ module.exports = class Record {
 	/**
 	 * Get directory path of record
 	 *
-	 * Directory is created if it doesn&apos;t exist.
+	 * Utility function, normally there is no need to call this directly.
 	 *
 	 * @param {bool} create - true to create directory if it does not exist
 	 * @returns {Promise&lt;string&gt;} dirpath
 	 */
-	async dir(create = true) {
-		let
-			hash = this.generateHash(),
-			dirParts = []
-		;
-		for (let i = 0; i &lt; 8; i += 2) {
-			dirParts.push(hash.slice(i, i + 2));
-		}
-		return this.collection.dir([...dirParts, this.identifier], create);
-	}
-
-	/**
-	 * Get file path of record part
-	 *
-	 * @param {?string} part - name of part, or null for default part
-	 * @param {bool} createDir - true to create directory if it does not exist
-	 * @returns {Promise&lt;string&gt;} filepath
-	 */
-	async filepath(part = null, createDir = true) {
-		return this.store.path.join(
-			await this.dir(createDir),
-			part || this.store.option(&apos;defaultPart&apos;)
+	async dir(create) {
+		return /* await */ this.store.dir(
+			[
+				this.store.option(&apos;recordsDir&apos;),
+				...this._getDirParts(),
+				this.identifier
+			],
+			create
 		);
 	}
 
@@ -167,51 +155,49 @@ module.exports = class Record {
 	/**
 	 * Get list of record parts
 	 *
-	 * @returns {Promise&lt;array&gt;} partnames
+	 * @returns {Promise&lt;array&gt;} part names
 	 */
 	async listParts() {
 		const
 			dir = await this.dir(false),
-			fs = this.store.fs
+			fsop = this.store.fsop
 		;
-		return new Promise((resolve, reject) =&gt; {
-			fs.readdir(
+		let entries;
+		try {
+			entries = await fsop.readdir(
 				dir,
 				{
 					withFileTypes: true
 				},
-				(err, entries) =&gt; {
-					if (err) {
-						if (err.code == &apos;ENOENT&apos;) {
-							resolve([]);
-						}
-						reject(err);
-						return;
-					}
-					let files = [];
-					for (let ent of entries) {
-						if (ent.isFile()) {
-							files.push(ent.name);
-						}
-					}
-					files.sort();
-					resolve(files);
-				}
 			);
-		});
+		}
+		catch (err) {
+			if (err.code == &apos;ENOENT&apos;) {
+				return [];
+			}
+			throw err;
+		}
+		let results = [];
+		for (let ent of entries) {
+			if (ent.isFile() &amp;&amp; ent.name.substring(1, 1) != &apos;@&apos;) {
+				results.push(ent.name);
+			}
+		}
+		results.sort();
+		return results;
 	}
 
 	/**
 	 * Get file stat data for multiple record parts
 	 *
-	 * @param {array} parts - part names to remove
+	 * @param {array} parts - part names to look up
 	 * @returns {Promise&lt;object&gt;} results. Property name is part name. Property value is {fs.Stats}
 	 */
 	async statMultipleParts(parts) {
 		const
 			dir = await this.dir(false),
 			path = this.store.path,
-			fs  = this.store.fs
+			fsop  = this.store.fsop
 		;
 		if (!(parts instanceof Array)) {
 			parts = Object.keys(parts);
@@ -219,18 +205,8 @@ module.exports = class Record {
 		let promises = [];
 		let results = {};
 		for (let part of parts) {
-			promises.push(new Promise(async (resolve, reject) =&gt; {
-				fs.stat(
-					path.join(dir, part),
-					(err, stat) =&gt; {
-						if (err) {
-							reject(err);
-							return;
-						}
-						results[part] = stat;
-						resolve();
-					}
-				);
+			promises.push(fsop.stat(path.join(dir, part)).then((stat) =&gt; {
+				results[part] = stat;
 			}));
 		}
 		await Promise.all(promises);
@@ -250,7 +226,8 @@ module.exports = class Record {
 		const
 			dir = await this.dir(false),
 			path = this.store.path,
-			fs  = this.store.fs
+			fs  = this.store.fs,
+			fsop  = this.store.fsop
 		;
 		if (Array.isArray(parts)) {
 			let p = {};
@@ -275,10 +252,10 @@ module.exports = class Record {
 						});
 						/* readers have &apos;end&apos;, writers have &apos;finish&apos; */
 						reader.on(&apos;end&apos;, () =&gt; {
+							results[part] = true;
 							resolve();
 						});
 						reader.pipe(parts[part]);
-						results[part] = true;
 					}
 					catch (err) {
 						reject(err);
@@ -286,19 +263,9 @@ module.exports = class Record {
 				}));
 			}
 			else {
-				promises.push(new Promise((resolve, reject) =&gt; {
-					fs.readFile(
-						filepath,
-						(err, content) =&gt; {
-							if (err) {
-								reject(err);
-								return;
-							}
-							results[part] = content;
-							resolve();
-						}
-					);
-				}));
+				promises.push((async () =&gt; {
+					results[part] = await fsop.readFile(filepath);
+				})());
 			}
 		}
 		await Promise.all(promises);
@@ -316,11 +283,12 @@ module.exports = class Record {
 	 */
 	async writeMultipleParts(parts) {
 		const
-			dir = await this.dir(),
+			dir = await this.dir(true),
 			path = this.store.path,
 			fs  = this.store.fs,
+			fsop  = this.store.fsop,
 			fileMode = this.store.option(&apos;fileMode&apos;),
-			flags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_SYNC
+			flags = fs.constants.O_WRONLY | fs.constants.O_TRUNC | fs.constants.O_CREAT
 		;
 		let promises = [];
 		let results = {};
@@ -356,24 +324,22 @@ module.exports = class Record {
 				}));
 			}
 			else {
-				promises.push(new Promise((resolve, reject) =&gt; {
-					fs.writeFile(
-						filepath,
-						parts[part],
-						{
-							flags: flags,
-							mode: fileMode
-						},
-						(err) =&gt; {
-							if (err) {
-								reject(err);
-								return;
-							}
-							results[part] = true;
-							resolve();
+				promises.push((async () =&gt; {
+					let fd;
+					try {
+						fd = await fsop.open(filepath, flags, fileMode);
+						await fsop.writeFile(fd, parts[part]);
+						await fsop.fdatasync(fd);
+						await fsop.close(fd);
+					}
+					catch (err) {
+						if (fd) {
+							fs.close(fd);
 						}
-					);
-				}));
+						throw err;
+					}
+					results[part] = true;
+				})());
 			}
 		}
 		await Promise.all(promises);
@@ -385,14 +351,14 @@ module.exports = class Record {
 	 *
 	 * Parts that do not exist are ignored (not treated as an error).
 	 *
-	 * @param {array} parts - part names to remove
-	 * @returns {Promise&lt;array&gt;} part names deleted
+	 * @param {array} parts - part names to delete
+	 * @returns {Promise&lt;array&lt;string&gt;&gt;} parts deleted
 	 */
 	async deleteMultipleParts(parts) {
 		const
 			dir = await this.dir(false),
 			path = this.store.path,
-			fs  = this.store.fs
+			fsop  = this.store.fsop
 		;
 		if (!(parts instanceof Array)) {
 			parts = Object.keys(parts);
@@ -400,108 +366,197 @@ module.exports = class Record {
 		let promises = [];
 		let results = [];
 		for (let part of parts) {
-			promises.push(new Promise(async (resolve, reject) =&gt; {
-				fs.unlink(
-					path.join(dir, part),
-					(err) =&gt; {
-						if (err) {
-							if (err.code == &apos;ENOENT&apos;) {
-								resolve();
-								return;
-							}
-							reject(err);
-							return;
-						}
-						results.push(part);
-						resolve();
+			promises.push((async () =&gt; {
+				try {
+					await fsop.unlink(path.join(dir, part));
+				}
+				catch (err) {
+					if (err.code == &apos;ENOENT&apos;) {
+						return;
 					}
-				);
-			}));
+					throw err;
+				}
+				results.push(part);
+			})());
 		}
-		results.sort();
-		promises.push((async () =&gt; {
-			let removeDir = dir;
-			for (let i = 0; i &lt; 6; i++) {
-				await new Promise((resolve) =&gt; {
-					fs.rmdir(removeDir, (err) =&gt; {
-						if (err) {
-							i = 6;
-						}
-						resolve();
-					});
-				});
-				removeDir = path.dirname(removeDir);
-			}
-		})());
 		await Promise.all(promises);
+		results.sort();
 		return results;
 	}
 
 	/**
-	 * Overwrite contents of multiple record parts
+	 * Delete multiple record parts and make contents unrecoverable
+	 *
+	 * Parts that do not exist are ignored (not treated as an error).
 	 *
 	 * @param {array} parts - part names to shred
-	 * @returns {Promise&lt;void&gt;}
+	 * @returns {Promise&lt;array&lt;string&gt;&gt;} parts shredded
 	 */
 	async shredMultipleParts(parts) {
 		const
 			dir = await this.dir(false),
 			path = this.store.path,
 			fs  = this.store.fs,
+			fsop  = this.store.fsop,
 			shred = this.store.option(&apos;shredFunction&apos;),
-			fileMode = this.store.option(&apos;fileMode&apos;),
-			flags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_SYNC
+			flags = fs.constants.O_WRONLY | fs.constants.O_APPEND,
+			passCount = this.store.option(&apos;shredPassCount&apos;)
 		;
 		if (!(parts instanceof Array)) {
 			parts = Object.keys(parts);
 		}
 		let promises = [];
+		let results = [];
 		for (let part of parts) {
-			promises.push(new Promise(async (resolve, reject) =&gt; {
+			promises.push((async () =&gt; {
 				let filepath = path.join(dir, part);
-				fs.stat(
-					filepath,
-					(err, stat) =&gt; {
-						if (err) {
-							reject(err);
-							return;
-						}
-						let bytesRemaining = stat.size;
-						let reader = new stream.Readable({
-							autoDestroy: true,
-							read(size) {
-								let go = true;
-								while(go &amp;&amp; bytesRemaining) {
-									if (bytesRemaining &lt;= size) {
-										size = bytesRemaining;
-									}
-									go = this.push(shred(size));
-									bytesRemaining -= size;
-								}
-								if (bytesRemaining == 0) {
-									this.push(null);
-								}
-							}
-						});
-						let writer = fs.createWriteStream(
-							filepath,
-							{
-								flags: flags,
-								mode: fileMode
-							}
-						);
-						writer.on(&apos;error&apos;, (err) =&gt; {
-							reject(err);
-						});
-						writer.on(&apos;finish&apos;, () =&gt; {
-							resolve();
-						});
-						reader.pipe(writer);
+				let stat;
+				try {
+					stat = await fsop.stat(filepath);
+				}
+				catch (err) {
+					if (err.code == &apos;ENOENT&apos;) {
+						return;
 					}
-				);
-			}));
+					throw err;
+				}
+				let newfilepath = path.join(dir, part + &apos;.shred.&apos; + Date.now().toString(16) + shred(8).toString(&apos;hex&apos;));
+				await fsop.rename(filepath, newfilepath);
+				let fd = await fsop.open(newfilepath, flags);
+				for (let pass = 0; pass &lt; passCount; pass++) {
+					await fsop.ftruncate(fd);
+					let bytesRemaining = stat.size;
+					while (bytesRemaining &gt;= stat.blksize) {
+						await fsop.write(fd, shred(stat.blksize));
+						bytesRemaining -= stat.blksize;
+					}
+					if (bytesRemaining &gt; 0) {
+						await fsop.write(fd, shred(1024 * Math.ceil(bytesRemaining / 1024)));
+					}
+					await fsop.fdatasync(fd);
+				}
+				await fsop.ftruncate(fd);
+				await fsop.fsync(fd);
+				await fsop.close(fd);
+				await fsop.unlink(newfilepath);
+				results.push(part);
+			})());
 		}
-		return Promise.all(promises);
+		await Promise.all(promises);
+		results.sort();
+		return results;
+	}
+
+	/**
+	 * Return collections this record is in
+	 *
+	 * @returns {Promise&lt;array&lt;string&gt;&gt;} collection names
+	 */
+	async listCollections() {
+		const
+			fs = this.store.fs,
+			fsop = this.store.fsop,
+			mode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK
+		;
+		let results = [];
+		await this._iterateCollections(
+			await this.store.collections(),
+			async (collection, dir) =&gt; {
+				try {
+					await fsop.access(dir, mode);
+					results.push(collection);
+				}
+				catch (err) {
+					/**/
+				}
+			}
+		);
+		results.sort();
+		return results;
+	}
+
+	/**
+	 * Add record to multiple collections
+	 *
+	 * @param {array&lt;string&gt;} collections - collection names to add record to
+	 * @returns {Promise&lt;array&lt;string&gt;&gt;} collections added
+	 */
+	async addMultipleCollections(collections) {
+		const
+			fs = this.store.fs,
+			fsop = this.store.fsop,
+			dirMode = this.store.option(&apos;dirMode&apos;),
+			mode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK
+		;
+		if (!(collections instanceof Array)) {
+			collections = Object.keys(collections);
+		}
+		let results = [];
+		await this._iterateCollections(
+			collections,
+			async (collection, dir) =&gt; {
+				try {
+					await fsop.access(dir, mode);
+					return;
+				}
+				catch (err) {
+					/**/
+				}
+				try {
+					await fsop.mkdir(
+						dir,
+						{
+							recursive: true,
+							mode: dirMode
+						}
+					);
+					results.push(collection);
+				}
+				catch (err) {
+					if (err.code != &apos;EEXIST&apos;) {
+						throw err;
+					}
+				}
+			}
+		);
+		results.sort();
+		return results;
+	}
+
+	/**
+	 * Remove record from multiple collections
+	 *
+	 * Collections that the record does not belong to are ignored (not treated as an error).
+	 *
+	 * @param {array&lt;string&gt;} collections - collection names to remove record from
+	 * @returns {Promise&lt;string&gt;} collections removed
+	 */
+	async removeMultipleCollections(collections) {
+		if (!(collections instanceof Array)) {
+			collections = Object.keys(collections);
+		}
+		let results = [];
+		await this._iterateCollections(
+			collections,
+			async (collection, dir) =&gt; {
+				if (await this._cleanupDirs(dir, COLLECTION_DEPTH) &gt; 0) {
+					results.push(collection);
+				}
+			}
+		);
+		results.sort();
+		return results;
+	}
+
+	/**
+	 * Delete entire record (delete all record parts and remove from all collections)
+	 *
+	 * @returns {Promise&lt;void&gt;}
+	 */
+	async deleteRecord() {
+		await this.removeAllCollections();
+		await this.deleteAllParts();
+		await this._cleanupDirs(await this.dir(false), RECORD_DEPTH);
 	}
 
 
@@ -514,7 +569,7 @@ module.exports = class Record {
 	 * @returns {Promise&lt;fs.Stats&gt;} stat results
 	 */
 	async statPart(part = null) {
-		return this._singlePartOperation(&apos;statMultipleParts&apos;, part, false);
+		return /* await */ this._singlePartOperation(&apos;statMultipleParts&apos;, part, false);
 	}
 
 	/**
@@ -524,7 +579,7 @@ module.exports = class Record {
 	 * @returns {Promise&lt;Buffer&gt;} content
 	 */
 	async readBuffer(part = null) {
-		return this._singlePartOperation(&apos;readMultipleParts&apos;, part, false);
+		return /* await */ this._singlePartOperation(&apos;readMultipleParts&apos;, part, false);
 	}
 
 	/**
@@ -535,7 +590,7 @@ module.exports = class Record {
 	 * @returns {Promise&lt;void&gt;}
 	 */
 	async writeBuffer(part, content) {
-		return this._singlePartOperation(&apos;writeMultipleParts&apos;, part, content);
+		return /* await */ this._singlePartOperation(&apos;writeMultipleParts&apos;, part, content);
 	}
 
 	/**
@@ -545,7 +600,7 @@ module.exports = class Record {
 	 * @returns {Promise&lt;fs.ReadStream&gt;}
 	 */
 	async readStream(part = null) {
-		return this._singlePartOperation(&apos;readMultipleParts&apos;, part, true);
+		return /* await */ this._singlePartOperation(&apos;readMultipleParts&apos;, part, true);
 	}
 
 	/**
@@ -555,40 +610,114 @@ module.exports = class Record {
 	 * @returns {Promise&lt;fs.WriteStream&gt;}
 	 */
 	async writeStream(part = null) {
-		return this._singlePartOperation(&apos;writeMultipleParts&apos;, part, true);
+		return /* await */ this._singlePartOperation(&apos;writeMultipleParts&apos;, part, true);
 	}
 
 	/**
 	 * Delete a record part
 	 *
+	 * Parts that do not exist are ignored (not treated as an error).
+	 *
 	 * @param {?string} part - name of part, or null for default part
 	 * @returns {Promise&lt;bool&gt;} true if part existed and was deleted, false if it did not exist
 	 */
 	async deletePart(part = null) {
-		return this._singlePartOperation(&apos;deleteMultipleParts&apos;, part, null);
+		return /* await */ this._singlePartOperation(&apos;deleteMultipleParts&apos;, part, null);
 	}
 
 	/**
-	 * Delete entire record (delete all record parts)
+	 * Delete all record parts
 	 *
-	 * @returns {Promise&lt;array&gt;} removed part names
+	 * @returns {Promise&lt;array&lt;string&gt;&gt;} parts deleted
 	 */
-	async deleteAll() {
-		return this.deleteMultipleParts(await this.listParts());
+	async deleteAllParts() {
+		return /* await */ this.deleteMultipleParts(await this.listParts());
 	}
 
 	/**
-	 * Overwrite part contents
+	 * Delete a record part and make contents unrecoverable
+	 *
+	 * Parts that do not exist are ignored (not treated as an error).
 	 *
 	 * @param {?string} part - name of part, or null for default part
-	 * @returns {Promise&lt;void&gt;}
+	 * @returns {Promise&lt;void&gt;} true if part existed and was shredded, false if it did not exist
 	 */
 	async shredPart(part = null) {
-		return this._singlePartOperation(&apos;shredMultipleParts&apos;, part, null);
+		return /* await */ this._singlePartOperation(&apos;shredMultipleParts&apos;, part, null);
+	}
+
+	/**
+	 * Add record to a collection
+	 *
+	 * @param {string} collection - name of collection
+	 * @returns {Promise&lt;bool&gt;} true if record was not in collection and was added, false record was already in collection
+	 */
+	async addCollection(collection) {
+		return /* await */ this._singlePartOperation(&apos;addMultipleCollections&apos;, collection, null);
+	}
+
+	/**
+	 * Remove record from a collection
+	 *
+	 * Collections that the record does not belong to are ignored (not treated as an error).
+	 *
+	 * @param {string} collection - name of collection
+	 * @returns {Promise&lt;bool&gt;} true if record was in collection and was removed, false record was not in collection
+	 */
+	async removeCollection(collection) {
+		return /* await */ this._singlePartOperation(&apos;removeMultipleCollections&apos;, collection, null);
+	}
+
+	/**
+	 * Remove record from all collections
+	 *
+	 * @returns {Promise&lt;string&gt;} collections removed
+	 */
+	async removeAllCollections() {
+		return /* await */ this.removeMultipleCollections(await this.listCollections());
+	}
+
+	/**
+	 * Set collections for this record
+	 *
+	 * Add record to/remove record from collections to match provided list.
+	 *
+	 * @param {array&lt;string&gt;} collections - collection names to add record to (record will be removed from others)
+	 * @returns {Promise&lt;void&gt;}
+	 */
+	async setCollections(collections) {
+		let oldCollections = await this.listCollections();
+		let add = collections.filter((v) =&gt; {
+			return !oldCollections.includes(v);
+		});
+		let rem = oldCollections.filter((v) =&gt; {
+			return !collections.includes(v);
+		});
+		if (rem.length) {
+			await this.removeMultipleCollections(rem);
+		}
+		if (add.length) {
+			await this.addMultipleCollections(add);
+		}
 	}
 
 
 	// Internal methods
+
+	/**
+	 * Return array of subdirs based on record hash
+	 * @access private
+	 */
+	_getDirParts() {
+		if (!this._dirParts) {
+			let hash = this.generateHash();
+			this._dirParts = [];
+			for (let i = 0; i &lt; HASH_SIZE; i += 2) {
+				this._dirParts.push(hash.slice(i, i + 2));
+			}
+		}
+		return this._dirParts;
+	}
 
 	/**
 	 * Convert convenience single-part operation into multiple-part operation
@@ -606,6 +735,43 @@ module.exports = class Record {
 			return parts[part];
 		}
 		return null;
+	}
+
+	/**
+	 * Run callback on provided collections, providing dir
+	 * @access private
+	 */
+	async _iterateCollections(collections, callback) {
+		const path = this.store.path;
+		let prefixDir = await this.store.dir([this.store.option(&apos;collectionsDir&apos;)], false);
+		let suffixDir = path.join(...this._getDirParts(), this.identifier);
+		let promises = [];
+		for (let collection of collections) {
+			promises.push(callback(collection, path.join(prefixDir, collection, suffixDir)));
+		}
+		await Promise.all(promises);
+	}
+
+	/**
+	 * Remove empty record storage directories
+	 * @access private
+	 */
+	async _cleanupDirs(dirpath, depth) {
+		const
+			fsop  = this.store.fsop,
+			path = this.store.path
+		;
+		let i;
+		try {
+			for (i = 0; i &lt; depth; i++) {
+				await fsop.rmdir(dirpath);
+				dirpath = path.dirname(dirpath);
+			}
+		}
+		catch (err) {
+			/**/
+		}
+		return i;
 	}
 };
 </code></pre>

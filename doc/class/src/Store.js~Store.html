@@ -29,23 +29,22 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-store">store</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Store from &apos;<span><a href="file/src/Store.js.html#lineNumber8">fs-atomic-data-store/src/Store.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Store from &apos;<span><a href="file/src/Store.js.html#lineNumber16">fs-atomic-data-store/src/Store.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/Store.js.html#lineNumber8">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/Store.js.html#lineNumber16">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -65,7 +64,8 @@
 
   
   
-  <div class="description" data-ice="description"><p>Interact with a datastore</p>
+  <div class="description" data-ice="description"><p>Access a datastore</p>
+<p>Do not instantiate this class directly, use function {@link store()} exported by module.</p>
 </div>
   
 
@@ -163,6 +163,35 @@
           
           
           
+          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-get-fsop">fsop</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Object with promisified fs operation methods</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      <span class="kind" data-ice="kind">get</span>
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
           <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-get-path">path</a></span></span><span class="code" data-ice="signature">: <span>module</span></span>
         </p>
       </div>
@@ -198,7 +227,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-member-_collections">_collections</a></span></span><span class="code" data-ice="signature">: {}</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-member-_fsop">_fsop</a></span></span><span class="code" data-ice="signature">: {}</span>
         </p>
       </div>
       <div>
@@ -226,7 +255,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-member-_options">_options</a></span></span><span class="code" data-ice="signature">: {&quot;rootDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;fileMode&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;dirMode&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;defaultPart&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;fsModule&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;pathModule&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;recordClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;collectionClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;lockClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;shredFunction&quot;: <span>*</span>, &quot;recordsDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;locksDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>}</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-member-_options">_options</a></span></span><span class="code" data-ice="signature">: {&quot;rootDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;fileMode&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;dirMode&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;defaultPart&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;transactionTimeout&quot;: <span>*</span>, &quot;transactionWait&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;lockTimeout&quot;: <span>*</span>, &quot;lockWait&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;shredPassCount&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;fsModule&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;pathModule&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;recordClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;lockClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;shredFunction&quot;: <span>*</span>, &quot;recordsDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;locksDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;collectionsDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;allCollection&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>}</span>
         </p>
       </div>
       <div>
@@ -259,15 +288,15 @@
       <div>
         <p>
           
+          <span data-ice="async">async</span>
           
-          
-          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-method-collection">collection</a></span></span><span class="code" data-ice="signature">(name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-method-collections">collections</a></span></span><span class="code" data-ice="signature">(): <span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Return an object to interact with a named collection of records</p>
+        <div data-ice="description"><p>Return list of named collections</p>
 </div>
       </div>
     </td>
@@ -297,6 +326,35 @@
         
         
         <div data-ice="description"><p>Get directory path within store</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-method-listDirectoriesInDir">listDirectoriesInDir</a></span></span><span class="code" data-ice="signature">(dirpath: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Return subdirectories in directory</p>
 </div>
       </div>
     </td>
@@ -377,13 +435,42 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-method-record">record</a></span></span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="class/src/Record.js~Record.html">Record</a></span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-method-record">record</a></span></span><span class="code" data-ice="signature">(identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="class/src/Record.js~Record.html">Record</a></span></span>
         </p>
       </div>
       <div>
         
         
         <div data-ice="description"><p>Return an object to interact with a record</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-method-runWithRetry">runWithRetry</a></span></span><span class="code" data-ice="signature">(operation: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>, onTimeout: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>, timeout: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, wait: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Perform an operation and retry it if first attempt(s) fail</p>
 </div>
       </div>
     </td>
@@ -421,6 +508,35 @@
       
     </td>
   </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Store.js~Store.html#instance-method-traverse">traverse</a></span></span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, callback: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Iterate over records in a collection</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
 </tbody>
 </table>
 </div>
@@ -443,7 +559,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber24">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber39">source</a></span></span>
     </span>
   </h3>
 
@@ -451,6 +567,7 @@
   
   
   <div data-ice="description"><p>Create new Store instance</p>
+<p>Do not instantiate this class directly, use function {@link store()} exported by module.</p>
 </div>
 
   
@@ -470,7 +587,7 @@
       <td data-ice="description"></td>
     </tr>
 <tr data-ice="property" data-depth="1">
-      <td data-ice="name" class="code" data-depth="1">options.dirPath</td>
+      <td data-ice="name" class="code" data-depth="1">options.rootDir</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>root directory for this store. Default is subdirectory &quot;store&quot; in current working directory</p>
@@ -498,6 +615,41 @@
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
+      <td data-ice="name" class="code" data-depth="1">options.transactionTimeout</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>transaction timeout option (see <span><a href="class/src/Store.js~Store.html#instance-method-transaction">transaction</a></span>, default 0 (no retry)</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="1">
+      <td data-ice="name" class="code" data-depth="1">options.transactionWait</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>transaction wait option (see <span><a href="class/src/Store.js~Store.html#instance-method-transaction">transaction</a></span>, default 10 ms</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="1">
+      <td data-ice="name" class="code" data-depth="1">options.lockTimeout</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>lock timeout option (see <span><a href="class/src/Lock.js~Lock.html#instance-method-lock">lock</a></span>, default 0 (no retry)</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="1">
+      <td data-ice="name" class="code" data-depth="1">options.lockWait</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>lock wait option (see <span><a href="class/src/Lock.js~Lock.html#instance-method-lock">lock</a></span>, default 10 ms</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="1">
+      <td data-ice="name" class="code" data-depth="1">options.shredPassCount</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>number of times to overwrite data when shredding record parts. Default 3</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="1">
       <td data-ice="name" class="code" data-depth="1">options.fsModule</td>
       <td data-ice="type" class="code"><span>module</span></td>
       <td data-ice="appendix"></td>
@@ -505,7 +657,7 @@
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
-      <td data-ice="name" class="code" data-depth="1">options.pathModule-</td>
+      <td data-ice="name" class="code" data-depth="1">options.pathModule</td>
       <td data-ice="type" class="code"><span>module</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>use this instead of Node.js buitin path (filepaths) module</p>
@@ -516,13 +668,6 @@
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>use this instead of internal Record class</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="1">
-      <td data-ice="name" class="code" data-depth="1">options.collectionClass</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>use this instead of internal Collection class</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
@@ -576,7 +721,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber72">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber111">source</a></span></span>
     </span>
   </h3>
 
@@ -584,6 +729,50 @@
   
   
   <div data-ice="description"><p>Filesystem module</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-get-fsop">
+    <span class="access" data-ice="access">public</span>
+    
+    <span class="kind" data-ice="kind">get</span>
+    
+    
+    
+    <span class="code" data-ice="name">fsop</span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber129">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Object with promisified fs operation methods</p>
 </div>
 
   
@@ -620,7 +809,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber81">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber120">source</a></span></span>
     </span>
   </h3>
 
@@ -655,18 +844,18 @@
 <h2 data-ice="title">Private Members</h2>
 
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-_collections">
+  <h3 data-ice="anchor" id="instance-member-_fsop">
     <span class="access" data-ice="access">private</span>
     
     
     
     
     
-    <span class="code" data-ice="name">_collections</span><span class="code" data-ice="signature">: {}</span>
+    <span class="code" data-ice="name">_fsop</span><span class="code" data-ice="signature">: {}</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber45">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber67">source</a></span></span>
     </span>
   </h3>
 
@@ -705,11 +894,11 @@
     
     
     
-    <span class="code" data-ice="name">_options</span><span class="code" data-ice="signature">: {&quot;rootDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;fileMode&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;dirMode&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;defaultPart&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;fsModule&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;pathModule&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;recordClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;collectionClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;lockClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;shredFunction&quot;: <span>*</span>, &quot;recordsDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;locksDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>}</span>
+    <span class="code" data-ice="name">_options</span><span class="code" data-ice="signature">: {&quot;rootDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;fileMode&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;dirMode&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;defaultPart&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;transactionTimeout&quot;: <span>*</span>, &quot;transactionWait&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;lockTimeout&quot;: <span>*</span>, &quot;lockWait&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;shredPassCount&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, &quot;fsModule&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;pathModule&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;recordClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;lockClass&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;shredFunction&quot;: <span>*</span>, &quot;recordsDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;locksDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;collectionsDir&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, &quot;allCollection&quot;: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>}</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber28">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber44">source</a></span></span>
     </span>
   </h3>
 
@@ -744,47 +933,32 @@
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-collection">
+  <h3 data-ice="anchor" id="instance-method-collections">
     <span class="access" data-ice="access">public</span>
     
     
     
+    <span data-ice="async">async</span>
     
-    
-    <span class="code" data-ice="name">collection</span><span class="code" data-ice="signature">(name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span>
+    <span class="code" data-ice="name">collections</span><span class="code" data-ice="signature">(): <span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber155">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber380">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Return an object to interact with a named collection of records</p>
+  <div data-ice="description"><p>Return list of named collections</p>
+<p>Returned collections always have at least one record. (Empty collections are automatically deleted.)</p>
+<p>Special collection &quot;@all&quot; is not included in the returned list.</p>
 </div>
 
   
 
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">name</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>collection name</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
+  <div data-ice="properties">
 </div>
 
   <div class="return-params" data-ice="returnParams">
@@ -792,8 +966,8 @@
     <table>
       <tbody>
         <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>collection object</p>
+          <td class="return-type code" data-ice="returnType"><span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>named collections</p>
 </td>
         </tr>
       </tbody>
@@ -829,7 +1003,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber104">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber152">source</a></span></span>
     </span>
   </h3>
 
@@ -837,7 +1011,7 @@
   
   
   <div data-ice="description"><p>Get directory path within store</p>
-<p>Directory is created if it doesn&apos;t exist.</p>
+<p>Utility function, normally there is no need to call this directly.</p>
 </div>
 
   
@@ -900,6 +1074,81 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-listDirectoriesInDir">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">listDirectoriesInDir</span><span class="code" data-ice="signature">(dirpath: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber194">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Return subdirectories in directory</p>
+<p>Utility function, normally there is no need to call this directly.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">dirpath</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>directory path</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>subdirectory names</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-lock">
     <span class="access" data-ice="access">public</span>
     
@@ -911,7 +1160,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber180">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber284">source</a></span></span>
     </span>
   </h3>
 
@@ -935,7 +1184,20 @@
       <td data-ice="name" class="code" data-depth="0">options</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>see Lock class</p>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="1">
+      <td data-ice="name" class="code" data-depth="1">options.timeout</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>default max retry time in milliseconds</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="1">
+      <td data-ice="name" class="code" data-depth="1">options.wait</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>default min time in ms to wait before first retry</p>
 </td>
     </tr>
 </tbody>
@@ -985,7 +1247,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber91">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber139">source</a></span></span>
     </span>
   </h3>
 
@@ -1055,11 +1317,11 @@
     
     
     
-    <span class="code" data-ice="name">record</span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="class/src/Record.js~Record.html">Record</a></span></span>
+    <span class="code" data-ice="name">record</span><span class="code" data-ice="signature">(identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="class/src/Record.js~Record.html">Record</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber170">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber272">source</a></span></span>
     </span>
   </h3>
 
@@ -1080,13 +1342,6 @@
     <tbody>
     
     <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">collection</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>collection name</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">identifier</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
       <td data-ice="appendix"></td>
@@ -1129,6 +1384,101 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-runWithRetry">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">runWithRetry</span><span class="code" data-ice="signature">(operation: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>, onTimeout: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>, timeout: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, wait: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber232">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Perform an operation and retry it if first attempt(s) fail</p>
+<p>Utility function, normally there is no need to call this directly.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">operation</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>Signature: <code>function(resolve: function, reject: function, retry: function, tryCount: number): Promise&lt;void&gt;</code></p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">onTimeout</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>On timeout, operation promise is rejected with value returned by this function</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">timeout</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>max retry time in milliseconds, default is as provided to Lock constructor</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">wait</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>min time to wait before first retry, default is as provided to Lock constructor</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-transaction">
     <span class="access" data-ice="access">public</span>
     
@@ -1140,7 +1490,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber209">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber316">source</a></span></span>
     </span>
   </h3>
 
@@ -1154,8 +1504,8 @@ The operation code must structure calls to ensure that it holds all needed locks
 <p>By default, no attempt is made to retry if a lock is not available.
 Likewise, no attempt is made to retry the entire transaction if any lock is unavailable.
 Both individual locks and the transaction as a whole can be configured to retry automatically after a delay.
-The delay before the first transaction retry is specified by the <code>retryWait</code> option.
-The maximum total transaction retry delay is specified by the <code>retryTimeout</code> option.</p>
+The delay before the first transaction retry is specified by the <code>transactionWait</code> option.
+The maximum total transaction retry delay is specified by the <code>transactionTimeout</code> option.</p>
 </div>
 
   
@@ -1173,7 +1523,7 @@ The maximum total transaction retry delay is specified by the <code>retryTimeout
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>perform operations; may be called multiple times, may be halted at any point where a lock is acquired
-  Signature: <code>async function(lockObject, storeObject, tryCount): Promise&lt;*&gt;</code></p>
+  Signature: <code>async function(lockObject: Lock, storeObject: Store, tryCount: number): Promise&lt;*&gt;</code></p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="0">
@@ -1183,31 +1533,38 @@ The maximum total transaction retry delay is specified by the <code>retryTimeout
       <td data-ice="description"></td>
     </tr>
 <tr data-ice="property" data-depth="1">
-      <td data-ice="name" class="code" data-depth="1">options.retryTimeout</td>
+      <td data-ice="name" class="code" data-depth="1">options.transactionTimeout</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>int maximum milliseconds to retry transaction until giving up, default 0 (no retry)</p>
+      <td data-ice="description"><p>maximum milliseconds to retry transaction until giving up, default 0 (no retry)</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
-      <td data-ice="name" class="code" data-depth="1">options.retryWait</td>
+      <td data-ice="name" class="code" data-depth="1">options.transactionWait</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>int minimum milliseconds before first transaction retry, default 10 ms.</p>
+      <td data-ice="description"><p>minimum milliseconds before first transaction retry, default 10 ms.</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
       <td data-ice="name" class="code" data-depth="1">options.lockTimeout</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>int maximum milliseconds to retry each lock until giving up, default 0 (no retry)</p>
+      <td data-ice="description"><p>maximum milliseconds to retry each lock until giving up, default 0 (no retry)</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
       <td data-ice="name" class="code" data-depth="1">options.lockWait</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>int minimum milliseconds before first lock retry, default 10 ms</p>
+      <td data-ice="description"><p>minimum milliseconds before first lock retry, default 10 ms</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="1">
+      <td data-ice="name" class="code" data-depth="1">options.lock</td>
+      <td data-ice="type" class="code"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>use this Lock instance, do not create or manage a lock for just this transaction. Note: if lock is provided then transaction() will NOT automatically release held locks before resolving</p>
 </td>
     </tr>
 </tbody>
@@ -1222,6 +1579,89 @@ The maximum total transaction retry delay is specified by the <code>retryTimeout
         <tr>
           <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>*</span>&gt;</td>
           <td class="return-desc" data-ice="returnDescription"><p>On success, resolves with result of callback function&apos;s promise. On failure due to lock conflict, rejects with code &apos;ELOCKED&apos;</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-traverse">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">traverse</span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, callback: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Store.js.html#lineNumber395">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Iterate over records in a collection</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">collection</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>name of collection, or &quot;@all&quot; to traverse all records in store</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">callback</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>called for each record found
+  Signature: <code>function(identifier, recordIndex): {(void|bool}}</code>
+  If callback returns bool false, traversal is halted</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>total records traversed</p>
 </td>
         </tr>
       </tbody>

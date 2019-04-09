@@ -29,23 +29,22 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-store">store</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Lock from &apos;<span><a href="file/src/Lock.js.html#lineNumber29">fs-atomic-data-store/src/Lock.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Lock from &apos;<span><a href="file/src/Lock.js.html#lineNumber19">fs-atomic-data-store/src/Lock.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/Lock.js.html#lineNumber29">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/Lock.js.html#lineNumber19">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -66,7 +65,7 @@
   
   
   <div class="description" data-ice="description"><p>Lock resources for exclusive access</p>
-<p>Do not instantiate this class directly, use methods from class {Store}</p>
+<p>Do not instantiate this class directly, use method <span><a href="class/src/Store.js~Store.html#instance-method-lock">Store.lock</a></span>.</p>
 </div>
   
 
@@ -261,93 +260,6 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-calcRetries">calcRetries</a></span></span><span class="code" data-ice="signature">(timeout: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, wait: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span>array</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Utility.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          <span data-ice="async">async</span>
-          
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-dir">dir</a></span></span><span class="code" data-ice="signature">(create: <span>bool</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Utility.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-filename">filename</a></span></span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Utility.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
           <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-list">list</a></span></span><span class="code" data-ice="signature">(): <span>*</span></span>
         </p>
       </div>
@@ -377,7 +289,7 @@
           
           <span data-ice="async">async</span>
           
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-listGlobal">listGlobal</a></span></span><span class="code" data-ice="signature">(): <span><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span><span>[]</span></span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-listGlobal">listGlobal</a></span></span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
         </p>
       </div>
       <div>
@@ -406,42 +318,13 @@
           
           <span data-ice="async">async</span>
           
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-lock">lock</a></span></span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-lock">lock</a></span></span><span class="code" data-ice="signature">(identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
         </p>
       </div>
       <div>
         
         
         <div data-ice="description"><p>Attempt to take an exclusive lock</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          <span data-ice="async">async</span>
-          
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-lockCollection">lockCollection</a></span></span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Attempt to take a collection-level lock (lock an entire collection)</p>
 </div>
       </div>
     </td>
@@ -491,67 +374,9 @@
       <div>
         <p>
           
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-parseFilename">parseFilename</a></span></span><span class="code" data-ice="signature">(filename: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Utility.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
           <span data-ice="async">async</span>
           
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-runWithRetry">runWithRetry</a></span></span><span class="code" data-ice="signature">(operation: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>, onTimeout: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>, options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Utility.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          <span data-ice="async">async</span>
-          
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-unlock">unlock</a></span></span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-unlock">unlock</a></span></span><span class="code" data-ice="signature">(identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
         </p>
       </div>
       <div>
@@ -609,35 +434,6 @@
           
           <span data-ice="async">async</span>
           
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-unlockCollection">unlockCollection</a></span></span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Release a held colection-level lock</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          <span data-ice="async">async</span>
-          
           <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-unlockStore">unlockStore</a></span></span><span class="code" data-ice="signature">(): <span>*</span></span>
         </p>
       </div>
@@ -671,37 +467,9 @@
       <div>
         <p>
           
-          
+          <span data-ice="async">async</span>
           
           <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-_lockOperation">_lockOperation</a></span></span><span class="code" data-ice="signature">(method: <span>*</span>, filepath: <span>*</span>): <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">private</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/Lock.js~Lock.html#instance-method-_sortLockList">_sortLockList</a></span></span><span class="code" data-ice="signature">(locks: <span>*</span>)</span>
         </p>
       </div>
       <div>
@@ -737,7 +505,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber38">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber31">source</a></span></span>
     </span>
   </h3>
 
@@ -745,6 +513,7 @@
   
   
   <div data-ice="description"><p>Get locking instance</p>
+<p>Do not instantiate this class directly, use method <span><a href="class/src/Store.js~Store.html#instance-method-lock">Store.lock</a></span>.</p>
 </div>
 
   
@@ -821,7 +590,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber64">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber57">source</a></span></span>
     </span>
   </h3>
 
@@ -867,7 +636,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber53">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber46">source</a></span></span>
     </span>
   </h3>
 
@@ -910,7 +679,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber46">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber39">source</a></span></span>
     </span>
   </h3>
 
@@ -953,7 +722,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber42">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber35">source</a></span></span>
     </span>
   </h3>
 
@@ -988,246 +757,6 @@
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-calcRetries">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">calcRetries</span><span class="code" data-ice="signature">(timeout: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, wait: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span>array</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber131">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Utility. Return array of retry delay times</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">timeout</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>maximum retry delay time in milliseconds</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">wait</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>minimum delay before first retry, in milliseconds</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span>array</span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>retry timer values, can be passed to setTimeout</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-dir">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    <span data-ice="async">async</span>
-    
-    <span class="code" data-ice="name">dir</span><span class="code" data-ice="signature">(create: <span>bool</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber182">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Utility. Get directory path for locks</p>
-<p>Directory is created if it doesn&apos;t exist.</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">create</td>
-      <td data-ice="type" class="code"><span>bool</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>true to create directory if it does not exist</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</td>
-          <td class="return-desc" data-ice="returnDescription"><p>dirpath</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-filename">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">filename</span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber79">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Utility. Get filename for a lock</p>
-<p>For a record lock, pass string collection and identifier.
-For a collection-level lock, pass string collection and null for identifier.
-For a store-level lock, pass null for both parameters</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">collection</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"><ul><li>nullable: true</li></ul></td>
-      <td data-ice="description"><p>collection name</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">identifier</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"><ul><li>nullable: true</li></ul></td>
-      <td data-ice="description"><p>identifier name</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>filename</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-list">
     <span class="access" data-ice="access">public</span>
     
@@ -1239,7 +768,7 @@ For a store-level lock, pass null for both parameters</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber331">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber193">source</a></span></span>
     </span>
   </h3>
 
@@ -1292,11 +821,11 @@ For a store-level lock, pass null for both parameters</p>
     
     <span data-ice="async">async</span>
     
-    <span class="code" data-ice="name">listGlobal</span><span class="code" data-ice="signature">(): <span><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span><span>[]</span></span></span>
+    <span class="code" data-ice="name">listGlobal</span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber357">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber204">source</a></span></span>
     </span>
   </h3>
 
@@ -1316,7 +845,7 @@ For a store-level lock, pass null for both parameters</p>
     <table>
       <tbody>
         <tr>
-          <td class="return-type code" data-ice="returnType"><span><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span><span>[]</span></span></td>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</td>
           <td class="return-desc" data-ice="returnDescription"><p>held locks</p>
 </td>
         </tr>
@@ -1349,11 +878,11 @@ For a store-level lock, pass null for both parameters</p>
     
     <span data-ice="async">async</span>
     
-    <span class="code" data-ice="name">lock</span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
+    <span class="code" data-ice="name">lock</span><span class="code" data-ice="signature">(identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber205">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber78">source</a></span></span>
     </span>
   </h3>
 
@@ -1364,7 +893,6 @@ For a store-level lock, pass null for both parameters</p>
 <p>If the lock is free, it will be taken by this instance.
 If the lock is already held by this instance, calling {lock} again will resolve ok.
 If the lock is held by another instance or process, rejects with code &quot;ELOCKED&quot; and lockType &quot;record&quot;.
-If the collection is locked (by this or any other instance), rejects with code &quot;ELOCKED&quot; and lockType &quot;collection&quot;.
 If the store is locked (by this or any other instance), rejects with code &quot;ELOCKED&quot; and lockType &quot;store&quot;.</p>
 </div>
 
@@ -1379,17 +907,10 @@ If the store is locked (by this or any other instance), rejects with code &quot;
     <tbody>
     
     <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">collection</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"><ul><li>nullable: true</li></ul></td>
-      <td data-ice="description"><p>collection name, or null for store-level lock</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">identifier</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"><ul><li>nullable: true</li></ul></td>
-      <td data-ice="description"><p>record identifier, or null for collection-level lock</p>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>record identifier, or special token &quot;@store&quot; for store-level lock</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="0">
@@ -1447,79 +968,6 @@ If the store is locked (by this or any other instance), rejects with code &quot;
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-lockCollection">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    <span data-ice="async">async</span>
-    
-    <span class="code" data-ice="name">lockCollection</span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber397">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Attempt to take a collection-level lock (lock an entire collection)</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">collection</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>collection name</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</td>
-          
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-lockStore">
     <span class="access" data-ice="access">public</span>
     
@@ -1531,7 +979,7 @@ If the store is locked (by this or any other instance), rejects with code &quot;
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber406">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber218">source</a></span></span>
     </span>
   </h3>
 
@@ -1576,180 +1024,6 @@ If the store is locked (by this or any other instance), rejects with code &quot;
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-parseFilename">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">parseFilename</span><span class="code" data-ice="signature">(filename: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber95">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Utility. Get lock info from lock filename</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">filename</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>lock filename</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></td>
-          <td class="return-desc" data-ice="returnDescription"><p>lock info</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-runWithRetry">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    <span data-ice="async">async</span>
-    
-    <span class="code" data-ice="name">runWithRetry</span><span class="code" data-ice="signature">(operation: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>, onTimeout: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>, options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber154">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Utility. Perform an operation and retry it if first attempt(s) fail</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">operation</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Signature: <code>function(resolve, reject, retry, tryCount): Promise&lt;void&gt;</code></p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">onTimeout</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>On timeout, operation promise is rejected with value returned by this function</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">options</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-<tr data-ice="property" data-depth="1">
-      <td data-ice="name" class="code" data-depth="1">options.timeout</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>max retry time in milliseconds, default is as provided to Lock constructor</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="1">
-      <td data-ice="name" class="code" data-depth="1">options.wait</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>min time to wait before first retry, default is as provided to Lock constructor</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span>*</span></td>
-          
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-unlock">
     <span class="access" data-ice="access">public</span>
     
@@ -1757,11 +1031,11 @@ If the store is locked (by this or any other instance), rejects with code &quot;
     
     <span data-ice="async">async</span>
     
-    <span class="code" data-ice="name">unlock</span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
+    <span class="code" data-ice="name">unlock</span><span class="code" data-ice="signature">(identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber282">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber143">source</a></span></span>
     </span>
   </h3>
 
@@ -1784,17 +1058,10 @@ If lock has been compromised, rejects with code &quot;ECOMPROMISED&quot;.</p>
     <tbody>
     
     <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">collection</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"><ul><li>nullable: true</li></ul></td>
-      <td data-ice="description"><p>collection name, or null for store-level lock</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">identifier</td>
       <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"><ul><li>nullable: true</li></ul></td>
-      <td data-ice="description"><p>record identifier, or null for collection-level lock</p>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>record identifier, or special token &quot;@store&quot; for store-level lock</p>
 </td>
     </tr>
 </tbody>
@@ -1843,7 +1110,7 @@ If lock has been compromised, rejects with code &quot;ECOMPROMISED&quot;.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber318">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber180">source</a></span></span>
     </span>
   </h3>
 
@@ -1888,79 +1155,6 @@ If lock has been compromised, rejects with code &quot;ECOMPROMISED&quot;.</p>
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-unlockCollection">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    <span data-ice="async">async</span>
-    
-    <span class="code" data-ice="name">unlockCollection</span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber416">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Release a held colection-level lock</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">collection</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>collection name</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</td>
-          
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-unlockStore">
     <span class="access" data-ice="access">public</span>
     
@@ -1972,7 +1166,7 @@ If lock has been compromised, rejects with code &quot;ECOMPROMISED&quot;.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber423">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber225">source</a></span></span>
     </span>
   </h3>
 
@@ -2024,13 +1218,13 @@ If lock has been compromised, rejects with code &quot;ECOMPROMISED&quot;.</p>
     
     
     
-    
+    <span data-ice="async">async</span>
     
     <span class="code" data-ice="name">_lockOperation</span><span class="code" data-ice="signature">(method: <span>*</span>, filepath: <span>*</span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber433">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber235">source</a></span></span>
     </span>
   </h3>
 
@@ -2079,65 +1273,6 @@ If lock has been compromised, rejects with code &quot;ECOMPROMISED&quot;.</p>
     <div data-ice="returnProperties">
 </div>
   </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-_sortLockList">
-    <span class="access" data-ice="access">private</span>
-    
-    
-    
-    
-    
-    <span class="code" data-ice="name">_sortLockList</span><span class="code" data-ice="signature">(locks: <span>*</span>)</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Lock.js.html#lineNumber446">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">locks</td>
-      <td data-ice="type" class="code"><span>*</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  
 
   
 

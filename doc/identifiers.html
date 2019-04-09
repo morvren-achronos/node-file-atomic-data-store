@@ -29,11 +29,10 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-store">store</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -50,35 +49,6 @@
   <tbody>
   
   <tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          <span data-ice="kind-icon" class="kind-class">C</span>
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Interact with a colection of records</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
     <td>
       <span class="access" data-ice="access">public</span>
       
@@ -156,7 +126,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Interact with a datastore</p>
+        <div data-ice="description"><p>Access a datastore</p>
 </div>
       </div>
     </td>
@@ -176,16 +146,17 @@
     <td>
       <div>
         <p>
-          <span data-ice="kind-icon" class="kind-typedef">T</span>
+          <span data-ice="kind-icon" class="kind-function">F</span>
           
           
-          <span class="code" data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span><span class="code" data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>&lt;<span>{collection: ?string, identifier: ?string, type: &quot;record&quot;</span>|<span>&quot;collection&quot;</span>|<span>&quot;store&quot;, ours: ?bool}</span>&gt;</span>
+          <span class="code" data-ice="name"><span><a href="function/index.html#static-function-store">store</a></span></span><span class="code" data-ice="signature">(datadir: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span><a href="class/src/Store.js~Store.html">Store</a></span></span>
         </p>
       </div>
       <div>
         
         
-        
+        <div data-ice="description"><p>Return a Store instance for interacting with a datastore</p>
+</div>
       </div>
     </td>
     <td>

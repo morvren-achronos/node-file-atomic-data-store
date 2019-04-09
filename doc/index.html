@@ -29,11 +29,10 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-store">store</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -74,49 +73,97 @@
 </ul>
 <h3 id="environment">Environment</h3><ul>
 <li>Node v10+ series (uses ES6 syntax)</li>
-<li>Built for Mac and Linux. Any POSIX-compliant system <em>should</em> be fine. Windows should be ok in theory although this is completely untested (2019-03).</li>
+<li>Built for Mac and Linux. Any POSIX-compliant system <em>should</em> be fine. Windows should be ok in theory although this is completely untested (as of 2019-04).</li>
 <li>Any filesystem is supported.</li>
 </ul>
 <h2 id="installation">Installation</h2><p>Install via npm:</p>
 <p> npm install --save fs-atomic-data-store</p>
-<h2 id="usage">Usage</h2><pre><code class="lang-javascript"><code class="source-code prettyprint">const fads = require(&apos;fs-atomic-data-store&apos;);
+<h2 id="usage">Usage</h2><pre><code class="lang-javascript"><code class="source-code prettyprint">const fsads = require(&apos;fs-atomic-data-store&apos;);
 
-// Access a store, provide store root directory. Store may or may not exist
-let mystore = new fads.Store(&apos;./path/to/my/store/dir&apos;);
+// Access a store, provide store root directory (store may or may not exist already)
+let mystore = fsads.store(&apos;./path/to/my/store/dir&apos;);
 
-// Access a collection by name. Collection may or may not exist
-let mycollection = mystore.collection(&apos;foo&apos;);
+// Access a record by identifier (record may or may not exist already)
+let myrecord = mystore.record(&apos;myrecord&apos;);
 
-// Access a record by identifier. Record may or may not exist
-let myrecord = mycollection.record(&apos;bar&apos;);
+// Read and write a record using Buffers
+let content = await myrecord.readBuffer();
+await myrecord.writeBuffer(Buffer.from(&apos;new content&apos;));
 
-// Read record into Buffer
-myrecord.readBuffer().then((content) =&gt; {
-    console.log(&apos;foo.bar contains: &apos; + content.toString(&apos;utf8&apos;));
+// Lock a record then write
+mylock = mystore.lock();
+try {
+    await mylock.lock(&apos;myrecord&apos;);
+    await myrecord.writeBuffer(Buffer.from(&apos;atomically written content&apos;));
+}
+catch (err) {
+    // ...
+}
+finally {
+    mylock.unlockAll();
+}
+
+// Perform a transaction involving multiple locks, allowing for retries in case of lock contention
+await mystore.transaction(
+    (lock) =&gt; {
+        // Get record objects (does not load any data yet)
+        let record1 = mystore.record(&apos;record1&apos;);
+        let record2 = mystore.record(&apos;record2&apos;);
+
+        // Lock records
+        await lock.lock(&apos;record1&apos;);
+        await lock.lock(&apos;record2&apos;);
+
+        // Read the records. We do this only after locking to ensure no one changes the content between reading and writing
+        let content1 = await record1.readBuffer();
+        let content2 = await record2.readBuffer();
+
+        // Operate on the record data
+        let newcontent1 = Buffer.concat(content1, Buffer.from(&apos;, also record2 is &apos;), content2);
+        let newcontent2 = Buffer.concat(content2, Buffer.from(&apos;, also record1 is &apos;), content1);
+
+        // Update the records
+        await record1.writeBuffer(newcontent1);
+        await record2.writeBuffer(newcontent2);
+
+        // all locks are released automatically by transaction(), we don&apos;t need to do it explicitly
+    },
+    {
+        // Retry for up to a maximum of 50 milliseconds
+        transactionTimeout: 50
+    }
+);
+
+// Iterate over all records
+await mystore.traverse(&apos;@all&apos;, (identifier) =&gt; {
+    console.log(&apos;found record identifier &apos; + identifier);
 });</code>
 </code></pre>
 <h2 id="notes">Notes</h2><h3 id="format">Format</h3><ul>
 <li>A store is a set of records stored within a directory on the filesystem.</li>
-<li>Stores are subdivided into named collections.</li>
-<li>Each collection has a string name.<br>Names should be 7-bit ASCII, suggested max size of 64 bytes.</li>
-<li>Each collection has zero or more records.</li>
-<li>Each record has a string identifier.<br>Identifiers should be 7-bit ASCII, suggested max size of 200 bytes.<br>For non-ASCII or binary identifiers, serialize first, e.g. by converting to hex (<code>mybufferkey.toString(&apos;hex&apos;)</code>).</li>
+<li>Each record has a string identifier.<br>Identifiers should be 7-bit ASCII, suggested max size of 100 bytes.<br>Identifiers should not begin with a dot (<code>.</code>) or at-sign (<code>@</code>).<br>For non-ASCII or binary identifiers, serialize first, e.g. by converting to hex (<code>mybufferidentifier.toString(&apos;hex&apos;)</code>).</li>
 <li>Each record has one or more content parts.</li>
-<li>Each part has a string key (7-bit ASCII, suggested max size 32 bytes).</li>
+<li>Each part has a string name.<br>Part names should be 7-bit ASCII, suggested max size 50 bytes.<br>Part names should not begin with a dot (<code>.</code>) or at-sign (<code>@</code>).</li>
 <li>Each part has a binary (buffer) value.</li>
+<li>Records may belong to collections.</li>
+<li>Each collection has a string name.<br>Collection names should be 7-bit ASCII, suggested max size of 50 bytes.
+Collection names should not begin with a dot (<code>.</code>) or at-sign (<code>@</code>).</li>
+<li>All records belong to the special collection &quot;@all&quot;.</li>
+<li>Records can belong to zero or more other collections.</li>
 </ul>
 <h3 id="locking-model">Locking model</h3><p>The use case this model is designed for is one where simultaneous access is expected to be uncommon, but must be absolutely guaranteed to never happen.</p>
 <ul>
-<li>Locks can be established at record level, collection level or &quot;globally&quot; at store level.</li>
-<li>Record locks are guaranteed exclusive and atomic.<br>No one record can be locked by multiple actors at the same time.<br>This includes different actors running within the same Node process.</li>
-<li>Store and collection locks are also guaranteed exclusive and atomic.<br>Once a global lock is established, no further record locks will be allowed.<br>To ensure exclusive access to enire store/collection, wait until all existing record locks have been unlocked.</li>
-<li>Locks are first-come-first-served, non-blocking, non-queued.<br>If a requested lock is unavailable, fail immediately (default) or retry with escalating delay.<br>Does not block.<br>Does not keep a lock request queue, so prioritization for highly-contested resources must be handled by the application.</li>
+<li>Locks can be established at record level or &quot;globally&quot; at store level.</li>
+<li>Record locks are guaranteed exclusive and atomic.<br>No one record can be locked by multiple actors at the same time.<br>This includes different actors running within the same Node process, and actors running within other Node processes utilizing the same physical store.</li>
+<li>Store locks are also guaranteed exclusive and atomic.<br>Once a store lock is established, no further locks will be allowed.<br>Existing record locks are not cancelled.<br>To ensure exclusive access, wait until all existing record locks have been unlocked.</li>
+<li>Locks are first-come-first-served, non-blocking, non-queued.<br>If a requested lock is unavailable, fail immediately (default) or retry with escalating delay (up to a specified maximum amount of time).<br>Does not block.<br>Does not keep a lock request queue, so prioritization for highly-contested resources must be handled by the application.</li>
 </ul>
 <p>The default included locking system is a wrapper around <a href="https://www.npmjs.com/package/proper-lockfile">proper-lockfile</a>.</p>
 <h3 id="storage-on-filesystem">Storage on filesystem</h3><ul>
-<li>Each collection is a subdirectory within <code>$dataDir/records</code>.</li>
-<li>Each record is a nested subdirectory within the collection directory, path based on a hash of the record identifier.</li>
+<li>Each record is a nested subdirectory within <code>$dataDir/records/</code>, path based on a hash of the record identifier.</li>
 <li>Each record part is stored in a separate plain file within the record directory.</li>
+<li>Each collection is a subdirectory within <code>$dataDir/collections</code>.</li>
+<li>Each record belonging to a collection is an empty nested subdirectory within the collection, path based on a hash of the record identifier.</li>
 <li>Lock data is stored in <code>$datadir/locks</code>.</li>
 </ul>
 <h3 id="backup-strategies">Backup strategies</h3><ul>

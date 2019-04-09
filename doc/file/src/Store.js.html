@@ -29,11 +29,10 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-store">store</a></span></span></li>
 </ul>
 </div>
 </nav>
@@ -43,26 +42,42 @@
  * class Store
  */
 
+// Libraries
+const util = require(&apos;util&apos;);
+
+// Constants
+const TRAVERSE_DEPTH = 3; // .../01/02/03/04/...
+
 /**
- * Interact with a datastore
+ * Access a datastore
+ *
+ * Do not instantiate this class directly, use function {@link store()} exported by module.
  */
 module.exports = class Store {
 	/**
 	 * Create new Store instance
 	 *
+	 * Do not instantiate this class directly, use function {@link store()} exported by module.
+	 *
 	 * @param {object} options
-	 * @param {string} options.dirPath - root directory for this store. Default is subdirectory &quot;store&quot; in current working directory
+	 * @param {string} options.rootDir - root directory for this store. Default is subdirectory &quot;store&quot; in current working directory
 	 * @param {number} options.fileMode - octal file permission mode when creating files. Default 0o660
 	 * @param {number} options.dirMode - octal file permission mode when creating directories. Default 0o770
 	 * @param {string} options.defaultPart - default part name to use when none is specified. Default &quot;r&quot;
+	 * @param {number} options.transactionTimeout - transaction timeout option (see {@link transaction}, default 0 (no retry)
+	 * @param {number} options.transactionWait - transaction wait option (see {@link transaction}, default 10 ms
+	 * @param {number} options.lockTimeout - lock timeout option (see {@link lock}, default 0 (no retry)
+	 * @param {number} options.lockWait - lock wait option (see {@link lock}, default 10 ms
+	 * @param {number} options.shredPassCount - number of times to overwrite data when shredding record parts. Default 3
 	 * @param {module} options.fsModule - use this instead of Node.js builtin fs (filesystem) module
-	 * @param {module} options.pathModule- use this instead of Node.js buitin path (filepaths) module
+	 * @param {module} options.pathModule - use this instead of Node.js buitin path (filepaths) module
 	 * @param {function} options.recordClass - use this instead of internal Record class
-	 * @param {function} options.collectionClass -  use this instead of internal Collection class
 	 * @param {function} options.lockClass - use this instead of internal Lock class
 	 * @param {function} options.shredFunction - use this to generate overwrite data when shredding record parts. Default is crypto.randomBytes. Signature: `function(size): Buffer`
+	 * @internal
 	 */
 	constructor(options = {}) {
+		// Define state vars
 		/**
 		 * @access private
 		 */
@@ -71,20 +86,27 @@ module.exports = class Store {
 			fileMode: 0o660,
 			dirMode: 0o770,
 			defaultPart: &apos;r&apos;,
+			transactionTimeout: 0,
+			transactionWait: 10,
+			lockTimeout: 0,
+			lockWait: 10,
+			shredPassCount: 3,
 			fsModule: &apos;fs&apos;,
 			pathModule: &apos;path&apos;,
 			recordClass: &apos;./Record&apos;,
-			collectionClass: &apos;./Collection&apos;,
 			lockClass: &apos;./Lock&apos;,
 			shredFunction: null,
 			recordsDir: &apos;records&apos;,
-			locksDir: &apos;locks&apos;
+			locksDir: &apos;locks&apos;,
+			collectionsDir: &apos;collections&apos;,
+			allCollection: &apos;@all&apos;
 		};
 		/**
 		 * @access private
 		 */
-		this._collections = {};
+		this._fsop = {};
 
+		// Finalize options
 		if (typeof options == &apos;object&apos;) {
 			for (let k in options) {
 				if (this._options[k] !== undefined) {
@@ -92,13 +114,29 @@ module.exports = class Store {
 				}
 			}
 		}
-		for (let k of [&apos;fsModule&apos;, &apos;pathModule&apos;, &apos;recordClass&apos;, &apos;collectionClass&apos;, &apos;lockClass&apos;]) {
-			if (typeof this._options[k] == &apos;string&apos;) {
+		for (let k of [&apos;fileMode&apos;, &apos;dirMode&apos;]) {
+			if (typeof this._options[k] != &apos;number&apos;) {
+				this._options[k] = parseInt(this._options[k], 8);
+			}
+		}
+		for (let k of [&apos;transactionTimeout&apos;, &apos;transactionWait&apos;, &apos;lockTimeout&apos;, &apos;lockWait&apos;]) {
+			if (typeof this._options[k] != &apos;number&apos;) {
+				this._options[k] = parseInt(this._options[k], 10);
+			}
+		}
+		for (let k of [&apos;fsModule&apos;, &apos;pathModule&apos;, &apos;recordClass&apos;, &apos;lockClass&apos;]) {
+			if (typeof this._options[k] != &apos;object&apos;) {
 				this._options[k] = require(this._options[k]);
 			}
 		}
-		if (this._options.shredFunction == null) {
+		if (typeof this._options.shredFunction != &apos;function&apos;) {
 			this._options.shredFunction = require(&apos;crypto&apos;).randomBytes;
+		}
+
+		// Promisify fs methods
+		let fs = this.fs;
+		for (let k of [&apos;access&apos;, &apos;close&apos;, &apos;fdatasync&apos;, &apos;fsync&apos;, &apos;ftruncate&apos;, &apos;mkdir&apos;, &apos;open&apos;, &apos;readdir&apos;, &apos;readFile&apos;, &apos;rename&apos;, &apos;rmdir&apos;, &apos;stat&apos;, &apos;unlink&apos;, &apos;write&apos;, &apos;writeFile&apos;]) {
+			this._fsop[k] = util.promisify(fs[k]);
 		}
 	}
 
@@ -124,6 +162,15 @@ module.exports = class Store {
 	}
 
 	/**
+	 * Object with promisified fs operation methods
+	 *
+	 * @type {object&lt;string,function&gt;}
+	 */
+	get fsop() {
+		return this._fsop;
+	}
+
+	/**
 	 * Return a configured option
 	 *
 	 * @param {string} name - option property name
@@ -136,51 +183,120 @@ module.exports = class Store {
 	/**
 	 * Get directory path within store
 	 *
-	 * Directory is created if it doesn&apos;t exist.
+	 * Utility function, normally there is no need to call this directly.
 	 *
 	 * @param {array} dirParts - dir path components
 	 * @param {bool} create - true to create directory if it does not exist
-	 * @returns {Promise&lt;s?tring&gt;} dirpath
+	 * @returns {Promise&lt;string&gt;} dirpath
 	 */
-	async dir(dirParts = [], create = true) {
+	async dir(dirParts, create) {
 		const
 			path = this.path,
 			fs  = this.fs,
+			fsop = this.fsop,
 			dir = path.resolve(this.option(&apos;rootDir&apos;), ...dirParts)
 		;
-		return new Promise((resolve, reject) =&gt; {
-			fs.access(
-				dir,
-				fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK,
-				(err) =&gt; {
-					if (!err) {
-						resolve(dir);
-						return;
-					}
-					if (err.code != &apos;ENOENT&apos;) {
-						reject(err);
-						return;
-					}
-					if (!create) {
-						resolve(dir);
-						return;
-					}
-					fs.mkdir(
+		try {
+			await fsop.access(dir, fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK);
+		}
+		catch (err) {
+			if (err.code != &apos;ENOENT&apos;) {
+				throw err;
+			}
+			if (create) {
+				try {
+					await fsop.mkdir(
 						dir,
 						{
 							recursive: true,
 							mode: this.option(&apos;dirMode&apos;)
-						},
-						(err) =&gt; {
-							if (err &amp;&amp; err.code != &apos;EEXIST&apos;) {
-								reject(err);
-								return;
-							}
-							resolve(dir);
 						}
 					);
 				}
+				catch (err2) {
+					if (err2.code != &apos;EEXIST&apos;) {
+						throw err2;
+					}
+				}
+			}
+		}
+		return dir;
+	}
+
+	/**
+	 * Return subdirectories in directory
+	 *
+	 * Utility function, normally there is no need to call this directly.
+	 *
+	 * @param {string} dirpath - directory path
+	 * @return {Promise&lt;array&lt;string&gt;&gt;} subdirectory names
+	 */
+	async listDirectoriesInDir(dirpath) {
+		const
+			fsop  = this.fsop
+		;
+		let entries;
+		try {
+			entries = await fsop.readdir(
+				dirpath,
+				{
+					withFileTypes: true
+				},
 			);
+		}
+		catch (err) {
+			if (err.code == &apos;ENOENT&apos;) {
+				return [];
+			}
+			throw err;
+		}
+		let dirs = [];
+		for (let ent of entries) {
+			if (ent.isDirectory()) {
+				dirs.push(ent.name);
+			}
+		}
+		return dirs;
+	}
+
+	/**
+	 * Perform an operation and retry it if first attempt(s) fail
+	 *
+	 * Utility function, normally there is no need to call this directly.
+	 *
+	 * @param {function} operation - Signature: `function(resolve: function, reject: function, retry: function, tryCount: number): Promise&lt;void&gt;`
+	 * @param {function} onTimeout - On timeout, operation promise is rejected with value returned by this function
+	 * @param {number} timeout - max retry time in milliseconds, default is as provided to Lock constructor
+	 * @param {number} wait - min time to wait before first retry, default is as provided to Lock constructor
+	 */
+	async runWithRetry(operation, onTimeout, timeout, wait) {
+		function calcRetries(timeout, wait) {
+			let retries = [];
+			if (timeout &gt; 0) {
+				while (timeout &gt;= wait) {
+					retries.unshift(timeout);
+					timeout = Math.floor(timeout / 3);
+				}
+				for (let i = 1; i &lt; retries.length; i++) {
+					retries[i] -= retries[i - 1];
+				}
+			}
+			return retries;
+		}
+		return /* await */ new Promise((resolve, reject) =&gt; {
+			let retries = calcRetries(timeout, wait);
+			let tryCount = 0;
+			function retry() {
+				if (retries.length == 0) {
+					reject(onTimeout());
+					return;
+				}
+				setTimeout(run, retries.shift());
+			}
+			function run() {
+				operation(resolve, reject, retry, tryCount++);
+			}
+			run();
 		});
 	}
 
@@ -188,37 +304,26 @@ module.exports = class Store {
 	// Factory methods
 
 	/**
-	 * Return an object to interact with a named collection of records
-	 *
-	 * @param {string} name - collection name
-	 * @returns {Collection} collection object
-	 */
-	collection(name) {
-		name = name.toLowerCase();
-		if (!this._collections[name]) {
-			this._collections[name] = new (this.option(&apos;collectionClass&apos;))(this, name);
-		}
-		return this._collections[name];
-	}
-
-	/**
 	 * Return an object to interact with a record
 	 *
-	 * @param {string} collection - collection name
 	 * @param {string} identifier - record identifier
 	 * @returns {Record} record object
 	 */
-	record(collection, identifier) {
-		return this.collection(collection).record(identifier);
+	record(identifier) {
+		return new (this.option(&apos;recordClass&apos;))(this, identifier);
 	}
 
 	/**
 	 * Return an object to perform exclusive access locking
 	 *
-	 * @param {object} options - see Lock class
+	 * @param {object} options
+	 * @param {number} options.timeout - default max retry time in milliseconds
+	 * @param {number} options.wait - default min time in ms to wait before first retry
 	 * @returns {Lock} locking instance
 	 */
 	lock(options = {}) {
+		options.timeout = parseInt(options.timeout, 10) || this.option(&apos;lockTimeout&apos;);
+		options.wait = parseInt(options.wait, 10) || this.option(&apos;lockWait&apos;);
 		return new (this.option(&apos;lockClass&apos;))(this, options);
 	}
 
@@ -235,37 +340,54 @@ module.exports = class Store {
 	 * By default, no attempt is made to retry if a lock is not available.
 	 * Likewise, no attempt is made to retry the entire transaction if any lock is unavailable.
 	 * Both individual locks and the transaction as a whole can be configured to retry automatically after a delay.
-	 * The delay before the first transaction retry is specified by the `retryWait` option.
-	 * The maximum total transaction retry delay is specified by the `retryTimeout` option.
+	 * The delay before the first transaction retry is specified by the `transactionWait` option.
+	 * The maximum total transaction retry delay is specified by the `transactionTimeout` option.
 	 *
 	 * @param {function} callback - perform operations; may be called multiple times, may be halted at any point where a lock is acquired
-	 *   Signature: `async function(lockObject, storeObject, tryCount): Promise&lt;*&gt;`
+	 *   Signature: `async function(lockObject: Lock, storeObject: Store, tryCount: number): Promise&lt;*&gt;`
 	 * @param {object} options
-	 * @param {number} options.retryTimeout int maximum milliseconds to retry transaction until giving up, default 0 (no retry)
-	 * @param {number} options.retryWait int minimum milliseconds before first transaction retry, default 10 ms.
-	 * @param {number} options.lockTimeout int maximum milliseconds to retry each lock until giving up, default 0 (no retry)
-	 * @param {number} options.lockWait int minimum milliseconds before first lock retry, default 10 ms
+	 * @param {number} options.transactionTimeout - maximum milliseconds to retry transaction until giving up, default 0 (no retry)
+	 * @param {number} options.transactionWait - minimum milliseconds before first transaction retry, default 10 ms.
+	 * @param {number} options.lockTimeout - maximum milliseconds to retry each lock until giving up, default 0 (no retry)
+	 * @param {number} options.lockWait - minimum milliseconds before first lock retry, default 10 ms
+	 * @param {Lock} options.lock - use this Lock instance, do not create or manage a lock for just this transaction. Note: if lock is provided then transaction() will NOT automatically release held locks before resolving
 	 * @returns {Promise&lt;*&gt;} On success, resolves with result of callback function&apos;s promise. On failure due to lock conflict, rejects with code &apos;ELOCKED&apos;
 	 */
 	async transaction(callback, options = {}) {
-		options.retryTimeout = parseInt(options.retryTimeout, 10) || 0;
-		options.retryWait = parseInt(options.retryWait, 10) || 10;
-		options.lockTimeout = parseInt(options.lockTimeout, 10) || 0;
-		options.lockWait = parseInt(options.lockWait, 10) || 10;
+		options.transactionTimeout = parseInt(options.transactionTimeout, 10) || this.option(&apos;transactionTimeout&apos;);
+		options.transactionWait = parseInt(options.transactionWait, 10) || this.option(&apos;transactionWait&apos;);
+		options.lockTimeout = parseInt(options.lockTimeout, 10) || this.option(&apos;lockTimeout&apos;);
+		options.lockWait = parseInt(options.lockWait, 10) || this.option(&apos;lockWait&apos;);
 
-		const lock = this.lock(this, {
-			timeout: options.lockTimeout,
-			wait: options.lockWait
-		});
-		return lock.runWithRetry(
+		let lock;
+		let clearLocks = true;
+		if (options.lock) {
+			lock = options.lock;
+			clearLocks = false;
+		}
+		else {
+			lock = this.lock(
+				this,
+				{
+					timeout: options.lockTimeout,
+					wait: options.lockWait
+				}
+			);
+		}
+
+		return /* await */ this.runWithRetry(
 			(resolve, reject, retry, tryCount) =&gt; {
 				callback(lock, this, tryCount)
 					.then((result) =&gt; {
-						lock.unlockAll();
+						if (clearLocks) {
+							lock.unlockAll();
+						}
 						resolve(result);
 					})
 					.catch((err) =&gt; {
-						lock.unlockAll();
+						if (clearLocks) {
+							lock.unlockAll();
+						}
 						if (err.code != &apos;ELOCKED&apos;) {
 							reject(err);
 							return;
@@ -281,11 +403,71 @@ module.exports = class Store {
 				err.cause = originalErr;
 				return err;
 			},
-			{
-				timeout: options.retryTimeout,
-				wait: options.retryWait
-			}
+			options.transactionTimeout,
+			options.transactionWait
 		);
+	}
+
+	/**
+	 * Return list of named collections
+	 *
+	 * Returned collections always have at least one record. (Empty collections are automatically deleted.)
+	 *
+	 * Special collection &quot;@all&quot; is not included in the returned list.
+	 *
+	 * @return {array&lt;string&gt;} named collections
+	 */
+	async collections() {
+		let collections = await this.listDirectoriesInDir(await this.dir([this.option(&apos;collectionsDir&apos;)], false));
+		collections.sort();
+		return collections;
+	}
+
+	/**
+	 * Iterate over records in a collection
+	 *
+	 * @param {string} collection - name of collection, or &quot;@all&quot; to traverse all records in store
+	 * @param {function} callback - called for each record found
+	 *   Signature: `function(identifier, recordIndex): {(void|bool}}`
+	 *   If callback returns bool false, traversal is halted
+	 * @returns {Promise&lt;number&gt;} total records traversed
+	 */
+	async traverse(collection, callback) {
+		const path = this.path;
+		let rootDir;
+		if (collection == this.option(&apos;allCollection&apos;)) {
+			rootDir = await this.dir([this.option(&apos;recordsDir&apos;)], false);
+		}
+		else {
+			rootDir = await this.dir([this.option(&apos;collectionsDir&apos;), collection], false);
+		}
+		let stack = [
+			[rootDir, await this.listDirectoriesInDir(rootDir)]
+		];
+		let recordCount = 0;
+		while (stack.length) {
+			let level = stack.length - 1;
+			if (!stack[level][1].length) {
+				stack.pop();
+				continue;
+			}
+			let dir = path.join(stack[level][0], stack[level][1].pop());
+			let subdirs = await this.listDirectoriesInDir(dir);
+			if (!subdirs.length) {
+				continue;
+			}
+			if (level &lt; TRAVERSE_DEPTH) {
+				stack.push([dir, subdirs]);
+				continue;
+			}
+			for (let identifier of subdirs) {
+				if (callback(identifier, recordCount++, this) === false) {
+					stack = [];
+					break;
+				}
+			}
+		}
+		return recordCount;
 	}
 };
 </code></pre>

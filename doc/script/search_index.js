@@ -1,11 +1,5 @@
 window.esdocSearchIndex = [
   [
-    "fs-atomic-data-store/src/collection.js~collection",
-    "class/src/Collection.js~Collection.html",
-    "<span>Collection</span> <span class=\"search-result-import-path\">fs-atomic-data-store/src/Collection.js</span>",
-    "class"
-  ],
-  [
     "fs-atomic-data-store/src/lock.js~lock",
     "class/src/Lock.js~Lock.html",
     "<span>Lock</span> <span class=\"search-result-import-path\">fs-atomic-data-store/src/Lock.js</span>",
@@ -22,6 +16,12 @@ window.esdocSearchIndex = [
     "class/src/Store.js~Store.html",
     "<span>Store</span> <span class=\"search-result-import-path\">fs-atomic-data-store/src/Store.js</span>",
     "class"
+  ],
+  [
+    "fs-atomic-data-store~store",
+    "function/index.html#static-function-store",
+    "<span>store</span> <span class=\"search-result-import-path\">fs-atomic-data-store</span>",
+    "function"
   ],
   [
     "src/.external-ecmascript.js~array",
@@ -306,60 +306,6 @@ window.esdocSearchIndex = [
     "external"
   ],
   [
-    "src/collection.js",
-    "file/src/Collection.js.html",
-    "src/Collection.js",
-    "file"
-  ],
-  [
-    "src/collection.js~collection#_name",
-    "class/src/Collection.js~Collection.html#instance-member-_name",
-    "src/Collection.js~Collection#_name",
-    "member"
-  ],
-  [
-    "src/collection.js~collection#_store",
-    "class/src/Collection.js~Collection.html#instance-member-_store",
-    "src/Collection.js~Collection#_store",
-    "member"
-  ],
-  [
-    "src/collection.js~collection#constructor",
-    "class/src/Collection.js~Collection.html#instance-constructor-constructor",
-    "src/Collection.js~Collection#constructor",
-    "method"
-  ],
-  [
-    "src/collection.js~collection#dir",
-    "class/src/Collection.js~Collection.html#instance-method-dir",
-    "src/Collection.js~Collection#dir",
-    "method"
-  ],
-  [
-    "src/collection.js~collection#name",
-    "class/src/Collection.js~Collection.html#instance-get-name",
-    "src/Collection.js~Collection#name",
-    "member"
-  ],
-  [
-    "src/collection.js~collection#record",
-    "class/src/Collection.js~Collection.html#instance-method-record",
-    "src/Collection.js~Collection#record",
-    "method"
-  ],
-  [
-    "src/collection.js~collection#store",
-    "class/src/Collection.js~Collection.html#instance-get-store",
-    "src/Collection.js~Collection#store",
-    "member"
-  ],
-  [
-    "src/collection.js~collection#traverse",
-    "class/src/Collection.js~Collection.html#instance-method-traverse",
-    "src/Collection.js~Collection#traverse",
-    "method"
-  ],
-  [
     "src/lock.js",
     "file/src/Lock.js.html",
     "src/Lock.js",
@@ -384,39 +330,15 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/lock.js~lock#_sortlocklist",
-    "class/src/Lock.js~Lock.html#instance-method-_sortLockList",
-    "src/Lock.js~Lock#_sortLockList",
-    "method"
-  ],
-  [
     "src/lock.js~lock#_store",
     "class/src/Lock.js~Lock.html#instance-member-_store",
     "src/Lock.js~Lock#_store",
     "member"
   ],
   [
-    "src/lock.js~lock#calcretries",
-    "class/src/Lock.js~Lock.html#instance-method-calcRetries",
-    "src/Lock.js~Lock#calcRetries",
-    "method"
-  ],
-  [
     "src/lock.js~lock#constructor",
     "class/src/Lock.js~Lock.html#instance-constructor-constructor",
     "src/Lock.js~Lock#constructor",
-    "method"
-  ],
-  [
-    "src/lock.js~lock#dir",
-    "class/src/Lock.js~Lock.html#instance-method-dir",
-    "src/Lock.js~Lock#dir",
-    "method"
-  ],
-  [
-    "src/lock.js~lock#filename",
-    "class/src/Lock.js~Lock.html#instance-method-filename",
-    "src/Lock.js~Lock#filename",
     "method"
   ],
   [
@@ -438,27 +360,9 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/lock.js~lock#lockcollection",
-    "class/src/Lock.js~Lock.html#instance-method-lockCollection",
-    "src/Lock.js~Lock#lockCollection",
-    "method"
-  ],
-  [
     "src/lock.js~lock#lockstore",
     "class/src/Lock.js~Lock.html#instance-method-lockStore",
     "src/Lock.js~Lock#lockStore",
-    "method"
-  ],
-  [
-    "src/lock.js~lock#parsefilename",
-    "class/src/Lock.js~Lock.html#instance-method-parseFilename",
-    "src/Lock.js~Lock#parseFilename",
-    "method"
-  ],
-  [
-    "src/lock.js~lock#runwithretry",
-    "class/src/Lock.js~Lock.html#instance-method-runWithRetry",
-    "src/Lock.js~Lock#runWithRetry",
     "method"
   ],
   [
@@ -480,22 +384,10 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/lock.js~lock#unlockcollection",
-    "class/src/Lock.js~Lock.html#instance-method-unlockCollection",
-    "src/Lock.js~Lock#unlockCollection",
-    "method"
-  ],
-  [
     "src/lock.js~lock#unlockstore",
     "class/src/Lock.js~Lock.html#instance-method-unlockStore",
     "src/Lock.js~Lock#unlockStore",
     "method"
-  ],
-  [
-    "src/lock.js~lockinfo",
-    "typedef/index.html#static-typedef-LockInfo",
-    "src/Lock.js~LockInfo",
-    "typedef"
   ],
   [
     "src/record.js",
@@ -504,16 +396,34 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/record.js~record#_col",
-    "class/src/Record.js~Record.html#instance-member-_col",
-    "src/Record.js~Record#_col",
+    "src/record.js~record#_cleanupdirs",
+    "class/src/Record.js~Record.html#instance-method-_cleanupDirs",
+    "src/Record.js~Record#_cleanupDirs",
+    "method"
+  ],
+  [
+    "src/record.js~record#_dirparts",
+    "class/src/Record.js~Record.html#instance-member-_dirParts",
+    "src/Record.js~Record#_dirParts",
     "member"
+  ],
+  [
+    "src/record.js~record#_getdirparts",
+    "class/src/Record.js~Record.html#instance-method-_getDirParts",
+    "src/Record.js~Record#_getDirParts",
+    "method"
   ],
   [
     "src/record.js~record#_id",
     "class/src/Record.js~Record.html#instance-member-_id",
     "src/Record.js~Record#_id",
     "member"
+  ],
+  [
+    "src/record.js~record#_iteratecollections",
+    "class/src/Record.js~Record.html#instance-method-_iterateCollections",
+    "src/Record.js~Record#_iterateCollections",
+    "method"
   ],
   [
     "src/record.js~record#_singlepartoperation",
@@ -528,10 +438,16 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/record.js~record#collection",
-    "class/src/Record.js~Record.html#instance-get-collection",
-    "src/Record.js~Record#collection",
-    "member"
+    "src/record.js~record#addcollection",
+    "class/src/Record.js~Record.html#instance-method-addCollection",
+    "src/Record.js~Record#addCollection",
+    "method"
+  ],
+  [
+    "src/record.js~record#addmultiplecollections",
+    "class/src/Record.js~Record.html#instance-method-addMultipleCollections",
+    "src/Record.js~Record#addMultipleCollections",
+    "method"
   ],
   [
     "src/record.js~record#constructor",
@@ -540,9 +456,9 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/record.js~record#deleteall",
-    "class/src/Record.js~Record.html#instance-method-deleteAll",
-    "src/Record.js~Record#deleteAll",
+    "src/record.js~record#deleteallparts",
+    "class/src/Record.js~Record.html#instance-method-deleteAllParts",
+    "src/Record.js~Record#deleteAllParts",
     "method"
   ],
   [
@@ -558,15 +474,15 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/record.js~record#dir",
-    "class/src/Record.js~Record.html#instance-method-dir",
-    "src/Record.js~Record#dir",
+    "src/record.js~record#deleterecord",
+    "class/src/Record.js~Record.html#instance-method-deleteRecord",
+    "src/Record.js~Record#deleteRecord",
     "method"
   ],
   [
-    "src/record.js~record#filepath",
-    "class/src/Record.js~Record.html#instance-method-filepath",
-    "src/Record.js~Record#filepath",
+    "src/record.js~record#dir",
+    "class/src/Record.js~Record.html#instance-method-dir",
+    "src/Record.js~Record#dir",
     "method"
   ],
   [
@@ -580,6 +496,12 @@ window.esdocSearchIndex = [
     "class/src/Record.js~Record.html#instance-get-identifier",
     "src/Record.js~Record#identifier",
     "member"
+  ],
+  [
+    "src/record.js~record#listcollections",
+    "class/src/Record.js~Record.html#instance-method-listCollections",
+    "src/Record.js~Record#listCollections",
+    "method"
   ],
   [
     "src/record.js~record#listparts",
@@ -603,6 +525,30 @@ window.esdocSearchIndex = [
     "src/record.js~record#readstream",
     "class/src/Record.js~Record.html#instance-method-readStream",
     "src/Record.js~Record#readStream",
+    "method"
+  ],
+  [
+    "src/record.js~record#removeallcollections",
+    "class/src/Record.js~Record.html#instance-method-removeAllCollections",
+    "src/Record.js~Record#removeAllCollections",
+    "method"
+  ],
+  [
+    "src/record.js~record#removecollection",
+    "class/src/Record.js~Record.html#instance-method-removeCollection",
+    "src/Record.js~Record#removeCollection",
+    "method"
+  ],
+  [
+    "src/record.js~record#removemultiplecollections",
+    "class/src/Record.js~Record.html#instance-method-removeMultipleCollections",
+    "src/Record.js~Record#removeMultipleCollections",
+    "method"
+  ],
+  [
+    "src/record.js~record#setcollections",
+    "class/src/Record.js~Record.html#instance-method-setCollections",
+    "src/Record.js~Record#setCollections",
     "method"
   ],
   [
@@ -660,9 +606,9 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/store.js~store#_collections",
-    "class/src/Store.js~Store.html#instance-member-_collections",
-    "src/Store.js~Store#_collections",
+    "src/store.js~store#_fsop",
+    "class/src/Store.js~Store.html#instance-member-_fsop",
+    "src/Store.js~Store#_fsop",
     "member"
   ],
   [
@@ -672,9 +618,9 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/store.js~store#collection",
-    "class/src/Store.js~Store.html#instance-method-collection",
-    "src/Store.js~Store#collection",
+    "src/store.js~store#collections",
+    "class/src/Store.js~Store.html#instance-method-collections",
+    "src/Store.js~Store#collections",
     "method"
   ],
   [
@@ -694,6 +640,18 @@ window.esdocSearchIndex = [
     "class/src/Store.js~Store.html#instance-get-fs",
     "src/Store.js~Store#fs",
     "member"
+  ],
+  [
+    "src/store.js~store#fsop",
+    "class/src/Store.js~Store.html#instance-get-fsop",
+    "src/Store.js~Store#fsop",
+    "member"
+  ],
+  [
+    "src/store.js~store#listdirectoriesindir",
+    "class/src/Store.js~Store.html#instance-method-listDirectoriesInDir",
+    "src/Store.js~Store#listDirectoriesInDir",
+    "method"
   ],
   [
     "src/store.js~store#lock",
@@ -720,9 +678,27 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/store.js~store#runwithretry",
+    "class/src/Store.js~Store.html#instance-method-runWithRetry",
+    "src/Store.js~Store#runWithRetry",
+    "method"
+  ],
+  [
     "src/store.js~store#transaction",
     "class/src/Store.js~Store.html#instance-method-transaction",
     "src/Store.js~Store#transaction",
     "method"
+  ],
+  [
+    "src/store.js~store#traverse",
+    "class/src/Store.js~Store.html#instance-method-traverse",
+    "src/Store.js~Store#traverse",
+    "method"
+  ],
+  [
+    "src/exports.js",
+    "file/src/exports.js.html",
+    "src/exports.js",
+    "file"
   ]
 ]

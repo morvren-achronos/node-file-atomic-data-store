@@ -566,270 +566,8 @@
   {
     "__docId__": 48,
     "kind": "file",
-    "name": "src/Collection.js",
-    "content": "/**\n * class Collection\n */\n\n/**\n * Interact with a colection of records\n *\n * Do not instantiate this class directly, use methods from class {Store}\n *\n * @access public\n */\nmodule.exports = class Collection {\n\t/**\n\t * Get collection interaction instance\n\t *\n\t * @access public\n\t * @param {Store} store - object\n\t * @param {string} collection - collection name\n\t */\n\tconstructor(store, collection) {\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._store = store;\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._name = collection;\n\t}\n\n\n\t// Utility methods\n\n\t/**\n\t * Store instance for this collection\n\t *\n\t * @type Store\n\t */\n\tget store() {\n\t\treturn this._store;\n\t}\n\n\t/**\n\t * Collection name\n\t *\n\t * @type string\n\t */\n\tget name() {\n\t\treturn this._name;\n\t}\n\n\t/**\n\t * Get directory path within collection\n\t *\n\t * Directory is created if it doesn't exist.\n\t *\n\t * @param {array} dirParts - dir path components\n\t * @param {bool} create - true to create directory if it does not exist\n\t * @returns {Promise<string>} dirpath\n\t */\n\tasync dir(dirParts = [], create = true) {\n\t\treturn this.store.dir([this.store.option('recordsDir'), this.name, ...dirParts], create);\n\t}\n\n\n\t// Factory methods\n\n\t/**\n\t * Return an object to interact with a record within this collection\n\t *\n\t * @param {string} identifier - record identifier\n\t * @returns {Record} object\n\t */\n\trecord(identifier) {\n\t\treturn new (this.store.option('recordClass'))(this.store, this, identifier);\n\t}\n\n\n\t// Data operation methods\n\n\t/**\n\t * Iterate over all records in collection, calling function for each\n\t *\n\t * @param {function} callback - called for each record found\n\t *   Signature: `function(identiier, recordIndex, collectionObj): {(void|bool}}`\n\t *   If callback returns bool false, traversal is halted\n\t * @returns {Promise<number>} total records traversed\n\t */\n\tasync traverse(callback) {\n\t\tconst\n\t\t\trootDir = await this.dir([], false),\n\t\t\tpath = this.store.path,\n\t\t\tfs  = this.store.fs\n\t\t;\n\t\tfunction getDirectoriesInDir(dir) {\n\t\t\treturn new Promise((resolve, reject) => {\n\t\t\t\tfs.readdir(\n\t\t\t\t\tdir,\n\t\t\t\t\t{\n\t\t\t\t\t\twithFileTypes: true\n\t\t\t\t\t},\n\t\t\t\t\t(err, entries) => {\n\t\t\t\t\t\tif (err) {\n\t\t\t\t\t\t\tif (err.code == 'ENOENT') {\n\t\t\t\t\t\t\t\tresolve([]);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tlet dirs = [];\n\t\t\t\t\t\tfor (let ent of entries) {\n\t\t\t\t\t\t\tif (ent.isDirectory()) {\n\t\t\t\t\t\t\t\tdirs.push(ent.name);\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\tresolve(dirs);\n\t\t\t\t\t}\n\t\t\t\t);\n\t\t\t});\n\t\t}\n\t\tlet stack = [\n\t\t\t[rootDir, await getDirectoriesInDir(rootDir)]\n\t\t];\n\t\tlet recordCount = 0;\n\t\twhile (stack.length) {\n\t\t\tlet level = stack.length - 1;\n\t\t\tif (!stack[level][1].length) {\n\t\t\t\tstack.pop();\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tlet dir = path.join(stack[level][0], stack[level][1].pop());\n\t\t\tlet subdirs = await getDirectoriesInDir(dir);\n\t\t\tif (!subdirs.length) {\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tif (level < 3) {\n\t\t\t\tstack.push([dir, subdirs]);\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tfor (let identifier of subdirs) {\n\t\t\t\tif (callback(identifier, recordCount++, this) === false) {\n\t\t\t\t\tstack = [];\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn recordCount;\n\t}\n};\n",
-    "static": true,
-    "longname": "/Users/ky/Documents/local/morvren-achronos/code/fs-atomic-data-store/src/Collection.js",
-    "access": "public",
-    "description": null,
-    "lineNumber": 1
-  },
-  {
-    "__docId__": 49,
-    "kind": "class",
-    "name": "Collection",
-    "memberof": "src/Collection.js",
-    "static": true,
-    "longname": "src/Collection.js~Collection",
-    "access": "public",
-    "export": true,
-    "importPath": "fs-atomic-data-store/src/Collection.js",
-    "importStyle": "Collection",
-    "description": "Interact with a colection of records\n\nDo not instantiate this class directly, use methods from class {Store}",
-    "lineNumber": 12,
-    "interface": false
-  },
-  {
-    "__docId__": 50,
-    "kind": "constructor",
-    "name": "constructor",
-    "memberof": "src/Collection.js~Collection",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Collection.js~Collection#constructor",
-    "access": "public",
-    "description": "Get collection interaction instance",
-    "lineNumber": 20,
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "Store"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "store",
-        "description": "object"
-      },
-      {
-        "nullable": null,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "collection",
-        "description": "collection name"
-      }
-    ]
-  },
-  {
-    "__docId__": 51,
-    "kind": "member",
-    "name": "_store",
-    "memberof": "src/Collection.js~Collection",
-    "static": false,
-    "longname": "src/Collection.js~Collection#_store",
-    "access": "private",
-    "description": "",
-    "lineNumber": 24,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 52,
-    "kind": "member",
-    "name": "_name",
-    "memberof": "src/Collection.js~Collection",
-    "static": false,
-    "longname": "src/Collection.js~Collection#_name",
-    "access": "private",
-    "description": "",
-    "lineNumber": 28,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 53,
-    "kind": "get",
-    "name": "store",
-    "memberof": "src/Collection.js~Collection",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Collection.js~Collection#store",
-    "access": "public",
-    "description": "Store instance for this collection",
-    "lineNumber": 39,
-    "type": {
-      "nullable": null,
-      "types": [
-        "*"
-      ],
-      "spread": false,
-      "description": null
-    }
-  },
-  {
-    "__docId__": 54,
-    "kind": "get",
-    "name": "name",
-    "memberof": "src/Collection.js~Collection",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Collection.js~Collection#name",
-    "access": "public",
-    "description": "Collection name",
-    "lineNumber": 48,
-    "type": {
-      "nullable": null,
-      "types": [
-        "*"
-      ],
-      "spread": false,
-      "description": null
-    }
-  },
-  {
-    "__docId__": 55,
-    "kind": "method",
-    "name": "dir",
-    "memberof": "src/Collection.js~Collection",
-    "generator": false,
-    "async": true,
-    "static": false,
-    "longname": "src/Collection.js~Collection#dir",
-    "access": "public",
-    "description": "Get directory path within collection\n\nDirectory is created if it doesn't exist.",
-    "lineNumber": 61,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{Promise<string>} dirpath"
-      }
-    ],
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "array"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "dirParts",
-        "description": "dir path components"
-      },
-      {
-        "nullable": null,
-        "types": [
-          "bool"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "create",
-        "description": "true to create directory if it does not exist"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "Promise<string>"
-      ],
-      "spread": false,
-      "description": "dirpath"
-    }
-  },
-  {
-    "__docId__": 56,
-    "kind": "method",
-    "name": "record",
-    "memberof": "src/Collection.js~Collection",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Collection.js~Collection#record",
-    "access": "public",
-    "description": "Return an object to interact with a record within this collection",
-    "lineNumber": 74,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{Record} object"
-      }
-    ],
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "identifier",
-        "description": "record identifier"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "Record"
-      ],
-      "spread": false,
-      "description": "object"
-    }
-  },
-  {
-    "__docId__": 57,
-    "kind": "method",
-    "name": "traverse",
-    "memberof": "src/Collection.js~Collection",
-    "generator": false,
-    "async": true,
-    "static": false,
-    "longname": "src/Collection.js~Collection#traverse",
-    "access": "public",
-    "description": "Iterate over all records in collection, calling function for each",
-    "lineNumber": 89,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{Promise<number>} total records traversed"
-      }
-    ],
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "function"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "callback",
-        "description": "called for each record found\n  Signature: `function(identiier, recordIndex, collectionObj): {(void|bool}}`\n  If callback returns bool false, traversal is halted"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "Promise<number>"
-      ],
-      "spread": false,
-      "description": "total records traversed"
-    }
-  },
-  {
-    "__docId__": 58,
-    "kind": "file",
     "name": "src/Lock.js",
-    "content": "/**\n * class Lock\n */\n\n/**\n * @typedef {Array<{collection: ?string, identifier: ?string, type: \"record\"|\"collection\"|\"store\", ours: ?bool}>} LockInfo\n */\n\n// Libraries\nconst lockfile = require('proper-lockfile');\n\n// Constants\n/**\n * @access private\n */\nconst\n\tSTORE_FILENAME = '@@--store@@',\n\tCOLLECTION_FILENAME = '@@--collection@@%s',\n\tCOLLECTION_FILENAME_REGEXP = new RegExp('^' + COLLECTION_FILENAME.replace(/%s/, '(.+)') + '$'),\n\tRECORD_FILENAME = '%s@@--record@@%s',\n\tRECORD_FILENAME_REGEXP = new RegExp('^' + RECORD_FILENAME.replace(/%s/g, '(.+)') + '$')\n;\n\n/**\n * Lock resources for exclusive access\n *\n * Do not instantiate this class directly, use methods from class {Store}\n */\nmodule.exports = class Lock {\n\t/**\n\t * Get locking instance\n\t *\n\t * @param {Store} store - object\n\t * @param {object} options\n\t * @param {number} options.timeout - default max retry time in milliseconds\n\t * @param {number} options.wait - default min time in ms to wait before first retry\n\t */\n\tconstructor(store, options) {\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._store = store;\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._options = {\n\t\t\ttimeout: options.timeout || 0,\n\t\t\twait: options.wait || 10\n\t\t};\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._locks = {};\n\t}\n\n\n\t// Utility methods\n\n\t/**\n\t * Store instance for this collection\n\t *\n\t * @type Store\n\t */\n\tget store() {\n\t\treturn this._store;\n\t}\n\n\t/**\n\t * Utility. Get filename for a lock\n\t *\n\t * For a record lock, pass string collection and identifier.\n\t * For a collection-level lock, pass string collection and null for identifier.\n\t * For a store-level lock, pass null for both parameters\n\t *\n\t * @param {?string} collection - collection name\n\t * @param {?string} identifier - identifier name\n\t * @returns {string} filename\n\t */\n\tfilename(collection, identifier) {\n\t\tif (collection == null && identifier == null) {\n\t\t\treturn STORE_FILENAME;\n\t\t}\n\t\tif (identifier == null) {\n\t\t\treturn COLLECTION_FILENAME.replace(/%s/, collection);\n\t\t}\n\t\treturn RECORD_FILENAME.replace(/%s/, collection).replace(/%s/, identifier);\n\t}\n\n\t/**\n\t * Utility. Get lock info from lock filename\n\t *\n\t * @param {string} filename - lock filename\n\t * @return {LockInfo} lock info\n\t */\n\tparseFilename(filename) {\n\t\tif (filename == STORE_FILENAME) {\n\t\t\treturn {\n\t\t\t\tcollection: null,\n\t\t\t\tidentifier: null,\n\t\t\t\ttype: 'store',\n\t\t\t\tours: null\n\t\t\t}\n\t\t}\n\t\tlet m;\n\t\tif ((m = COLLECTION_FILENAME_REGEXP.exec(filename))) {\n\t\t\treturn {\n\t\t\t\tcollection: m[1],\n\t\t\t\tidentifier: null,\n\t\t\t\ttype: 'collection',\n\t\t\t\tours: null\n\t\t\t}\n\t\t}\n\t\tif ((m = RECORD_FILENAME_REGEXP.exec(filename))) {\n\t\t\treturn {\n\t\t\t\tcollection: m[1],\n\t\t\t\tidentifier: m[2],\n\t\t\t\ttype: 'record',\n\t\t\t\tours: null\n\t\t\t}\n\t\t}\n\t\treturn null;\n\t}\n\n\t/**\n\t * Utility. Return array of retry delay times\n\t *\n\t * @param {number} timeout - maximum retry delay time in milliseconds\n\t * @param {number} wait - minimum delay before first retry, in milliseconds\n\t * @returns {array} retry timer values, can be passed to setTimeout\n\t */\n\tcalcRetries(timeout, wait) {\n\t\tlet retries = [];\n\t\tif (timeout > 0) {\n\t\t\twhile (timeout >= wait) {\n\t\t\t\tretries.unshift(timeout);\n\t\t\t\ttimeout = Math.floor(timeout / 3);\n\t\t\t}\n\t\t\tfor (let i = 1; i < retries.length; i++) {\n\t\t\t\tretries[i] -= retries[i - 1];\n\t\t\t}\n\t\t}\n\t\treturn retries;\n\t}\n\n\t/**\n\t * Utility. Perform an operation and retry it if first attempt(s) fail\n\t *\n\t * @param {function} operation - Signature: `function(resolve, reject, retry, tryCount): Promise<void>`\n\t * @param {function} onTimeout - On timeout, operation promise is rejected with value returned by this function\n\t * @param {object} options\n\t * @param {number} options.timeout - max retry time in milliseconds, default is as provided to Lock constructor\n\t * @param {number} options.wait - min time to wait before first retry, default is as provided to Lock constructor\n\t */\n\tasync runWithRetry(operation, onTimeout, options = {}) {\n\t\toptions.timeout = options.timeout || this._options.timeout;\n\t\toptions.wait = options.wait || this._options.wait;\n\t\treturn new Promise((resolve, reject) => {\n\t\t\tlet retries = this.calcRetries(options.timeout, options.wait);\n\t\t\tlet tryCount = 0;\n\t\t\tfunction retry() {\n\t\t\t\tif (retries.length == 0) {\n\t\t\t\t\treject(onTimeout());\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tsetTimeout(run, retries.shift());\n\t\t\t}\n\t\t\tfunction run() {\n\t\t\t\toperation(resolve, reject, retry, tryCount++);\n\t\t\t}\n\t\t\trun();\n\t\t});\n\t}\n\n\t/**\n\t * Utility. Get directory path for locks\n\t *\n\t * Directory is created if it doesn't exist.\n\t *\n\t * @param {bool} create - true to create directory if it does not exist\n\t * @returns {Promise<string>} dirpath\n\t */\n\tasync dir(create = true) {\n\t\treturn this.store.dir([this.store.option('locksDir')], create);\n\t}\n\n\n\t// Data operation methods\n\n\t/**\n\t * Attempt to take an exclusive lock\n\t *\n\t * If the lock is free, it will be taken by this instance.\n\t * If the lock is already held by this instance, calling {lock} again will resolve ok.\n\t * If the lock is held by another instance or process, rejects with code \"ELOCKED\" and lockType \"record\".\n\t * If the collection is locked (by this or any other instance), rejects with code \"ELOCKED\" and lockType \"collection\".\n\t * If the store is locked (by this or any other instance), rejects with code \"ELOCKED\" and lockType \"store\".\n\t *\n\t * @param {?string} collection - collection name, or null for store-level lock\n\t * @param {?string} identifier - record identifier, or null for collection-level lock\n\t * @param {object} options\n\t * @param {number} options.timeout - max retry time in milliseconds. Default is per options to constructor\n\t * @param {number} options.wait - min time in ms to wait before first retry. Default is per options to constructor\n\t * @returns {Promise<void>}\n\t */\n\tasync lock(collection, identifier, options = {}) {\n\t\tconst\n\t\t\tdir = await this.dir(),\n\t\t\tpath = this.store.path,\n\t\t\tfilename = this.filename(collection, identifier),\n\t\t\tfilepath = path.join(dir, filename)\n\t\t;\n\n\t\t// Check whether this instance already holds lock\n\t\tif (this._locks[filename]) {\n\t\t\t// Confirm we really still have it\n\t\t\tif (await this._lockOperation('check', filepath)) {\n\t\t\t\t// We do\n\t\t\t\treturn;\n\t\t\t}\n\t\t\t// We don't... this is bad but nothing we can do about it here, unlock will throw\n\t\t}\n\n\t\t// Check for store-level lock\n\t\tif (await this._lockOperation('check', path.join(dir, this.filename(null, null)))) {\n\t\t\t// Store is locked\n\t\t\tconst err = new Error('Error: ELOCKED: store is locked');\n\t\t\terr.code = 'ELOCKED';\n\t\t\terr.lockType = 'store';\n\t\t\tthrow err;\n\t\t}\n\n\t\t// Check for collection lock\n\t\tif (collection && await this._lockOperation('check', path.join(dir, this.filename(collection, null)))) {\n\t\t\t// Store is locked\n\t\t\tconst err = new Error('Error: ELOCKED: collection is locked');\n\t\t\terr.code = 'ELOCKED';\n\t\t\terr.lockType = 'collection';\n\t\t\tthrow err;\n\t\t}\n\n\t\t// Attempt to take lock\n\t\treturn this.runWithRetry(\n\t\t\t(resolve, reject, retry) => {\n\t\t\t\tthis._lockOperation('lock', filepath)\n\t\t\t\t\t.then((release) => {\n\t\t\t\t\t\tthis._locks[filename] = {\n\t\t\t\t\t\t\tc: collection,\n\t\t\t\t\t\t\ti: identifier,\n\t\t\t\t\t\t\tr: release\n\t\t\t\t\t\t};\n\t\t\t\t\t\tresolve();\n\t\t\t\t\t})\n\t\t\t\t\t.catch((err) => {\n\t\t\t\t\t\tif (err.code != 'ELOCKED') {\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tretry();\n\t\t\t\t\t})\n\t\t\t\t;\n\t\t\t},\n\t\t\t() => {\n\t\t\t\tconst err = new Error('Error: ELOCKED: lock is held by another instance');\n\t\t\t\terr.code = 'ELOCKED';\n\t\t\t\terr.lockType = 'lock';\n\t\t\t\treturn err;\n\t\t\t},\n\t\t\toptions\n\t\t);\n\t}\n\n\t/**\n\t * Release a lock held by this instance\n\t *\n\t * If lock is not held by this instance, rejects with code \"ENOTACQUIRED\".\n\t * If lock has been compromised, rejects with code \"ECOMPROMISED\".\n\t *\n\t * @param {?string} collection - collection name, or null for store-level lock\n\t * @param {?string} identifier - record identifier, or null for collection-level lock\n\t * @returns {Promise<void>}\n\t */\n\tasync unlock(collection, identifier) {\n\t\tconst\n\t\t\tpath = this.store.path,\n\t\t\tfilename = this.filename(collection, identifier)\n\t\t;\n\n\t\t// Check whether this instance holds lock\n\t\tif (!this._locks[filename]) {\n\t\t\tlet err = new Error('Error: ENOTACQUIRED: lock is not held by this instance');\n\t\t\terr.code = 'ENOTACQUIRED';\n\t\t\tthrow err;\n\t\t}\n\n\t\t// Confirm we really still have it\n\t\tlet err;\n\t\tif (await this._lockOperation('check', path.join(await this.dir(), filename)) == false) {\n\t\t\t// We don't... throw error\n\t\t\terr = new Error('Error: ECOMPROMISED: lock has been removed by another process, possible simultaneous data access');\n\t\t\terr.code = 'ECOMPROMISED';\n\t\t}\n\n\t\t// Release lock\n\t\tawait this._locks[filename].r();\n\t\tdelete this._locks[filename];\n\n\t\t// Throw error if present\n\t\tif (err) {\n\t\t\tthrow err;\n\t\t}\n\t}\n\n\t/**\n\t * Release all locks held by this instance\n\t *\n\t * @returns {Promise<void>}\n\t */\n\tasync unlockAll() {\n\t\tfor (let k of Object.keys(this._locks)) {\n\t\t\t// Release lock\n\t\t\tawait this._locks[k].r();\n\t\t\tdelete this._locks[k];\n\t\t}\n\t}\n\n\t/**\n\t * List locks currently held by this instance\n\t *\n\t * @return LockInfo[] held locks\n\t */\n\tlist() {\n\t\tlet locks = [];\n\t\tfor (let k in this._locks) {\n\t\t\tlocks.push({\n\t\t\t\tcollection: this._locks[k].c,\n\t\t\t\tidentifier: this._locks[k].i,\n\t\t\t\ttype:\n\t\t\t\t\t(this._locks[k].c == null)\n\t\t\t\t\t? 'store'\n\t\t\t\t\t: (\n\t\t\t\t\t\t(this._locks[k].i == null)\n\t\t\t\t\t\t? 'collection'\n\t\t\t\t\t\t: 'record'\n\t\t\t\t\t),\n\t\t\t\tours: true\n\t\t\t});\n\t\t}\n\t\tthis._sortLockList(locks);\n\t\treturn locks;\n\t}\n\n\t/**\n\t * List locks currently held by all actors (all processes, all instances)\n\t *\n\t * @return {LockInfo[]} held locks\n\t */\n\tasync listGlobal() {\n\t\tconst\n\t\t\tdir = await this.dir(),\n\t\t\tfs = this.store.fs\n\t\t;\n\t\treturn new Promise((resolve, reject) => {\n\t\t\tfs.readdir(\n\t\t\t\tdir,\n\t\t\t\t{\n\t\t\t\t\twithFileTypes: true\n\t\t\t\t},\n\t\t\t\t(err, entries) => {\n\t\t\t\t\tif (err) {\n\t\t\t\t\t\treject(err);\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tlet locks = [];\n\t\t\t\t\tfor (let ent of entries) {\n\t\t\t\t\t\tif (ent.isDirectory()) {\n\t\t\t\t\t\t\tlet lockinfo = this.parseFilename(ent.name)\n\t\t\t\t\t\t\tlockinfo.ours = (typeof this._locks[ent.name] == 'object');\n\t\t\t\t\t\t\tlocks.push(lockinfo);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tthis._sortLockList(locks);\n\t\t\t\t\tresolve(locks);\n\t\t\t\t}\n\t\t\t);\n\t\t});\n\t}\n\n\n\t// Convenience methods\n\n\t/**\n\t * Attempt to take a collection-level lock (lock an entire collection)\n\t *\n\t * @param {string} collection - collection name\n\t * @returns {Promise<void>}\n\t */\n\tasync lockCollection(collection) {\n\t\treturn this.lock(collection, null);\n\t}\n\n\t/**\n\t * Attempt to take a store-level lock (lock the entire store)\n\t *\n\t * @returns {Promise<void>}\n\t */\n\tasync lockStore() {\n\t\treturn this.lock(null, null);\n\t}\n\n\t/**\n\t * Release a held colection-level lock\n\t *\n\t * @param {string} collection - collection name\n\t * @returns {Promise<void>}\n\t */\n\tasync unlockCollection(collection) {\n\t\treturn this.unlock(collection, null);\n\t}\n\n\t/**\n\t * Release held store-level lock\n\t */\n\tasync unlockStore() {\n\t\treturn this.unlock(null, null);\n\t}\n\n\n\t// Internal methods\n\n\t/**\n\t * @access private\n\t */\n\t_lockOperation(method, filepath) {\n\t\treturn lockfile[method](\n\t\t\tfilepath,\n\t\t\t{\n\t\t\t\trealpath: false,\n\t\t\t\tlockfilePath: filepath\n\t\t\t}\n\t\t);\n\t}\n\n\t/**\n\t * @access private\n\t */\n\t_sortLockList(locks) {\n\t\tconst typeSortMap = {\n\t\t\tstore: 0,\n\t\t\tcollection: 1,\n\t\t\trecord: 2\n\t\t};\n\t\tlocks.sort((a, b) => {\n\t\t\tlet v = typeSortMap[a.type] - typeSortMap[b.type];\n\t\t\tif (v) {\n\t\t\t\treturn v;\n\t\t\t}\n\t\t\tv = a.collection.localeCompare(b.collection);\n\t\t\tif (v) {\n\t\t\t\treturn v;\n\t\t\t}\n\t\t\treturn a.identifier.localeCompare(b.identifier);\n\t\t});\n\t}\n};\n",
+    "content": "/**\n * class Lock\n */\n\n// Libraries\nconst lockfile = require('proper-lockfile');\n\n// Constants\n/**\n * @access private\n */\nconst STORE_LOCK = '@store';\n\n/**\n * Lock resources for exclusive access\n *\n * Do not instantiate this class directly, use method {@link Store.lock}.\n */\nmodule.exports = class Lock {\n\t/**\n\t * Get locking instance\n\t *\n\t * Do not instantiate this class directly, use method {@link Store.lock}.\n\t *\n\t * @param {Store} store - object\n\t * @param {object} options\n\t * @param {number} options.timeout - default max retry time in milliseconds\n\t * @param {number} options.wait - default min time in ms to wait before first retry\n\t * @internal\n\t */\n\tconstructor(store, options) {\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._store = store;\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._options = {\n\t\t\ttimeout: parseInt(options.timeout, 10) || 0,\n\t\t\twait: parseInt(options.wait, 10) || 10\n\t\t};\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._locks = {};\n\t}\n\n\n\t// Utility methods\n\n\t/**\n\t * Store instance for this collection\n\t *\n\t * @type Store\n\t */\n\tget store() {\n\t\treturn this._store;\n\t}\n\n\n\t// Data operation methods\n\n\t/**\n\t * Attempt to take an exclusive lock\n\t *\n\t * If the lock is free, it will be taken by this instance.\n\t * If the lock is already held by this instance, calling {lock} again will resolve ok.\n\t * If the lock is held by another instance or process, rejects with code \"ELOCKED\" and lockType \"record\".\n\t * If the store is locked (by this or any other instance), rejects with code \"ELOCKED\" and lockType \"store\".\n\t *\n\t * @param {string} identifier - record identifier, or special token \"@store\" for store-level lock\n\t * @param {object} options\n\t * @param {number} options.timeout - max retry time in milliseconds. Default is per options to constructor\n\t * @param {number} options.wait - min time in ms to wait before first retry. Default is per options to constructor\n\t * @returns {Promise<void>}\n\t */\n\tasync lock(identifier, options = {}) {\n\t\tconst\n\t\t\tpath = this.store.path,\n\t\t\tdir = await this.store.dir([this.store.option('locksDir')], true),\n\t\t\tfilepath = path.join(dir, identifier)\n\t\t;\n\t\toptions.timeout = parseInt(options.timeout, 10) || this._options.timeout;\n\t\toptions.wait = parseInt(options.wait, 10) || this._options.wait;\n\n\t\t// Check whether this instance already holds lock\n\t\tif (this._locks[identifier]) {\n\t\t\t// Confirm we really still have it\n\t\t\tif (await this._lockOperation('check', filepath)) {\n\t\t\t\t// We do, resolve now\n\t\t\t\treturn;\n\t\t\t}\n\t\t\t// We don't... this is bad but nothing we can do about it here, unlock will throw if we can't lock it again\n\t\t}\n\n\t\t// Check for store-level lock\n\t\tif (await this._lockOperation('check', path.join(dir, STORE_LOCK))) {\n\t\t\t// Store is locked\n\t\t\tlet err = new Error('Error: ELOCKED: store is locked');\n\t\t\terr.code = 'ELOCKED';\n\t\t\terr.lockType = 'store';\n\t\t\tthrow err;\n\t\t}\n\n\t\t// Attempt to take lock\n\t\treturn /* await */ this.store.runWithRetry(\n\t\t\t(resolve, reject, retry) => {\n\t\t\t\tthis._lockOperation('lock', filepath)\n\t\t\t\t\t.then((release) => {\n\t\t\t\t\t\tthis._locks[identifier] = release;\n\t\t\t\t\t\tresolve();\n\t\t\t\t\t})\n\t\t\t\t\t.catch((err) => {\n\t\t\t\t\t\tif (err.code != 'ELOCKED') {\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tretry();\n\t\t\t\t\t})\n\t\t\t\t;\n\t\t\t},\n\t\t\t() => {\n\t\t\t\tlet err = new Error('Error: ELOCKED: lock is held by another instance');\n\t\t\t\terr.code = 'ELOCKED';\n\t\t\t\terr.lockType = 'record';\n\t\t\t\treturn err;\n\t\t\t},\n\t\t\toptions.timeout,\n\t\t\toptions.wait\n\t\t);\n\t}\n\n\t/**\n\t * Release a lock held by this instance\n\t *\n\t * If lock is not held by this instance, rejects with code \"ENOTACQUIRED\".\n\t * If lock has been compromised, rejects with code \"ECOMPROMISED\".\n\t *\n\t * @param {string} identifier - record identifier, or special token \"@store\" for store-level lock\n\t * @returns {Promise<void>}\n\t */\n\tasync unlock(identifier) {\n\t\tconst\n\t\t\tpath = this.store.path,\n\t\t\tdir = await this.store.dir([this.store.option('locksDir')], true),\n\t\t\tfilepath = path.join(dir, identifier)\n\t\t;\n\n\t\t// Check whether this instance holds lock\n\t\tif (!this._locks[identifier]) {\n\t\t\tlet err = new Error('Error: ENOTACQUIRED: lock is not held by this instance');\n\t\t\terr.code = 'ENOTACQUIRED';\n\t\t\tthrow err;\n\t\t}\n\n\t\t// Confirm we really still have it\n\t\tlet err;\n\t\tif (await this._lockOperation('check', filepath) == false) {\n\t\t\t// We don't... throw error\n\t\t\terr = new Error('Error: ECOMPROMISED: lock has been removed by another process, possible simultaneous data access');\n\t\t\terr.code = 'ECOMPROMISED';\n\t\t}\n\n\t\t// Release lock\n\t\tawait this._locks[identifier]();\n\t\tdelete this._locks[identifier];\n\n\t\t// Throw error if present\n\t\tif (err) {\n\t\t\tthrow err;\n\t\t}\n\t}\n\n\t/**\n\t * Release all locks held by this instance\n\t *\n\t * @returns {Promise<void>}\n\t */\n\tasync unlockAll() {\n\t\tfor (let identifier of Object.keys(this._locks)) {\n\t\t\t// Release lock\n\t\t\tawait this._locks[identifier]();\n\t\t\tdelete this._locks[identifier];\n\t\t}\n\t}\n\n\t/**\n\t * List locks currently held by this instance\n\t *\n\t * @return LockInfo[] held locks\n\t */\n\tlist() {\n\t\tlet locks = Object.keys(this._locks);\n\t\tlocks.sort();\n\t\treturn locks;\n\t}\n\n\t/**\n\t * List locks currently held by all actors (all processes, all instances)\n\t *\n\t * @return {Promise<string>} held locks\n\t */\n\tasync listGlobal() {\n\t\tlet locks = await this.store.listDirectoriesInDir(await this.store.dir([this.store.option('locksDir')], false));\n\t\tlocks.sort();\n\t\treturn locks;\n\t}\n\n\n\t// Convenience methods\n\n\t/**\n\t * Attempt to take a store-level lock (lock the entire store)\n\t *\n\t * @returns {Promise<void>}\n\t */\n\tasync lockStore() {\n\t\treturn /* await */ this.lock(STORE_LOCK);\n\t}\n\n\t/**\n\t * Release held store-level lock\n\t */\n\tasync unlockStore() {\n\t\treturn /* await */ this.unlock(STORE_LOCK);\n\t}\n\n\n\t// Internal methods\n\n\t/**\n\t * @access private\n\t */\n\tasync _lockOperation(method, filepath) {\n\t\treturn /* await */ lockfile[method](\n\t\t\tfilepath,\n\t\t\t{\n\t\t\t\trealpath: false,\n\t\t\t\tlockfilePath: filepath\n\t\t\t}\n\t\t);\n\t}\n};\n",
     "static": true,
     "longname": "/Users/ky/Documents/local/morvren-achronos/code/fs-atomic-data-store/src/Lock.js",
     "access": "public",
@@ -837,36 +575,18 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 59,
-    "kind": "typedef",
-    "name": "LockInfo",
-    "memberof": "src/Lock.js",
-    "static": true,
-    "longname": "src/Lock.js~LockInfo",
-    "access": "public",
-    "description": "",
-    "lineNumber": 10,
-    "type": {
-      "types": [
-        "Array<{collection: ?string, identifier: ?string, type: \"record\"|\"collection\"|\"store\", ours: ?bool}>"
-      ],
-      "optional": false,
-      "name": "LockInfo"
-    }
-  },
-  {
-    "__docId__": 60,
+    "__docId__": 49,
     "kind": "variable",
-    "name": "STORE_FILENAME",
+    "name": "STORE_LOCK",
     "memberof": "src/Lock.js",
     "static": true,
-    "longname": "src/Lock.js~STORE_FILENAME",
+    "longname": "src/Lock.js~STORE_LOCK",
     "access": "private",
     "export": false,
     "importPath": "fs-atomic-data-store/src/Lock.js",
     "importStyle": null,
     "description": "",
-    "lineNumber": 16,
+    "lineNumber": 12,
     "type": {
       "types": [
         "string"
@@ -875,7 +595,7 @@
     "ignore": true
   },
   {
-    "__docId__": 61,
+    "__docId__": 50,
     "kind": "class",
     "name": "Lock",
     "memberof": "src/Lock.js",
@@ -885,12 +605,12 @@
     "export": true,
     "importPath": "fs-atomic-data-store/src/Lock.js",
     "importStyle": "Lock",
-    "description": "Lock resources for exclusive access\n\nDo not instantiate this class directly, use methods from class {Store}",
-    "lineNumber": 29,
+    "description": "Lock resources for exclusive access\n\nDo not instantiate this class directly, use method {@link Store.lock}.",
+    "lineNumber": 19,
     "interface": false
   },
   {
-    "__docId__": 62,
+    "__docId__": 51,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/Lock.js~Lock",
@@ -899,8 +619,14 @@
     "static": false,
     "longname": "src/Lock.js~Lock#constructor",
     "access": "public",
-    "description": "Get locking instance",
-    "lineNumber": 38,
+    "description": "Get locking instance\n\nDo not instantiate this class directly, use method {@link Store.lock}.",
+    "lineNumber": 31,
+    "unknown": [
+      {
+        "tagName": "@internal",
+        "tagValue": ""
+      }
+    ],
     "params": [
       {
         "nullable": null,
@@ -945,7 +671,7 @@
     ]
   },
   {
-    "__docId__": 63,
+    "__docId__": 52,
     "kind": "member",
     "name": "_store",
     "memberof": "src/Lock.js~Lock",
@@ -953,7 +679,7 @@
     "longname": "src/Lock.js~Lock#_store",
     "access": "private",
     "description": "",
-    "lineNumber": 42,
+    "lineNumber": 35,
     "type": {
       "types": [
         "*"
@@ -961,7 +687,7 @@
     }
   },
   {
-    "__docId__": 64,
+    "__docId__": 53,
     "kind": "member",
     "name": "_options",
     "memberof": "src/Lock.js~Lock",
@@ -969,7 +695,7 @@
     "longname": "src/Lock.js~Lock#_options",
     "access": "private",
     "description": "",
-    "lineNumber": 46,
+    "lineNumber": 39,
     "type": {
       "types": [
         "{\"timeout\": *, \"wait\": *}"
@@ -977,7 +703,7 @@
     }
   },
   {
-    "__docId__": 65,
+    "__docId__": 54,
     "kind": "member",
     "name": "_locks",
     "memberof": "src/Lock.js~Lock",
@@ -985,7 +711,7 @@
     "longname": "src/Lock.js~Lock#_locks",
     "access": "private",
     "description": "",
-    "lineNumber": 53,
+    "lineNumber": 46,
     "type": {
       "types": [
         "{}"
@@ -993,7 +719,7 @@
     }
   },
   {
-    "__docId__": 66,
+    "__docId__": 55,
     "kind": "get",
     "name": "store",
     "memberof": "src/Lock.js~Lock",
@@ -1003,7 +729,7 @@
     "longname": "src/Lock.js~Lock#store",
     "access": "public",
     "description": "Store instance for this collection",
-    "lineNumber": 64,
+    "lineNumber": 57,
     "type": {
       "nullable": null,
       "types": [
@@ -1014,247 +740,7 @@
     }
   },
   {
-    "__docId__": 67,
-    "kind": "method",
-    "name": "filename",
-    "memberof": "src/Lock.js~Lock",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Lock.js~Lock#filename",
-    "access": "public",
-    "description": "Utility. Get filename for a lock\n\nFor a record lock, pass string collection and identifier.\nFor a collection-level lock, pass string collection and null for identifier.\nFor a store-level lock, pass null for both parameters",
-    "lineNumber": 79,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{string} filename"
-      }
-    ],
-    "params": [
-      {
-        "nullable": true,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "collection",
-        "description": "collection name"
-      },
-      {
-        "nullable": true,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "identifier",
-        "description": "identifier name"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "string"
-      ],
-      "spread": false,
-      "description": "filename"
-    }
-  },
-  {
-    "__docId__": 68,
-    "kind": "method",
-    "name": "parseFilename",
-    "memberof": "src/Lock.js~Lock",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Lock.js~Lock#parseFilename",
-    "access": "public",
-    "description": "Utility. Get lock info from lock filename",
-    "lineNumber": 95,
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "filename",
-        "description": "lock filename"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "LockInfo"
-      ],
-      "spread": false,
-      "description": "lock info"
-    }
-  },
-  {
-    "__docId__": 69,
-    "kind": "method",
-    "name": "calcRetries",
-    "memberof": "src/Lock.js~Lock",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Lock.js~Lock#calcRetries",
-    "access": "public",
-    "description": "Utility. Return array of retry delay times",
-    "lineNumber": 131,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{array} retry timer values, can be passed to setTimeout"
-      }
-    ],
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "number"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "timeout",
-        "description": "maximum retry delay time in milliseconds"
-      },
-      {
-        "nullable": null,
-        "types": [
-          "number"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "wait",
-        "description": "minimum delay before first retry, in milliseconds"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "array"
-      ],
-      "spread": false,
-      "description": "retry timer values, can be passed to setTimeout"
-    }
-  },
-  {
-    "__docId__": 70,
-    "kind": "method",
-    "name": "runWithRetry",
-    "memberof": "src/Lock.js~Lock",
-    "generator": false,
-    "async": true,
-    "static": false,
-    "longname": "src/Lock.js~Lock#runWithRetry",
-    "access": "public",
-    "description": "Utility. Perform an operation and retry it if first attempt(s) fail",
-    "lineNumber": 154,
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "function"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "operation",
-        "description": "Signature: `function(resolve, reject, retry, tryCount): Promise<void>`"
-      },
-      {
-        "nullable": null,
-        "types": [
-          "function"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "onTimeout",
-        "description": "On timeout, operation promise is rejected with value returned by this function"
-      },
-      {
-        "nullable": null,
-        "types": [
-          "object"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "options",
-        "description": ""
-      },
-      {
-        "nullable": null,
-        "types": [
-          "number"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "options.timeout",
-        "description": "max retry time in milliseconds, default is as provided to Lock constructor"
-      },
-      {
-        "nullable": null,
-        "types": [
-          "number"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "options.wait",
-        "description": "min time to wait before first retry, default is as provided to Lock constructor"
-      }
-    ],
-    "return": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 71,
-    "kind": "method",
-    "name": "dir",
-    "memberof": "src/Lock.js~Lock",
-    "generator": false,
-    "async": true,
-    "static": false,
-    "longname": "src/Lock.js~Lock#dir",
-    "access": "public",
-    "description": "Utility. Get directory path for locks\n\nDirectory is created if it doesn't exist.",
-    "lineNumber": 182,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{Promise<string>} dirpath"
-      }
-    ],
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "bool"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "create",
-        "description": "true to create directory if it does not exist"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "Promise<string>"
-      ],
-      "spread": false,
-      "description": "dirpath"
-    }
-  },
-  {
-    "__docId__": 72,
+    "__docId__": 56,
     "kind": "method",
     "name": "lock",
     "memberof": "src/Lock.js~Lock",
@@ -1263,8 +749,8 @@
     "static": false,
     "longname": "src/Lock.js~Lock#lock",
     "access": "public",
-    "description": "Attempt to take an exclusive lock\n\nIf the lock is free, it will be taken by this instance.\nIf the lock is already held by this instance, calling {lock} again will resolve ok.\nIf the lock is held by another instance or process, rejects with code \"ELOCKED\" and lockType \"record\".\nIf the collection is locked (by this or any other instance), rejects with code \"ELOCKED\" and lockType \"collection\".\nIf the store is locked (by this or any other instance), rejects with code \"ELOCKED\" and lockType \"store\".",
-    "lineNumber": 205,
+    "description": "Attempt to take an exclusive lock\n\nIf the lock is free, it will be taken by this instance.\nIf the lock is already held by this instance, calling {lock} again will resolve ok.\nIf the lock is held by another instance or process, rejects with code \"ELOCKED\" and lockType \"record\".\nIf the store is locked (by this or any other instance), rejects with code \"ELOCKED\" and lockType \"store\".",
+    "lineNumber": 78,
     "unknown": [
       {
         "tagName": "@returns",
@@ -1273,24 +759,14 @@
     ],
     "params": [
       {
-        "nullable": true,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "collection",
-        "description": "collection name, or null for store-level lock"
-      },
-      {
-        "nullable": true,
+        "nullable": null,
         "types": [
           "string"
         ],
         "spread": false,
         "optional": false,
         "name": "identifier",
-        "description": "record identifier, or null for collection-level lock"
+        "description": "record identifier, or special token \"@store\" for store-level lock"
       },
       {
         "nullable": null,
@@ -1333,7 +809,7 @@
     }
   },
   {
-    "__docId__": 73,
+    "__docId__": 57,
     "kind": "method",
     "name": "unlock",
     "memberof": "src/Lock.js~Lock",
@@ -1343,7 +819,7 @@
     "longname": "src/Lock.js~Lock#unlock",
     "access": "public",
     "description": "Release a lock held by this instance\n\nIf lock is not held by this instance, rejects with code \"ENOTACQUIRED\".\nIf lock has been compromised, rejects with code \"ECOMPROMISED\".",
-    "lineNumber": 282,
+    "lineNumber": 143,
     "unknown": [
       {
         "tagName": "@returns",
@@ -1352,24 +828,14 @@
     ],
     "params": [
       {
-        "nullable": true,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "collection",
-        "description": "collection name, or null for store-level lock"
-      },
-      {
-        "nullable": true,
+        "nullable": null,
         "types": [
           "string"
         ],
         "spread": false,
         "optional": false,
         "name": "identifier",
-        "description": "record identifier, or null for collection-level lock"
+        "description": "record identifier, or special token \"@store\" for store-level lock"
       }
     ],
     "return": {
@@ -1382,7 +848,7 @@
     }
   },
   {
-    "__docId__": 74,
+    "__docId__": 58,
     "kind": "method",
     "name": "unlockAll",
     "memberof": "src/Lock.js~Lock",
@@ -1392,7 +858,7 @@
     "longname": "src/Lock.js~Lock#unlockAll",
     "access": "public",
     "description": "Release all locks held by this instance",
-    "lineNumber": 318,
+    "lineNumber": 180,
     "unknown": [
       {
         "tagName": "@returns",
@@ -1410,7 +876,7 @@
     "params": []
   },
   {
-    "__docId__": 75,
+    "__docId__": 59,
     "kind": "method",
     "name": "list",
     "memberof": "src/Lock.js~Lock",
@@ -1420,7 +886,7 @@
     "longname": "src/Lock.js~Lock#list",
     "access": "public",
     "description": "List locks currently held by this instance",
-    "lineNumber": 331,
+    "lineNumber": 193,
     "return": {
       "nullable": null,
       "types": [
@@ -1432,7 +898,7 @@
     "params": []
   },
   {
-    "__docId__": 76,
+    "__docId__": 60,
     "kind": "method",
     "name": "listGlobal",
     "memberof": "src/Lock.js~Lock",
@@ -1442,11 +908,11 @@
     "longname": "src/Lock.js~Lock#listGlobal",
     "access": "public",
     "description": "List locks currently held by all actors (all processes, all instances)",
-    "lineNumber": 357,
+    "lineNumber": 204,
     "return": {
       "nullable": null,
       "types": [
-        "LockInfo[]"
+        "Promise<string>"
       ],
       "spread": false,
       "description": "held locks"
@@ -1454,46 +920,7 @@
     "params": []
   },
   {
-    "__docId__": 77,
-    "kind": "method",
-    "name": "lockCollection",
-    "memberof": "src/Lock.js~Lock",
-    "generator": false,
-    "async": true,
-    "static": false,
-    "longname": "src/Lock.js~Lock#lockCollection",
-    "access": "public",
-    "description": "Attempt to take a collection-level lock (lock an entire collection)",
-    "lineNumber": 397,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{Promise<void>}"
-      }
-    ],
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "collection",
-        "description": "collection name"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "Promise<void>"
-      ],
-      "spread": false,
-      "description": ""
-    }
-  },
-  {
-    "__docId__": 78,
+    "__docId__": 61,
     "kind": "method",
     "name": "lockStore",
     "memberof": "src/Lock.js~Lock",
@@ -1503,7 +930,7 @@
     "longname": "src/Lock.js~Lock#lockStore",
     "access": "public",
     "description": "Attempt to take a store-level lock (lock the entire store)",
-    "lineNumber": 406,
+    "lineNumber": 218,
     "unknown": [
       {
         "tagName": "@returns",
@@ -1521,46 +948,7 @@
     "params": []
   },
   {
-    "__docId__": 79,
-    "kind": "method",
-    "name": "unlockCollection",
-    "memberof": "src/Lock.js~Lock",
-    "generator": false,
-    "async": true,
-    "static": false,
-    "longname": "src/Lock.js~Lock#unlockCollection",
-    "access": "public",
-    "description": "Release a held colection-level lock",
-    "lineNumber": 416,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{Promise<void>}"
-      }
-    ],
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "collection",
-        "description": "collection name"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "Promise<void>"
-      ],
-      "spread": false,
-      "description": ""
-    }
-  },
-  {
-    "__docId__": 80,
+    "__docId__": 62,
     "kind": "method",
     "name": "unlockStore",
     "memberof": "src/Lock.js~Lock",
@@ -1570,7 +958,7 @@
     "longname": "src/Lock.js~Lock#unlockStore",
     "access": "public",
     "description": "Release held store-level lock",
-    "lineNumber": 423,
+    "lineNumber": 225,
     "params": [],
     "return": {
       "types": [
@@ -1579,17 +967,17 @@
     }
   },
   {
-    "__docId__": 81,
+    "__docId__": 63,
     "kind": "method",
     "name": "_lockOperation",
     "memberof": "src/Lock.js~Lock",
     "generator": false,
-    "async": false,
+    "async": true,
     "static": false,
     "longname": "src/Lock.js~Lock#_lockOperation",
     "access": "private",
     "description": "",
-    "lineNumber": 433,
+    "lineNumber": 235,
     "params": [
       {
         "name": "method",
@@ -1611,32 +999,10 @@
     }
   },
   {
-    "__docId__": 82,
-    "kind": "method",
-    "name": "_sortLockList",
-    "memberof": "src/Lock.js~Lock",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Lock.js~Lock#_sortLockList",
-    "access": "private",
-    "description": "",
-    "lineNumber": 446,
-    "params": [
-      {
-        "name": "locks",
-        "types": [
-          "*"
-        ]
-      }
-    ],
-    "return": null
-  },
-  {
-    "__docId__": 83,
+    "__docId__": 64,
     "kind": "file",
     "name": "src/Record.js",
-    "content": "/**\n * class Record\n */\n\n // Libraries\n const stream = require('stream');\n\n/**\n * Interact with a record\n *\n * Do not instantiate this class directly, use methods from class {Store}\n */\nmodule.exports = class Record {\n\t/**\n\t * Get record interaction instance\n\t *\n\t * @param {Store} store - object\n\t * @param {Collection} collection - object\n\t * @param {string} identifier - record identifier\n\t */\n\tconstructor(store, collection, identifier) {\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._store = store;\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._col = collection;\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._id = identifier;\n\t}\n\n\n\t// Utility methods\n\n\t/**\n\t * Store instance for this record\n\t *\n\t * @type {Store}\n\t */\n\tget store() {\n\t\treturn this._store;\n\t}\n\n\t/**\n\t * Collection instance for this record\n\t *\n\t * @type {Collection}\n\t */\n\tget collection() {\n\t\treturn this._col;\n\t}\n\n\t/**\n\t * Identifier for this record\n\t *\n\t * @type {string}\n\t */\n\tget identifier() {\n\t\treturn this._id;\n\t}\n\n\t/**\n\t * Return hex-encoded 32-bit unsigned integer hash of record identifier\n\t *\n\t * Based on npm module string-hash (https://github.com/darkskyapp/string-hash) by The Dark Sky Company, LLC\n\t * That code is licensed under CC0-1.0\n\t *\n\t * @return {string} 8-character hex encoding of hash\n\t */\n\tgenerateHash() {\n\t\tlet\n\t\t\thash = 5381,\n\t\t\tid = this.identifier,\n\t\t\ti = id.length\n\t\t;\n\t\twhile(i) {\n\t\t\thash = (hash * 33) ^ id.charCodeAt(--i);\n\t\t}\n\t\thash = (hash >>> 0).toString(16);\n\t\tif (hash.length < 8) {\n\t\t\thash = '0'.repeat(8 - hash.length) + hash;\n\t\t}\n\t\treturn hash;\n\t}\n\n\t/**\n\t * Get directory path of record\n\t *\n\t * Directory is created if it doesn't exist.\n\t *\n\t * @param {bool} create - true to create directory if it does not exist\n\t * @returns {Promise<string>} dirpath\n\t */\n\tasync dir(create = true) {\n\t\tlet\n\t\t\thash = this.generateHash(),\n\t\t\tdirParts = []\n\t\t;\n\t\tfor (let i = 0; i < 8; i += 2) {\n\t\t\tdirParts.push(hash.slice(i, i + 2));\n\t\t}\n\t\treturn this.collection.dir([...dirParts, this.identifier], create);\n\t}\n\n\t/**\n\t * Get file path of record part\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @param {bool} createDir - true to create directory if it does not exist\n\t * @returns {Promise<string>} filepath\n\t */\n\tasync filepath(part = null, createDir = true) {\n\t\treturn this.store.path.join(\n\t\t\tawait this.dir(createDir),\n\t\t\tpart || this.store.option('defaultPart')\n\t\t);\n\t}\n\n\n\t// Data operation methods\n\n\t/**\n\t * Get list of record parts\n\t *\n\t * @returns {Promise<array>} partnames\n\t */\n\tasync listParts() {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tfs = this.store.fs\n\t\t;\n\t\treturn new Promise((resolve, reject) => {\n\t\t\tfs.readdir(\n\t\t\t\tdir,\n\t\t\t\t{\n\t\t\t\t\twithFileTypes: true\n\t\t\t\t},\n\t\t\t\t(err, entries) => {\n\t\t\t\t\tif (err) {\n\t\t\t\t\t\tif (err.code == 'ENOENT') {\n\t\t\t\t\t\t\tresolve([]);\n\t\t\t\t\t\t}\n\t\t\t\t\t\treject(err);\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tlet files = [];\n\t\t\t\t\tfor (let ent of entries) {\n\t\t\t\t\t\tif (ent.isFile()) {\n\t\t\t\t\t\t\tfiles.push(ent.name);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tfiles.sort();\n\t\t\t\t\tresolve(files);\n\t\t\t\t}\n\t\t\t);\n\t\t});\n\t}\n\n\t/**\n\t * Get file stat data for multiple record parts\n\t *\n\t * @param {array} parts - part names to remove\n\t * @returns {Promise<object>} results. Property name is part name. Property value is {fs.Stats}\n\t */\n\tasync statMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tpath = this.store.path,\n\t\t\tfs  = this.store.fs\n\t\t;\n\t\tif (!(parts instanceof Array)) {\n\t\t\tparts = Object.keys(parts);\n\t\t}\n\t\tlet promises = [];\n\t\tlet results = {};\n\t\tfor (let part of parts) {\n\t\t\tpromises.push(new Promise(async (resolve, reject) => {\n\t\t\t\tfs.stat(\n\t\t\t\t\tpath.join(dir, part),\n\t\t\t\t\t(err, stat) => {\n\t\t\t\t\t\tif (err) {\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tresults[part] = stat;\n\t\t\t\t\t\tresolve();\n\t\t\t\t\t}\n\t\t\t\t);\n\t\t\t}));\n\t\t}\n\t\tawait Promise.all(promises);\n\t\treturn results;\n\t}\n\n\t/**\n\t * Read multiple record parts\n\t *\n\t * @param {(array|object} parts - {array} of part names to read, each is returned in Buffer. Or, {object} of part names and handling instructions:\n\t * @param {bool false} parts.__partname__ - return content in Buffer\n\t * @param {bool true} parts.__partname__ - return ReadStream\n\t * @param {stream.Writable} parts.__partname__ - pipe part content to this stream\n\t * @returns {Promise<object>} results. Property name is part name. Property value is {Buffer} or {fs.ReadStream} or {bool true}\n\t */\n\tasync readMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tpath = this.store.path,\n\t\t\tfs  = this.store.fs\n\t\t;\n\t\tif (Array.isArray(parts)) {\n\t\t\tlet p = {};\n\t\t\tfor (let part of parts) {\n\t\t\t\tp[part] = false;\n\t\t\t}\n\t\t\tparts = p;\n\t\t}\n\t\tlet promises = [];\n\t\tlet results = {};\n\t\tfor (let part in parts) {\n\t\t\tlet filepath = path.join(dir, part);\n\t\t\tif (parts[part] === true) {\n\t\t\t\tresults[part] = fs.createReadStream(filepath);\n\t\t\t}\n\t\t\telse if (parts[part] instanceof stream.Writable) {\n\t\t\t\tpromises.push(new Promise((resolve, reject) => {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tlet reader = fs.createReadStream(filepath);\n\t\t\t\t\t\treader.on('error', (err) => {\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t});\n\t\t\t\t\t\t/* readers have 'end', writers have 'finish' */\n\t\t\t\t\t\treader.on('end', () => {\n\t\t\t\t\t\t\tresolve();\n\t\t\t\t\t\t});\n\t\t\t\t\t\treader.pipe(parts[part]);\n\t\t\t\t\t\tresults[part] = true;\n\t\t\t\t\t}\n\t\t\t\t\tcatch (err) {\n\t\t\t\t\t\treject(err);\n\t\t\t\t\t}\n\t\t\t\t}));\n\t\t\t}\n\t\t\telse {\n\t\t\t\tpromises.push(new Promise((resolve, reject) => {\n\t\t\t\t\tfs.readFile(\n\t\t\t\t\t\tfilepath,\n\t\t\t\t\t\t(err, content) => {\n\t\t\t\t\t\t\tif (err) {\n\t\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tresults[part] = content;\n\t\t\t\t\t\t\tresolve();\n\t\t\t\t\t\t}\n\t\t\t\t\t);\n\t\t\t\t}));\n\t\t\t}\n\t\t}\n\t\tawait Promise.all(promises);\n\t\treturn results;\n\t}\n\n\t/**\n\t * Write multiple record parts\n\t *\n\t * @param {object} parts - part names and contents to write. Each property is a part to write. Property name is part name. Property value specifies part contents\n\t * @param {(Buffer|string)} parts.__partname__ - contents to write\n\t * @param {stream.Readable} parts.__partname__ - pipe part contents from this stream\n\t * @param {bool true} parts.__partname__ - return {fs.WriteStream}\n\t * @returns {Promise<object>} results. Property name is part name. Property value is {bool true} or {fs.WriteStream}\n\t */\n\tasync writeMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(),\n\t\t\tpath = this.store.path,\n\t\t\tfs  = this.store.fs,\n\t\t\tfileMode = this.store.option('fileMode'),\n\t\t\tflags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_SYNC\n\t\t;\n\t\tlet promises = [];\n\t\tlet results = {};\n\t\tfor (let part in parts) {\n\t\t\tlet filepath = path.join(dir, part);\n\t\t\tif (parts[part] === true) {\n\t\t\t\tresults[part] = fs.createWriteStream(\n\t\t\t\t\tfilepath,\n\t\t\t\t\t{\n\t\t\t\t\t\tflags: flags,\n\t\t\t\t\t\tmode: fileMode\n\t\t\t\t\t}\n\t\t\t\t);\n\t\t\t}\n\t\t\telse if (parts[part] instanceof stream.Readable) {\n\t\t\t\tpromises.push(new Promise((resolve, reject) => {\n\t\t\t\t\tlet writer = fs.createWriteStream(\n\t\t\t\t\t\tfilepath,\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tflags: flags,\n\t\t\t\t\t\t\tmode: fileMode\n\t\t\t\t\t\t}\n\t\t\t\t\t);\n\t\t\t\t\twriter.on('error', (err) => {\n\t\t\t\t\t\treject(err);\n\t\t\t\t\t});\n\t\t\t\t\t/* readers have 'end', writers have 'finish' */\n\t\t\t\t\twriter.on('finish', () => {\n\t\t\t\t\t\tresolve();\n\t\t\t\t\t});\n\t\t\t\t\tparts[part].pipe(writer);\n\t\t\t\t\tresults[part] = true;\n\t\t\t\t}));\n\t\t\t}\n\t\t\telse {\n\t\t\t\tpromises.push(new Promise((resolve, reject) => {\n\t\t\t\t\tfs.writeFile(\n\t\t\t\t\t\tfilepath,\n\t\t\t\t\t\tparts[part],\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tflags: flags,\n\t\t\t\t\t\t\tmode: fileMode\n\t\t\t\t\t\t},\n\t\t\t\t\t\t(err) => {\n\t\t\t\t\t\t\tif (err) {\n\t\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tresults[part] = true;\n\t\t\t\t\t\t\tresolve();\n\t\t\t\t\t\t}\n\t\t\t\t\t);\n\t\t\t\t}));\n\t\t\t}\n\t\t}\n\t\tawait Promise.all(promises);\n\t\treturn results;\n\t}\n\n\t/**\n\t * Delete multiple record parts\n\t *\n\t * Parts that do not exist are ignored (not treated as an error).\n\t *\n\t * @param {array} parts - part names to remove\n\t * @returns {Promise<array>} part names deleted\n\t */\n\tasync deleteMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tpath = this.store.path,\n\t\t\tfs  = this.store.fs\n\t\t;\n\t\tif (!(parts instanceof Array)) {\n\t\t\tparts = Object.keys(parts);\n\t\t}\n\t\tlet promises = [];\n\t\tlet results = [];\n\t\tfor (let part of parts) {\n\t\t\tpromises.push(new Promise(async (resolve, reject) => {\n\t\t\t\tfs.unlink(\n\t\t\t\t\tpath.join(dir, part),\n\t\t\t\t\t(err) => {\n\t\t\t\t\t\tif (err) {\n\t\t\t\t\t\t\tif (err.code == 'ENOENT') {\n\t\t\t\t\t\t\t\tresolve();\n\t\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tresults.push(part);\n\t\t\t\t\t\tresolve();\n\t\t\t\t\t}\n\t\t\t\t);\n\t\t\t}));\n\t\t}\n\t\tresults.sort();\n\t\tpromises.push((async () => {\n\t\t\tlet removeDir = dir;\n\t\t\tfor (let i = 0; i < 6; i++) {\n\t\t\t\tawait new Promise((resolve) => {\n\t\t\t\t\tfs.rmdir(removeDir, (err) => {\n\t\t\t\t\t\tif (err) {\n\t\t\t\t\t\t\ti = 6;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tresolve();\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t\tremoveDir = path.dirname(removeDir);\n\t\t\t}\n\t\t})());\n\t\tawait Promise.all(promises);\n\t\treturn results;\n\t}\n\n\t/**\n\t * Overwrite contents of multiple record parts\n\t *\n\t * @param {array} parts - part names to shred\n\t * @returns {Promise<void>}\n\t */\n\tasync shredMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tpath = this.store.path,\n\t\t\tfs  = this.store.fs,\n\t\t\tshred = this.store.option('shredFunction'),\n\t\t\tfileMode = this.store.option('fileMode'),\n\t\t\tflags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_SYNC\n\t\t;\n\t\tif (!(parts instanceof Array)) {\n\t\t\tparts = Object.keys(parts);\n\t\t}\n\t\tlet promises = [];\n\t\tfor (let part of parts) {\n\t\t\tpromises.push(new Promise(async (resolve, reject) => {\n\t\t\t\tlet filepath = path.join(dir, part);\n\t\t\t\tfs.stat(\n\t\t\t\t\tfilepath,\n\t\t\t\t\t(err, stat) => {\n\t\t\t\t\t\tif (err) {\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tlet bytesRemaining = stat.size;\n\t\t\t\t\t\tlet reader = new stream.Readable({\n\t\t\t\t\t\t\tautoDestroy: true,\n\t\t\t\t\t\t\tread(size) {\n\t\t\t\t\t\t\t\tlet go = true;\n\t\t\t\t\t\t\t\twhile(go && bytesRemaining) {\n\t\t\t\t\t\t\t\t\tif (bytesRemaining <= size) {\n\t\t\t\t\t\t\t\t\t\tsize = bytesRemaining;\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\tgo = this.push(shred(size));\n\t\t\t\t\t\t\t\t\tbytesRemaining -= size;\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\tif (bytesRemaining == 0) {\n\t\t\t\t\t\t\t\t\tthis.push(null);\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t\tlet writer = fs.createWriteStream(\n\t\t\t\t\t\t\tfilepath,\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\tflags: flags,\n\t\t\t\t\t\t\t\tmode: fileMode\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t);\n\t\t\t\t\t\twriter.on('error', (err) => {\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t});\n\t\t\t\t\t\twriter.on('finish', () => {\n\t\t\t\t\t\t\tresolve();\n\t\t\t\t\t\t});\n\t\t\t\t\t\treader.pipe(writer);\n\t\t\t\t\t}\n\t\t\t\t);\n\t\t\t}));\n\t\t}\n\t\treturn Promise.all(promises);\n\t}\n\n\n\t// Convenience methods\n\n\t/**\n\t * Return file stat data for part\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<fs.Stats>} stat results\n\t */\n\tasync statPart(part = null) {\n\t\treturn this._singlePartOperation('statMultipleParts', part, false);\n\t}\n\n\t/**\n\t * Read a record part into a buffer\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<Buffer>} content\n\t */\n\tasync readBuffer(part = null) {\n\t\treturn this._singlePartOperation('readMultipleParts', part, false);\n\t}\n\n\t/**\n\t * Write a record part from a buffer\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @param {(Buffer|string)} content - content to write to part\n\t * @returns {Promise<void>}\n\t */\n\tasync writeBuffer(part, content) {\n\t\treturn this._singlePartOperation('writeMultipleParts', part, content);\n\t}\n\n\t/**\n\t * Get a stream reader for a record part\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<fs.ReadStream>}\n\t */\n\tasync readStream(part = null) {\n\t\treturn this._singlePartOperation('readMultipleParts', part, true);\n\t}\n\n\t/**\n\t * Get a stream writer for a record part\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<fs.WriteStream>}\n\t */\n\tasync writeStream(part = null) {\n\t\treturn this._singlePartOperation('writeMultipleParts', part, true);\n\t}\n\n\t/**\n\t * Delete a record part\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<bool>} true if part existed and was deleted, false if it did not exist\n\t */\n\tasync deletePart(part = null) {\n\t\treturn this._singlePartOperation('deleteMultipleParts', part, null);\n\t}\n\n\t/**\n\t * Delete entire record (delete all record parts)\n\t *\n\t * @returns {Promise<array>} removed part names\n\t */\n\tasync deleteAll() {\n\t\treturn this.deleteMultipleParts(await this.listParts());\n\t}\n\n\t/**\n\t * Overwrite part contents\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<void>}\n\t */\n\tasync shredPart(part = null) {\n\t\treturn this._singlePartOperation('shredMultipleParts', part, null);\n\t}\n\n\n\t// Internal methods\n\n\t/**\n\t * Convert convenience single-part operation into multiple-part operation\n\t * @access private\n\t */\n\tasync _singlePartOperation(method, part, value) {\n\t\tpart = part || this.store.option('defaultPart');\n\t\tlet parts = {};\n\t\tparts[part] = value;\n\t\tparts = await this[method](parts);\n\t\tif (Array.isArray(parts)) {\n\t\t\treturn parts.length ? true : false;\n\t\t}\n\t\tif (typeof parts == 'object') {\n\t\t\treturn parts[part];\n\t\t}\n\t\treturn null;\n\t}\n};\n",
+    "content": "/**\n * class Record\n */\n\n// Libraries\nconst stream = require('stream');\n\n// Constants\nconst\n\tHASH_SIZE = 8,\n\tRECORD_DEPTH = 6, // records/01/02/03/04/testrec\n\tCOLLECTION_DEPTH = 7 // collections/colname/\n;\n\n/**\n * Interact with a record\n *\n * Do not instantiate this class directly, use method {@link Store.record}\n */\nmodule.exports = class Record {\n\t/**\n\t * Get record interaction instance\n\t *\n\t * Do not instantiate this class directly, use method {@link Store.record}\n\t *\n\t * @param {Store} store - object\n\t * @param {Collection} collection - object\n\t * @param {string} identifier - record identifier\n\t * @internal\n\t */\n\tconstructor(store, identifier) {\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._store = store;\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._id = identifier;\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._dirParts = null;\n\t}\n\n\n\t// Utility methods\n\n\t/**\n\t * Store instance for this record\n\t *\n\t * @type {Store}\n\t */\n\tget store() {\n\t\treturn this._store;\n\t}\n\n\t/**\n\t * Identifier for this record\n\t *\n\t * @type {string}\n\t */\n\tget identifier() {\n\t\treturn this._id;\n\t}\n\n\t/**\n\t * Return hex-encoded 32-bit unsigned integer hash of record identifier\n\t *\n\t * Utility function, normally there is no need to call this directly.\n\t *\n\t * Based on npm module string-hash (https://github.com/darkskyapp/string-hash) by The Dark Sky Company, LLC\n\t * That code is licensed under CC0-1.0\n\t *\n\t * @return {string} 8-character hex encoding of hash\n\t */\n\tgenerateHash() {\n\t\tlet\n\t\t\thash = 5381,\n\t\t\tid = this.identifier,\n\t\t\ti = id.length\n\t\t;\n\t\twhile(i) {\n\t\t\thash = (hash * 33) ^ id.charCodeAt(--i);\n\t\t}\n\t\thash = (hash >>> 0).toString(16);\n\t\tif (hash.length < HASH_SIZE) {\n\t\t\thash = '0'.repeat(HASH_SIZE - hash.length) + hash;\n\t\t}\n\t\treturn hash;\n\t}\n\n\t/**\n\t * Get directory path of record\n\t *\n\t * Utility function, normally there is no need to call this directly.\n\t *\n\t * @param {bool} create - true to create directory if it does not exist\n\t * @returns {Promise<string>} dirpath\n\t */\n\tasync dir(create) {\n\t\treturn /* await */ this.store.dir(\n\t\t\t[\n\t\t\t\tthis.store.option('recordsDir'),\n\t\t\t\t...this._getDirParts(),\n\t\t\t\tthis.identifier\n\t\t\t],\n\t\t\tcreate\n\t\t);\n\t}\n\n\n\t// Data operation methods\n\n\t/**\n\t * Get list of record parts\n\t *\n\t * @returns {Promise<array>} part names\n\t */\n\tasync listParts() {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tfsop = this.store.fsop\n\t\t;\n\t\tlet entries;\n\t\ttry {\n\t\t\tentries = await fsop.readdir(\n\t\t\t\tdir,\n\t\t\t\t{\n\t\t\t\t\twithFileTypes: true\n\t\t\t\t},\n\t\t\t);\n\t\t}\n\t\tcatch (err) {\n\t\t\tif (err.code == 'ENOENT') {\n\t\t\t\treturn [];\n\t\t\t}\n\t\t\tthrow err;\n\t\t}\n\t\tlet results = [];\n\t\tfor (let ent of entries) {\n\t\t\tif (ent.isFile() && ent.name.substring(1, 1) != '@') {\n\t\t\t\tresults.push(ent.name);\n\t\t\t}\n\t\t}\n\t\tresults.sort();\n\t\treturn results;\n\t}\n\n\t/**\n\t * Get file stat data for multiple record parts\n\t *\n\t * @param {array} parts - part names to look up\n\t * @returns {Promise<object>} results. Property name is part name. Property value is {fs.Stats}\n\t */\n\tasync statMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tpath = this.store.path,\n\t\t\tfsop  = this.store.fsop\n\t\t;\n\t\tif (!(parts instanceof Array)) {\n\t\t\tparts = Object.keys(parts);\n\t\t}\n\t\tlet promises = [];\n\t\tlet results = {};\n\t\tfor (let part of parts) {\n\t\t\tpromises.push(fsop.stat(path.join(dir, part)).then((stat) => {\n\t\t\t\tresults[part] = stat;\n\t\t\t}));\n\t\t}\n\t\tawait Promise.all(promises);\n\t\treturn results;\n\t}\n\n\t/**\n\t * Read multiple record parts\n\t *\n\t * @param {(array|object} parts - {array} of part names to read, each is returned in Buffer. Or, {object} of part names and handling instructions:\n\t * @param {bool false} parts.__partname__ - return content in Buffer\n\t * @param {bool true} parts.__partname__ - return ReadStream\n\t * @param {stream.Writable} parts.__partname__ - pipe part content to this stream\n\t * @returns {Promise<object>} results. Property name is part name. Property value is {Buffer} or {fs.ReadStream} or {bool true}\n\t */\n\tasync readMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tpath = this.store.path,\n\t\t\tfs  = this.store.fs,\n\t\t\tfsop  = this.store.fsop\n\t\t;\n\t\tif (Array.isArray(parts)) {\n\t\t\tlet p = {};\n\t\t\tfor (let part of parts) {\n\t\t\t\tp[part] = false;\n\t\t\t}\n\t\t\tparts = p;\n\t\t}\n\t\tlet promises = [];\n\t\tlet results = {};\n\t\tfor (let part in parts) {\n\t\t\tlet filepath = path.join(dir, part);\n\t\t\tif (parts[part] === true) {\n\t\t\t\tresults[part] = fs.createReadStream(filepath);\n\t\t\t}\n\t\t\telse if (parts[part] instanceof stream.Writable) {\n\t\t\t\tpromises.push(new Promise((resolve, reject) => {\n\t\t\t\t\ttry {\n\t\t\t\t\t\tlet reader = fs.createReadStream(filepath);\n\t\t\t\t\t\treader.on('error', (err) => {\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t});\n\t\t\t\t\t\t/* readers have 'end', writers have 'finish' */\n\t\t\t\t\t\treader.on('end', () => {\n\t\t\t\t\t\t\tresults[part] = true;\n\t\t\t\t\t\t\tresolve();\n\t\t\t\t\t\t});\n\t\t\t\t\t\treader.pipe(parts[part]);\n\t\t\t\t\t}\n\t\t\t\t\tcatch (err) {\n\t\t\t\t\t\treject(err);\n\t\t\t\t\t}\n\t\t\t\t}));\n\t\t\t}\n\t\t\telse {\n\t\t\t\tpromises.push((async () => {\n\t\t\t\t\tresults[part] = await fsop.readFile(filepath);\n\t\t\t\t})());\n\t\t\t}\n\t\t}\n\t\tawait Promise.all(promises);\n\t\treturn results;\n\t}\n\n\t/**\n\t * Write multiple record parts\n\t *\n\t * @param {object} parts - part names and contents to write. Each property is a part to write. Property name is part name. Property value specifies part contents\n\t * @param {(Buffer|string)} parts.__partname__ - contents to write\n\t * @param {stream.Readable} parts.__partname__ - pipe part contents from this stream\n\t * @param {bool true} parts.__partname__ - return {fs.WriteStream}\n\t * @returns {Promise<object>} results. Property name is part name. Property value is {bool true} or {fs.WriteStream}\n\t */\n\tasync writeMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(true),\n\t\t\tpath = this.store.path,\n\t\t\tfs  = this.store.fs,\n\t\t\tfsop  = this.store.fsop,\n\t\t\tfileMode = this.store.option('fileMode'),\n\t\t\tflags = fs.constants.O_WRONLY | fs.constants.O_TRUNC | fs.constants.O_CREAT\n\t\t;\n\t\tlet promises = [];\n\t\tlet results = {};\n\t\tfor (let part in parts) {\n\t\t\tlet filepath = path.join(dir, part);\n\t\t\tif (parts[part] === true) {\n\t\t\t\tresults[part] = fs.createWriteStream(\n\t\t\t\t\tfilepath,\n\t\t\t\t\t{\n\t\t\t\t\t\tflags: flags,\n\t\t\t\t\t\tmode: fileMode\n\t\t\t\t\t}\n\t\t\t\t);\n\t\t\t}\n\t\t\telse if (parts[part] instanceof stream.Readable) {\n\t\t\t\tpromises.push(new Promise((resolve, reject) => {\n\t\t\t\t\tlet writer = fs.createWriteStream(\n\t\t\t\t\t\tfilepath,\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tflags: flags,\n\t\t\t\t\t\t\tmode: fileMode\n\t\t\t\t\t\t}\n\t\t\t\t\t);\n\t\t\t\t\twriter.on('error', (err) => {\n\t\t\t\t\t\treject(err);\n\t\t\t\t\t});\n\t\t\t\t\t/* readers have 'end', writers have 'finish' */\n\t\t\t\t\twriter.on('finish', () => {\n\t\t\t\t\t\tresolve();\n\t\t\t\t\t});\n\t\t\t\t\tparts[part].pipe(writer);\n\t\t\t\t\tresults[part] = true;\n\t\t\t\t}));\n\t\t\t}\n\t\t\telse {\n\t\t\t\tpromises.push((async () => {\n\t\t\t\t\tlet fd;\n\t\t\t\t\ttry {\n\t\t\t\t\t\tfd = await fsop.open(filepath, flags, fileMode);\n\t\t\t\t\t\tawait fsop.writeFile(fd, parts[part]);\n\t\t\t\t\t\tawait fsop.fdatasync(fd);\n\t\t\t\t\t\tawait fsop.close(fd);\n\t\t\t\t\t}\n\t\t\t\t\tcatch (err) {\n\t\t\t\t\t\tif (fd) {\n\t\t\t\t\t\t\tfs.close(fd);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tthrow err;\n\t\t\t\t\t}\n\t\t\t\t\tresults[part] = true;\n\t\t\t\t})());\n\t\t\t}\n\t\t}\n\t\tawait Promise.all(promises);\n\t\treturn results;\n\t}\n\n\t/**\n\t * Delete multiple record parts\n\t *\n\t * Parts that do not exist are ignored (not treated as an error).\n\t *\n\t * @param {array} parts - part names to delete\n\t * @returns {Promise<array<string>>} parts deleted\n\t */\n\tasync deleteMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tpath = this.store.path,\n\t\t\tfsop  = this.store.fsop\n\t\t;\n\t\tif (!(parts instanceof Array)) {\n\t\t\tparts = Object.keys(parts);\n\t\t}\n\t\tlet promises = [];\n\t\tlet results = [];\n\t\tfor (let part of parts) {\n\t\t\tpromises.push((async () => {\n\t\t\t\ttry {\n\t\t\t\t\tawait fsop.unlink(path.join(dir, part));\n\t\t\t\t}\n\t\t\t\tcatch (err) {\n\t\t\t\t\tif (err.code == 'ENOENT') {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tthrow err;\n\t\t\t\t}\n\t\t\t\tresults.push(part);\n\t\t\t})());\n\t\t}\n\t\tawait Promise.all(promises);\n\t\tresults.sort();\n\t\treturn results;\n\t}\n\n\t/**\n\t * Delete multiple record parts and make contents unrecoverable\n\t *\n\t * Parts that do not exist are ignored (not treated as an error).\n\t *\n\t * @param {array} parts - part names to shred\n\t * @returns {Promise<array<string>>} parts shredded\n\t */\n\tasync shredMultipleParts(parts) {\n\t\tconst\n\t\t\tdir = await this.dir(false),\n\t\t\tpath = this.store.path,\n\t\t\tfs  = this.store.fs,\n\t\t\tfsop  = this.store.fsop,\n\t\t\tshred = this.store.option('shredFunction'),\n\t\t\tflags = fs.constants.O_WRONLY | fs.constants.O_APPEND,\n\t\t\tpassCount = this.store.option('shredPassCount')\n\t\t;\n\t\tif (!(parts instanceof Array)) {\n\t\t\tparts = Object.keys(parts);\n\t\t}\n\t\tlet promises = [];\n\t\tlet results = [];\n\t\tfor (let part of parts) {\n\t\t\tpromises.push((async () => {\n\t\t\t\tlet filepath = path.join(dir, part);\n\t\t\t\tlet stat;\n\t\t\t\ttry {\n\t\t\t\t\tstat = await fsop.stat(filepath);\n\t\t\t\t}\n\t\t\t\tcatch (err) {\n\t\t\t\t\tif (err.code == 'ENOENT') {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tthrow err;\n\t\t\t\t}\n\t\t\t\tlet newfilepath = path.join(dir, part + '.shred.' + Date.now().toString(16) + shred(8).toString('hex'));\n\t\t\t\tawait fsop.rename(filepath, newfilepath);\n\t\t\t\tlet fd = await fsop.open(newfilepath, flags);\n\t\t\t\tfor (let pass = 0; pass < passCount; pass++) {\n\t\t\t\t\tawait fsop.ftruncate(fd);\n\t\t\t\t\tlet bytesRemaining = stat.size;\n\t\t\t\t\twhile (bytesRemaining >= stat.blksize) {\n\t\t\t\t\t\tawait fsop.write(fd, shred(stat.blksize));\n\t\t\t\t\t\tbytesRemaining -= stat.blksize;\n\t\t\t\t\t}\n\t\t\t\t\tif (bytesRemaining > 0) {\n\t\t\t\t\t\tawait fsop.write(fd, shred(1024 * Math.ceil(bytesRemaining / 1024)));\n\t\t\t\t\t}\n\t\t\t\t\tawait fsop.fdatasync(fd);\n\t\t\t\t}\n\t\t\t\tawait fsop.ftruncate(fd);\n\t\t\t\tawait fsop.fsync(fd);\n\t\t\t\tawait fsop.close(fd);\n\t\t\t\tawait fsop.unlink(newfilepath);\n\t\t\t\tresults.push(part);\n\t\t\t})());\n\t\t}\n\t\tawait Promise.all(promises);\n\t\tresults.sort();\n\t\treturn results;\n\t}\n\n\t/**\n\t * Return collections this record is in\n\t *\n\t * @returns {Promise<array<string>>} collection names\n\t */\n\tasync listCollections() {\n\t\tconst\n\t\t\tfs = this.store.fs,\n\t\t\tfsop = this.store.fsop,\n\t\t\tmode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK\n\t\t;\n\t\tlet results = [];\n\t\tawait this._iterateCollections(\n\t\t\tawait this.store.collections(),\n\t\t\tasync (collection, dir) => {\n\t\t\t\ttry {\n\t\t\t\t\tawait fsop.access(dir, mode);\n\t\t\t\t\tresults.push(collection);\n\t\t\t\t}\n\t\t\t\tcatch (err) {\n\t\t\t\t\t/**/\n\t\t\t\t}\n\t\t\t}\n\t\t);\n\t\tresults.sort();\n\t\treturn results;\n\t}\n\n\t/**\n\t * Add record to multiple collections\n\t *\n\t * @param {array<string>} collections - collection names to add record to\n\t * @returns {Promise<array<string>>} collections added\n\t */\n\tasync addMultipleCollections(collections) {\n\t\tconst\n\t\t\tfs = this.store.fs,\n\t\t\tfsop = this.store.fsop,\n\t\t\tdirMode = this.store.option('dirMode'),\n\t\t\tmode = fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK\n\t\t;\n\t\tif (!(collections instanceof Array)) {\n\t\t\tcollections = Object.keys(collections);\n\t\t}\n\t\tlet results = [];\n\t\tawait this._iterateCollections(\n\t\t\tcollections,\n\t\t\tasync (collection, dir) => {\n\t\t\t\ttry {\n\t\t\t\t\tawait fsop.access(dir, mode);\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tcatch (err) {\n\t\t\t\t\t/**/\n\t\t\t\t}\n\t\t\t\ttry {\n\t\t\t\t\tawait fsop.mkdir(\n\t\t\t\t\t\tdir,\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\trecursive: true,\n\t\t\t\t\t\t\tmode: dirMode\n\t\t\t\t\t\t}\n\t\t\t\t\t);\n\t\t\t\t\tresults.push(collection);\n\t\t\t\t}\n\t\t\t\tcatch (err) {\n\t\t\t\t\tif (err.code != 'EEXIST') {\n\t\t\t\t\t\tthrow err;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t);\n\t\tresults.sort();\n\t\treturn results;\n\t}\n\n\t/**\n\t * Remove record from multiple collections\n\t *\n\t * Collections that the record does not belong to are ignored (not treated as an error).\n\t *\n\t * @param {array<string>} collections - collection names to remove record from\n\t * @returns {Promise<string>} collections removed\n\t */\n\tasync removeMultipleCollections(collections) {\n\t\tif (!(collections instanceof Array)) {\n\t\t\tcollections = Object.keys(collections);\n\t\t}\n\t\tlet results = [];\n\t\tawait this._iterateCollections(\n\t\t\tcollections,\n\t\t\tasync (collection, dir) => {\n\t\t\t\tif (await this._cleanupDirs(dir, COLLECTION_DEPTH) > 0) {\n\t\t\t\t\tresults.push(collection);\n\t\t\t\t}\n\t\t\t}\n\t\t);\n\t\tresults.sort();\n\t\treturn results;\n\t}\n\n\t/**\n\t * Delete entire record (delete all record parts and remove from all collections)\n\t *\n\t * @returns {Promise<void>}\n\t */\n\tasync deleteRecord() {\n\t\tawait this.removeAllCollections();\n\t\tawait this.deleteAllParts();\n\t\tawait this._cleanupDirs(await this.dir(false), RECORD_DEPTH);\n\t}\n\n\n\t// Convenience methods\n\n\t/**\n\t * Return file stat data for part\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<fs.Stats>} stat results\n\t */\n\tasync statPart(part = null) {\n\t\treturn /* await */ this._singlePartOperation('statMultipleParts', part, false);\n\t}\n\n\t/**\n\t * Read a record part into a buffer\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<Buffer>} content\n\t */\n\tasync readBuffer(part = null) {\n\t\treturn /* await */ this._singlePartOperation('readMultipleParts', part, false);\n\t}\n\n\t/**\n\t * Write a record part from a buffer\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @param {(Buffer|string)} content - content to write to part\n\t * @returns {Promise<void>}\n\t */\n\tasync writeBuffer(part, content) {\n\t\treturn /* await */ this._singlePartOperation('writeMultipleParts', part, content);\n\t}\n\n\t/**\n\t * Get a stream reader for a record part\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<fs.ReadStream>}\n\t */\n\tasync readStream(part = null) {\n\t\treturn /* await */ this._singlePartOperation('readMultipleParts', part, true);\n\t}\n\n\t/**\n\t * Get a stream writer for a record part\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<fs.WriteStream>}\n\t */\n\tasync writeStream(part = null) {\n\t\treturn /* await */ this._singlePartOperation('writeMultipleParts', part, true);\n\t}\n\n\t/**\n\t * Delete a record part\n\t *\n\t * Parts that do not exist are ignored (not treated as an error).\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<bool>} true if part existed and was deleted, false if it did not exist\n\t */\n\tasync deletePart(part = null) {\n\t\treturn /* await */ this._singlePartOperation('deleteMultipleParts', part, null);\n\t}\n\n\t/**\n\t * Delete all record parts\n\t *\n\t * @returns {Promise<array<string>>} parts deleted\n\t */\n\tasync deleteAllParts() {\n\t\treturn /* await */ this.deleteMultipleParts(await this.listParts());\n\t}\n\n\t/**\n\t * Delete a record part and make contents unrecoverable\n\t *\n\t * Parts that do not exist are ignored (not treated as an error).\n\t *\n\t * @param {?string} part - name of part, or null for default part\n\t * @returns {Promise<void>} true if part existed and was shredded, false if it did not exist\n\t */\n\tasync shredPart(part = null) {\n\t\treturn /* await */ this._singlePartOperation('shredMultipleParts', part, null);\n\t}\n\n\t/**\n\t * Add record to a collection\n\t *\n\t * @param {string} collection - name of collection\n\t * @returns {Promise<bool>} true if record was not in collection and was added, false record was already in collection\n\t */\n\tasync addCollection(collection) {\n\t\treturn /* await */ this._singlePartOperation('addMultipleCollections', collection, null);\n\t}\n\n\t/**\n\t * Remove record from a collection\n\t *\n\t * Collections that the record does not belong to are ignored (not treated as an error).\n\t *\n\t * @param {string} collection - name of collection\n\t * @returns {Promise<bool>} true if record was in collection and was removed, false record was not in collection\n\t */\n\tasync removeCollection(collection) {\n\t\treturn /* await */ this._singlePartOperation('removeMultipleCollections', collection, null);\n\t}\n\n\t/**\n\t * Remove record from all collections\n\t *\n\t * @returns {Promise<string>} collections removed\n\t */\n\tasync removeAllCollections() {\n\t\treturn /* await */ this.removeMultipleCollections(await this.listCollections());\n\t}\n\n\t/**\n\t * Set collections for this record\n\t *\n\t * Add record to/remove record from collections to match provided list.\n\t *\n\t * @param {array<string>} collections - collection names to add record to (record will be removed from others)\n\t * @returns {Promise<void>}\n\t */\n\tasync setCollections(collections) {\n\t\tlet oldCollections = await this.listCollections();\n\t\tlet add = collections.filter((v) => {\n\t\t\treturn !oldCollections.includes(v);\n\t\t});\n\t\tlet rem = oldCollections.filter((v) => {\n\t\t\treturn !collections.includes(v);\n\t\t});\n\t\tif (rem.length) {\n\t\t\tawait this.removeMultipleCollections(rem);\n\t\t}\n\t\tif (add.length) {\n\t\t\tawait this.addMultipleCollections(add);\n\t\t}\n\t}\n\n\n\t// Internal methods\n\n\t/**\n\t * Return array of subdirs based on record hash\n\t * @access private\n\t */\n\t_getDirParts() {\n\t\tif (!this._dirParts) {\n\t\t\tlet hash = this.generateHash();\n\t\t\tthis._dirParts = [];\n\t\t\tfor (let i = 0; i < HASH_SIZE; i += 2) {\n\t\t\t\tthis._dirParts.push(hash.slice(i, i + 2));\n\t\t\t}\n\t\t}\n\t\treturn this._dirParts;\n\t}\n\n\t/**\n\t * Convert convenience single-part operation into multiple-part operation\n\t * @access private\n\t */\n\tasync _singlePartOperation(method, part, value) {\n\t\tpart = part || this.store.option('defaultPart');\n\t\tlet parts = {};\n\t\tparts[part] = value;\n\t\tparts = await this[method](parts);\n\t\tif (Array.isArray(parts)) {\n\t\t\treturn parts.length ? true : false;\n\t\t}\n\t\tif (typeof parts == 'object') {\n\t\t\treturn parts[part];\n\t\t}\n\t\treturn null;\n\t}\n\n\t/**\n\t * Run callback on provided collections, providing dir\n\t * @access private\n\t */\n\tasync _iterateCollections(collections, callback) {\n\t\tconst path = this.store.path;\n\t\tlet prefixDir = await this.store.dir([this.store.option('collectionsDir')], false);\n\t\tlet suffixDir = path.join(...this._getDirParts(), this.identifier);\n\t\tlet promises = [];\n\t\tfor (let collection of collections) {\n\t\t\tpromises.push(callback(collection, path.join(prefixDir, collection, suffixDir)));\n\t\t}\n\t\tawait Promise.all(promises);\n\t}\n\n\t/**\n\t * Remove empty record storage directories\n\t * @access private\n\t */\n\tasync _cleanupDirs(dirpath, depth) {\n\t\tconst\n\t\t\tfsop  = this.store.fsop,\n\t\t\tpath = this.store.path\n\t\t;\n\t\tlet i;\n\t\ttry {\n\t\t\tfor (i = 0; i < depth; i++) {\n\t\t\t\tawait fsop.rmdir(dirpath);\n\t\t\t\tdirpath = path.dirname(dirpath);\n\t\t\t}\n\t\t}\n\t\tcatch (err) {\n\t\t\t/**/\n\t\t}\n\t\treturn i;\n\t}\n};\n",
     "static": true,
     "longname": "/Users/ky/Documents/local/morvren-achronos/code/fs-atomic-data-store/src/Record.js",
     "access": "public",
@@ -1644,27 +1010,28 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 84,
+    "__docId__": 65,
     "kind": "variable",
-    "name": "stream",
+    "name": "HASH_SIZE",
     "memberof": "src/Record.js",
     "static": true,
-    "longname": "src/Record.js~stream",
+    "longname": "src/Record.js~HASH_SIZE",
     "access": "public",
     "export": false,
     "importPath": "fs-atomic-data-store/src/Record.js",
     "importStyle": null,
-    "description": "class Record",
-    "lineNumber": 6,
+    "description": null,
+    "lineNumber": 9,
+    "undocument": true,
     "type": {
       "types": [
-        "*"
+        "number"
       ]
     },
     "ignore": true
   },
   {
-    "__docId__": 85,
+    "__docId__": 66,
     "kind": "class",
     "name": "Record",
     "memberof": "src/Record.js",
@@ -1674,12 +1041,12 @@
     "export": true,
     "importPath": "fs-atomic-data-store/src/Record.js",
     "importStyle": "Record",
-    "description": "Interact with a record\n\nDo not instantiate this class directly, use methods from class {Store}",
-    "lineNumber": 13,
+    "description": "Interact with a record\n\nDo not instantiate this class directly, use method {@link Store.record}",
+    "lineNumber": 20,
     "interface": false
   },
   {
-    "__docId__": 86,
+    "__docId__": 67,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/Record.js~Record",
@@ -1688,8 +1055,14 @@
     "static": false,
     "longname": "src/Record.js~Record#constructor",
     "access": "public",
-    "description": "Get record interaction instance",
-    "lineNumber": 21,
+    "description": "Get record interaction instance\n\nDo not instantiate this class directly, use method {@link Store.record}",
+    "lineNumber": 31,
+    "unknown": [
+      {
+        "tagName": "@internal",
+        "tagValue": ""
+      }
+    ],
     "params": [
       {
         "nullable": null,
@@ -1724,7 +1097,7 @@
     ]
   },
   {
-    "__docId__": 87,
+    "__docId__": 68,
     "kind": "member",
     "name": "_store",
     "memberof": "src/Record.js~Record",
@@ -1732,7 +1105,7 @@
     "longname": "src/Record.js~Record#_store",
     "access": "private",
     "description": "",
-    "lineNumber": 25,
+    "lineNumber": 35,
     "type": {
       "types": [
         "*"
@@ -1740,23 +1113,7 @@
     }
   },
   {
-    "__docId__": 88,
-    "kind": "member",
-    "name": "_col",
-    "memberof": "src/Record.js~Record",
-    "static": false,
-    "longname": "src/Record.js~Record#_col",
-    "access": "private",
-    "description": "",
-    "lineNumber": 29,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 89,
+    "__docId__": 69,
     "kind": "member",
     "name": "_id",
     "memberof": "src/Record.js~Record",
@@ -1764,7 +1121,7 @@
     "longname": "src/Record.js~Record#_id",
     "access": "private",
     "description": "",
-    "lineNumber": 33,
+    "lineNumber": 39,
     "type": {
       "types": [
         "*"
@@ -1772,7 +1129,23 @@
     }
   },
   {
-    "__docId__": 90,
+    "__docId__": 70,
+    "kind": "member",
+    "name": "_dirParts",
+    "memberof": "src/Record.js~Record",
+    "static": false,
+    "longname": "src/Record.js~Record#_dirParts",
+    "access": "private",
+    "description": "",
+    "lineNumber": 43,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 71,
     "kind": "get",
     "name": "store",
     "memberof": "src/Record.js~Record",
@@ -1782,7 +1155,7 @@
     "longname": "src/Record.js~Record#store",
     "access": "public",
     "description": "Store instance for this record",
-    "lineNumber": 44,
+    "lineNumber": 54,
     "type": {
       "nullable": null,
       "types": [
@@ -1793,28 +1166,7 @@
     }
   },
   {
-    "__docId__": 91,
-    "kind": "get",
-    "name": "collection",
-    "memberof": "src/Record.js~Record",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "src/Record.js~Record#collection",
-    "access": "public",
-    "description": "Collection instance for this record",
-    "lineNumber": 53,
-    "type": {
-      "nullable": null,
-      "types": [
-        "Collection"
-      ],
-      "spread": false,
-      "description": null
-    }
-  },
-  {
-    "__docId__": 92,
+    "__docId__": 72,
     "kind": "get",
     "name": "identifier",
     "memberof": "src/Record.js~Record",
@@ -1824,7 +1176,7 @@
     "longname": "src/Record.js~Record#identifier",
     "access": "public",
     "description": "Identifier for this record",
-    "lineNumber": 62,
+    "lineNumber": 63,
     "type": {
       "nullable": null,
       "types": [
@@ -1835,7 +1187,7 @@
     }
   },
   {
-    "__docId__": 93,
+    "__docId__": 73,
     "kind": "method",
     "name": "generateHash",
     "memberof": "src/Record.js~Record",
@@ -1844,8 +1196,8 @@
     "static": false,
     "longname": "src/Record.js~Record#generateHash",
     "access": "public",
-    "description": "Return hex-encoded 32-bit unsigned integer hash of record identifier\n\nBased on npm module string-hash (https://github.com/darkskyapp/string-hash) by The Dark Sky Company, LLC\nThat code is licensed under CC0-1.0",
-    "lineNumber": 74,
+    "description": "Return hex-encoded 32-bit unsigned integer hash of record identifier\n\nUtility function, normally there is no need to call this directly.\n\nBased on npm module string-hash (https://github.com/darkskyapp/string-hash) by The Dark Sky Company, LLC\nThat code is licensed under CC0-1.0",
+    "lineNumber": 77,
     "return": {
       "nullable": null,
       "types": [
@@ -1857,7 +1209,7 @@
     "params": []
   },
   {
-    "__docId__": 94,
+    "__docId__": 74,
     "kind": "method",
     "name": "dir",
     "memberof": "src/Record.js~Record",
@@ -1866,8 +1218,8 @@
     "static": false,
     "longname": "src/Record.js~Record#dir",
     "access": "public",
-    "description": "Get directory path of record\n\nDirectory is created if it doesn't exist.",
-    "lineNumber": 98,
+    "description": "Get directory path of record\n\nUtility function, normally there is no need to call this directly.",
+    "lineNumber": 101,
     "unknown": [
       {
         "tagName": "@returns",
@@ -1896,56 +1248,7 @@
     }
   },
   {
-    "__docId__": 95,
-    "kind": "method",
-    "name": "filepath",
-    "memberof": "src/Record.js~Record",
-    "generator": false,
-    "async": true,
-    "static": false,
-    "longname": "src/Record.js~Record#filepath",
-    "access": "public",
-    "description": "Get file path of record part",
-    "lineNumber": 116,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{Promise<string>} filepath"
-      }
-    ],
-    "params": [
-      {
-        "nullable": true,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "part",
-        "description": "name of part, or null for default part"
-      },
-      {
-        "nullable": null,
-        "types": [
-          "bool"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "createDir",
-        "description": "true to create directory if it does not exist"
-      }
-    ],
-    "return": {
-      "nullable": null,
-      "types": [
-        "Promise<string>"
-      ],
-      "spread": false,
-      "description": "filepath"
-    }
-  },
-  {
-    "__docId__": 96,
+    "__docId__": 75,
     "kind": "method",
     "name": "listParts",
     "memberof": "src/Record.js~Record",
@@ -1955,11 +1258,11 @@
     "longname": "src/Record.js~Record#listParts",
     "access": "public",
     "description": "Get list of record parts",
-    "lineNumber": 131,
+    "lineNumber": 120,
     "unknown": [
       {
         "tagName": "@returns",
-        "tagValue": "{Promise<array>} partnames"
+        "tagValue": "{Promise<array>} part names"
       }
     ],
     "return": {
@@ -1968,12 +1271,12 @@
         "Promise<array>"
       ],
       "spread": false,
-      "description": "partnames"
+      "description": "part names"
     },
     "params": []
   },
   {
-    "__docId__": 97,
+    "__docId__": 76,
     "kind": "method",
     "name": "statMultipleParts",
     "memberof": "src/Record.js~Record",
@@ -1983,7 +1286,7 @@
     "longname": "src/Record.js~Record#statMultipleParts",
     "access": "public",
     "description": "Get file stat data for multiple record parts",
-    "lineNumber": 169,
+    "lineNumber": 156,
     "unknown": [
       {
         "tagName": "@returns",
@@ -1999,7 +1302,7 @@
         "spread": false,
         "optional": false,
         "name": "parts",
-        "description": "part names to remove"
+        "description": "part names to look up"
       }
     ],
     "return": {
@@ -2012,7 +1315,7 @@
     }
   },
   {
-    "__docId__": 98,
+    "__docId__": 77,
     "kind": "method",
     "name": "readMultipleParts",
     "memberof": "src/Record.js~Record",
@@ -2022,7 +1325,7 @@
     "longname": "src/Record.js~Record#readMultipleParts",
     "access": "public",
     "description": "Read multiple record parts",
-    "lineNumber": 208,
+    "lineNumber": 185,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2082,7 +1385,7 @@
     }
   },
   {
-    "__docId__": 99,
+    "__docId__": 78,
     "kind": "method",
     "name": "writeMultipleParts",
     "memberof": "src/Record.js~Record",
@@ -2092,7 +1395,7 @@
     "longname": "src/Record.js~Record#writeMultipleParts",
     "access": "public",
     "description": "Write multiple record parts",
-    "lineNumber": 276,
+    "lineNumber": 244,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2152,7 +1455,7 @@
     }
   },
   {
-    "__docId__": 100,
+    "__docId__": 79,
     "kind": "method",
     "name": "deleteMultipleParts",
     "memberof": "src/Record.js~Record",
@@ -2162,11 +1465,11 @@
     "longname": "src/Record.js~Record#deleteMultipleParts",
     "access": "public",
     "description": "Delete multiple record parts\n\nParts that do not exist are ignored (not treated as an error).",
-    "lineNumber": 350,
+    "lineNumber": 317,
     "unknown": [
       {
         "tagName": "@returns",
-        "tagValue": "{Promise<array>} part names deleted"
+        "tagValue": "{Promise<array<string>>} parts deleted"
       }
     ],
     "params": [
@@ -2178,20 +1481,20 @@
         "spread": false,
         "optional": false,
         "name": "parts",
-        "description": "part names to remove"
+        "description": "part names to delete"
       }
     ],
     "return": {
       "nullable": null,
       "types": [
-        "Promise<array>"
+        "Promise<array<string>>"
       ],
       "spread": false,
-      "description": "part names deleted"
+      "description": "parts deleted"
     }
   },
   {
-    "__docId__": 101,
+    "__docId__": 80,
     "kind": "method",
     "name": "shredMultipleParts",
     "memberof": "src/Record.js~Record",
@@ -2200,12 +1503,12 @@
     "static": false,
     "longname": "src/Record.js~Record#shredMultipleParts",
     "access": "public",
-    "description": "Overwrite contents of multiple record parts",
-    "lineNumber": 405,
+    "description": "Delete multiple record parts and make contents unrecoverable\n\nParts that do not exist are ignored (not treated as an error).",
+    "lineNumber": 355,
     "unknown": [
       {
         "tagName": "@returns",
-        "tagValue": "{Promise<void>}"
+        "tagValue": "{Promise<array<string>>} parts shredded"
       }
     ],
     "params": [
@@ -2223,14 +1526,148 @@
     "return": {
       "nullable": null,
       "types": [
+        "Promise<array<string>>"
+      ],
+      "spread": false,
+      "description": "parts shredded"
+    }
+  },
+  {
+    "__docId__": 81,
+    "kind": "method",
+    "name": "listCollections",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#listCollections",
+    "access": "public",
+    "description": "Return collections this record is in",
+    "lineNumber": 415,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Promise<array<string>>} collection names"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Promise<array<string>>"
+      ],
+      "spread": false,
+      "description": "collection names"
+    },
+    "params": []
+  },
+  {
+    "__docId__": 82,
+    "kind": "method",
+    "name": "addMultipleCollections",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#addMultipleCollections",
+    "access": "public",
+    "description": "Add record to multiple collections",
+    "lineNumber": 444,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Promise<array<string>>} collections added"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "array<string>"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "collections",
+        "description": "collection names to add record to"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Promise<array<string>>"
+      ],
+      "spread": false,
+      "description": "collections added"
+    }
+  },
+  {
+    "__docId__": 83,
+    "kind": "method",
+    "name": "removeMultipleCollections",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#removeMultipleCollections",
+    "access": "public",
+    "description": "Remove record from multiple collections\n\nCollections that the record does not belong to are ignored (not treated as an error).",
+    "lineNumber": 494,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Promise<string>} collections removed"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "array<string>"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "collections",
+        "description": "collection names to remove record from"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Promise<string>"
+      ],
+      "spread": false,
+      "description": "collections removed"
+    }
+  },
+  {
+    "__docId__": 84,
+    "kind": "method",
+    "name": "deleteRecord",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#deleteRecord",
+    "access": "public",
+    "description": "Delete entire record (delete all record parts and remove from all collections)",
+    "lineNumber": 516,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Promise<void>}"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
         "Promise<void>"
       ],
       "spread": false,
       "description": ""
-    }
+    },
+    "params": []
   },
   {
-    "__docId__": 102,
+    "__docId__": 85,
     "kind": "method",
     "name": "statPart",
     "memberof": "src/Record.js~Record",
@@ -2240,7 +1677,7 @@
     "longname": "src/Record.js~Record#statPart",
     "access": "public",
     "description": "Return file stat data for part",
-    "lineNumber": 475,
+    "lineNumber": 531,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2269,7 +1706,7 @@
     }
   },
   {
-    "__docId__": 103,
+    "__docId__": 86,
     "kind": "method",
     "name": "readBuffer",
     "memberof": "src/Record.js~Record",
@@ -2279,7 +1716,7 @@
     "longname": "src/Record.js~Record#readBuffer",
     "access": "public",
     "description": "Read a record part into a buffer",
-    "lineNumber": 485,
+    "lineNumber": 541,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2308,7 +1745,7 @@
     }
   },
   {
-    "__docId__": 104,
+    "__docId__": 87,
     "kind": "method",
     "name": "writeBuffer",
     "memberof": "src/Record.js~Record",
@@ -2318,7 +1755,7 @@
     "longname": "src/Record.js~Record#writeBuffer",
     "access": "public",
     "description": "Write a record part from a buffer",
-    "lineNumber": 496,
+    "lineNumber": 552,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2358,7 +1795,7 @@
     }
   },
   {
-    "__docId__": 105,
+    "__docId__": 88,
     "kind": "method",
     "name": "readStream",
     "memberof": "src/Record.js~Record",
@@ -2368,7 +1805,7 @@
     "longname": "src/Record.js~Record#readStream",
     "access": "public",
     "description": "Get a stream reader for a record part",
-    "lineNumber": 506,
+    "lineNumber": 562,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2397,7 +1834,7 @@
     }
   },
   {
-    "__docId__": 106,
+    "__docId__": 89,
     "kind": "method",
     "name": "writeStream",
     "memberof": "src/Record.js~Record",
@@ -2407,7 +1844,7 @@
     "longname": "src/Record.js~Record#writeStream",
     "access": "public",
     "description": "Get a stream writer for a record part",
-    "lineNumber": 516,
+    "lineNumber": 572,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2436,7 +1873,7 @@
     }
   },
   {
-    "__docId__": 107,
+    "__docId__": 90,
     "kind": "method",
     "name": "deletePart",
     "memberof": "src/Record.js~Record",
@@ -2445,8 +1882,8 @@
     "static": false,
     "longname": "src/Record.js~Record#deletePart",
     "access": "public",
-    "description": "Delete a record part",
-    "lineNumber": 526,
+    "description": "Delete a record part\n\nParts that do not exist are ignored (not treated as an error).",
+    "lineNumber": 584,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2475,35 +1912,35 @@
     }
   },
   {
-    "__docId__": 108,
+    "__docId__": 91,
     "kind": "method",
-    "name": "deleteAll",
+    "name": "deleteAllParts",
     "memberof": "src/Record.js~Record",
     "generator": false,
     "async": true,
     "static": false,
-    "longname": "src/Record.js~Record#deleteAll",
+    "longname": "src/Record.js~Record#deleteAllParts",
     "access": "public",
-    "description": "Delete entire record (delete all record parts)",
-    "lineNumber": 535,
+    "description": "Delete all record parts",
+    "lineNumber": 593,
     "unknown": [
       {
         "tagName": "@returns",
-        "tagValue": "{Promise<array>} removed part names"
+        "tagValue": "{Promise<array<string>>} parts deleted"
       }
     ],
     "return": {
       "nullable": null,
       "types": [
-        "Promise<array>"
+        "Promise<array<string>>"
       ],
       "spread": false,
-      "description": "removed part names"
+      "description": "parts deleted"
     },
     "params": []
   },
   {
-    "__docId__": 109,
+    "__docId__": 92,
     "kind": "method",
     "name": "shredPart",
     "memberof": "src/Record.js~Record",
@@ -2512,12 +1949,12 @@
     "static": false,
     "longname": "src/Record.js~Record#shredPart",
     "access": "public",
-    "description": "Overwrite part contents",
-    "lineNumber": 545,
+    "description": "Delete a record part and make contents unrecoverable\n\nParts that do not exist are ignored (not treated as an error).",
+    "lineNumber": 605,
     "unknown": [
       {
         "tagName": "@returns",
-        "tagValue": "{Promise<void>}"
+        "tagValue": "{Promise<void>} true if part existed and was shredded, false if it did not exist"
       }
     ],
     "params": [
@@ -2538,11 +1975,175 @@
         "Promise<void>"
       ],
       "spread": false,
+      "description": "true if part existed and was shredded, false if it did not exist"
+    }
+  },
+  {
+    "__docId__": 93,
+    "kind": "method",
+    "name": "addCollection",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#addCollection",
+    "access": "public",
+    "description": "Add record to a collection",
+    "lineNumber": 615,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Promise<bool>} true if record was not in collection and was added, false record was already in collection"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "collection",
+        "description": "name of collection"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Promise<bool>"
+      ],
+      "spread": false,
+      "description": "true if record was not in collection and was added, false record was already in collection"
+    }
+  },
+  {
+    "__docId__": 94,
+    "kind": "method",
+    "name": "removeCollection",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#removeCollection",
+    "access": "public",
+    "description": "Remove record from a collection\n\nCollections that the record does not belong to are ignored (not treated as an error).",
+    "lineNumber": 627,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Promise<bool>} true if record was in collection and was removed, false record was not in collection"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "collection",
+        "description": "name of collection"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Promise<bool>"
+      ],
+      "spread": false,
+      "description": "true if record was in collection and was removed, false record was not in collection"
+    }
+  },
+  {
+    "__docId__": 95,
+    "kind": "method",
+    "name": "removeAllCollections",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#removeAllCollections",
+    "access": "public",
+    "description": "Remove record from all collections",
+    "lineNumber": 636,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Promise<string>} collections removed"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Promise<string>"
+      ],
+      "spread": false,
+      "description": "collections removed"
+    },
+    "params": []
+  },
+  {
+    "__docId__": 96,
+    "kind": "method",
+    "name": "setCollections",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#setCollections",
+    "access": "public",
+    "description": "Set collections for this record\n\nAdd record to/remove record from collections to match provided list.",
+    "lineNumber": 648,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Promise<void>}"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "array<string>"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "collections",
+        "description": "collection names to add record to (record will be removed from others)"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Promise<void>"
+      ],
+      "spread": false,
       "description": ""
     }
   },
   {
-    "__docId__": 110,
+    "__docId__": 97,
+    "kind": "method",
+    "name": "_getDirParts",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "src/Record.js~Record#_getDirParts",
+    "access": "private",
+    "description": "Return array of subdirs based on record hash",
+    "lineNumber": 671,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 99,
     "kind": "method",
     "name": "_singlePartOperation",
     "memberof": "src/Record.js~Record",
@@ -2552,7 +2153,7 @@
     "longname": "src/Record.js~Record#_singlePartOperation",
     "access": "private",
     "description": "Convert convenience single-part operation into multiple-part operation",
-    "lineNumber": 556,
+    "lineNumber": 686,
     "params": [
       {
         "name": "method",
@@ -2580,10 +2181,70 @@
     }
   },
   {
-    "__docId__": 111,
+    "__docId__": 100,
+    "kind": "method",
+    "name": "_iterateCollections",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#_iterateCollections",
+    "access": "private",
+    "description": "Run callback on provided collections, providing dir",
+    "lineNumber": 704,
+    "params": [
+      {
+        "name": "collections",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "callback",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 101,
+    "kind": "method",
+    "name": "_cleanupDirs",
+    "memberof": "src/Record.js~Record",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Record.js~Record#_cleanupDirs",
+    "access": "private",
+    "description": "Remove empty record storage directories",
+    "lineNumber": 719,
+    "params": [
+      {
+        "name": "dirpath",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "depth",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 102,
     "kind": "file",
     "name": "src/Store.js",
-    "content": "/**\n * class Store\n */\n\n/**\n * Interact with a datastore\n */\nmodule.exports = class Store {\n\t/**\n\t * Create new Store instance\n\t *\n\t * @param {object} options\n\t * @param {string} options.dirPath - root directory for this store. Default is subdirectory \"store\" in current working directory\n\t * @param {number} options.fileMode - octal file permission mode when creating files. Default 0o660\n\t * @param {number} options.dirMode - octal file permission mode when creating directories. Default 0o770\n\t * @param {string} options.defaultPart - default part name to use when none is specified. Default \"r\"\n\t * @param {module} options.fsModule - use this instead of Node.js builtin fs (filesystem) module\n\t * @param {module} options.pathModule- use this instead of Node.js buitin path (filepaths) module\n\t * @param {function} options.recordClass - use this instead of internal Record class\n\t * @param {function} options.collectionClass -  use this instead of internal Collection class\n\t * @param {function} options.lockClass - use this instead of internal Lock class\n\t * @param {function} options.shredFunction - use this to generate overwrite data when shredding record parts. Default is crypto.randomBytes. Signature: `function(size): Buffer`\n\t */\n\tconstructor(options = {}) {\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._options = {\n\t\t\trootDir: 'store',\n\t\t\tfileMode: 0o660,\n\t\t\tdirMode: 0o770,\n\t\t\tdefaultPart: 'r',\n\t\t\tfsModule: 'fs',\n\t\t\tpathModule: 'path',\n\t\t\trecordClass: './Record',\n\t\t\tcollectionClass: './Collection',\n\t\t\tlockClass: './Lock',\n\t\t\tshredFunction: null,\n\t\t\trecordsDir: 'records',\n\t\t\tlocksDir: 'locks'\n\t\t};\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._collections = {};\n\n\t\tif (typeof options == 'object') {\n\t\t\tfor (let k in options) {\n\t\t\t\tif (this._options[k] !== undefined) {\n\t\t\t\t\tthis._options[k] = options[k];\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tfor (let k of ['fsModule', 'pathModule', 'recordClass', 'collectionClass', 'lockClass']) {\n\t\t\tif (typeof this._options[k] == 'string') {\n\t\t\t\tthis._options[k] = require(this._options[k]);\n\t\t\t}\n\t\t}\n\t\tif (this._options.shredFunction == null) {\n\t\t\tthis._options.shredFunction = require('crypto').randomBytes;\n\t\t}\n\t}\n\n\n\t// Utility methods\n\n\t/**\n\t * Filesystem module\n\t *\n\t * @type {module}\n\t */\n\tget fs() {\n\t\treturn this.option('fsModule');\n\t}\n\n\t/**\n\t * Filepaths module\n\t *\n\t * @type {module}\n\t */\n\tget path() {\n\t\treturn this.option('pathModule');\n\t}\n\n\t/**\n\t * Return a configured option\n\t *\n\t * @param {string} name - option property name\n\t * @returns {*} option value\n\t */\n\toption(name) {\n\t\treturn this._options[name];\n\t}\n\n\t/**\n\t * Get directory path within store\n\t *\n\t * Directory is created if it doesn't exist.\n\t *\n\t * @param {array} dirParts - dir path components\n\t * @param {bool} create - true to create directory if it does not exist\n\t * @returns {Promise<s?tring>} dirpath\n\t */\n\tasync dir(dirParts = [], create = true) {\n\t\tconst\n\t\t\tpath = this.path,\n\t\t\tfs  = this.fs,\n\t\t\tdir = path.resolve(this.option('rootDir'), ...dirParts)\n\t\t;\n\t\treturn new Promise((resolve, reject) => {\n\t\t\tfs.access(\n\t\t\t\tdir,\n\t\t\t\tfs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK,\n\t\t\t\t(err) => {\n\t\t\t\t\tif (!err) {\n\t\t\t\t\t\tresolve(dir);\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tif (err.code != 'ENOENT') {\n\t\t\t\t\t\treject(err);\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tif (!create) {\n\t\t\t\t\t\tresolve(dir);\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\tfs.mkdir(\n\t\t\t\t\t\tdir,\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\trecursive: true,\n\t\t\t\t\t\t\tmode: this.option('dirMode')\n\t\t\t\t\t\t},\n\t\t\t\t\t\t(err) => {\n\t\t\t\t\t\t\tif (err && err.code != 'EEXIST') {\n\t\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tresolve(dir);\n\t\t\t\t\t\t}\n\t\t\t\t\t);\n\t\t\t\t}\n\t\t\t);\n\t\t});\n\t}\n\n\n\t// Factory methods\n\n\t/**\n\t * Return an object to interact with a named collection of records\n\t *\n\t * @param {string} name - collection name\n\t * @returns {Collection} collection object\n\t */\n\tcollection(name) {\n\t\tname = name.toLowerCase();\n\t\tif (!this._collections[name]) {\n\t\t\tthis._collections[name] = new (this.option('collectionClass'))(this, name);\n\t\t}\n\t\treturn this._collections[name];\n\t}\n\n\t/**\n\t * Return an object to interact with a record\n\t *\n\t * @param {string} collection - collection name\n\t * @param {string} identifier - record identifier\n\t * @returns {Record} record object\n\t */\n\trecord(collection, identifier) {\n\t\treturn this.collection(collection).record(identifier);\n\t}\n\n\t/**\n\t * Return an object to perform exclusive access locking\n\t *\n\t * @param {object} options - see Lock class\n\t * @returns {Lock} locking instance\n\t */\n\tlock(options = {}) {\n\t\treturn new (this.option('lockClass'))(this, options);\n\t}\n\n\n\t// Data operation methods\n\n\t/**\n\t * Perform a sequence of operations requiring exclusive access\n\t *\n\t * The operation should request exclusive locks using the provided instance of the Lock class.\n\t * If a lock cannot be applied, the entire transaction will fail.\n\t * The operation code must structure calls to ensure that it holds all needed locks prior to making any data changes or assumptions about the immutability of loaded records.\n\t *\n\t * By default, no attempt is made to retry if a lock is not available.\n\t * Likewise, no attempt is made to retry the entire transaction if any lock is unavailable.\n\t * Both individual locks and the transaction as a whole can be configured to retry automatically after a delay.\n\t * The delay before the first transaction retry is specified by the `retryWait` option.\n\t * The maximum total transaction retry delay is specified by the `retryTimeout` option.\n\t *\n\t * @param {function} callback - perform operations; may be called multiple times, may be halted at any point where a lock is acquired\n\t *   Signature: `async function(lockObject, storeObject, tryCount): Promise<*>`\n\t * @param {object} options\n\t * @param {number} options.retryTimeout int maximum milliseconds to retry transaction until giving up, default 0 (no retry)\n\t * @param {number} options.retryWait int minimum milliseconds before first transaction retry, default 10 ms.\n\t * @param {number} options.lockTimeout int maximum milliseconds to retry each lock until giving up, default 0 (no retry)\n\t * @param {number} options.lockWait int minimum milliseconds before first lock retry, default 10 ms\n\t * @returns {Promise<*>} On success, resolves with result of callback function's promise. On failure due to lock conflict, rejects with code 'ELOCKED'\n\t */\n\tasync transaction(callback, options = {}) {\n\t\toptions.retryTimeout = parseInt(options.retryTimeout, 10) || 0;\n\t\toptions.retryWait = parseInt(options.retryWait, 10) || 10;\n\t\toptions.lockTimeout = parseInt(options.lockTimeout, 10) || 0;\n\t\toptions.lockWait = parseInt(options.lockWait, 10) || 10;\n\n\t\tconst lock = this.lock(this, {\n\t\t\ttimeout: options.lockTimeout,\n\t\t\twait: options.lockWait\n\t\t});\n\t\treturn lock.runWithRetry(\n\t\t\t(resolve, reject, retry, tryCount) => {\n\t\t\t\tcallback(lock, this, tryCount)\n\t\t\t\t\t.then((result) => {\n\t\t\t\t\t\tlock.unlockAll();\n\t\t\t\t\t\tresolve(result);\n\t\t\t\t\t})\n\t\t\t\t\t.catch((err) => {\n\t\t\t\t\t\tlock.unlockAll();\n\t\t\t\t\t\tif (err.code != 'ELOCKED') {\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tretry();\n\t\t\t\t\t})\n\t\t\t\t;\n\t\t\t},\n\t\t\t(originalErr) => {\n\t\t\t\tconst err = new Error('Error: ELOCKED: unable to acquire locks');\n\t\t\t\terr.code = 'ELOCKED';\n\t\t\t\terr.lockType = 'transaction';\n\t\t\t\terr.cause = originalErr;\n\t\t\t\treturn err;\n\t\t\t},\n\t\t\t{\n\t\t\t\ttimeout: options.retryTimeout,\n\t\t\t\twait: options.retryWait\n\t\t\t}\n\t\t);\n\t}\n};\n",
+    "content": "/**\n * class Store\n */\n\n// Libraries\nconst util = require('util');\n\n// Constants\nconst TRAVERSE_DEPTH = 3; // .../01/02/03/04/...\n\n/**\n * Access a datastore\n *\n * Do not instantiate this class directly, use function {@link store()} exported by module.\n */\nmodule.exports = class Store {\n\t/**\n\t * Create new Store instance\n\t *\n\t * Do not instantiate this class directly, use function {@link store()} exported by module.\n\t *\n\t * @param {object} options\n\t * @param {string} options.rootDir - root directory for this store. Default is subdirectory \"store\" in current working directory\n\t * @param {number} options.fileMode - octal file permission mode when creating files. Default 0o660\n\t * @param {number} options.dirMode - octal file permission mode when creating directories. Default 0o770\n\t * @param {string} options.defaultPart - default part name to use when none is specified. Default \"r\"\n\t * @param {number} options.transactionTimeout - transaction timeout option (see {@link transaction}, default 0 (no retry)\n\t * @param {number} options.transactionWait - transaction wait option (see {@link transaction}, default 10 ms\n\t * @param {number} options.lockTimeout - lock timeout option (see {@link lock}, default 0 (no retry)\n\t * @param {number} options.lockWait - lock wait option (see {@link lock}, default 10 ms\n\t * @param {number} options.shredPassCount - number of times to overwrite data when shredding record parts. Default 3\n\t * @param {module} options.fsModule - use this instead of Node.js builtin fs (filesystem) module\n\t * @param {module} options.pathModule - use this instead of Node.js buitin path (filepaths) module\n\t * @param {function} options.recordClass - use this instead of internal Record class\n\t * @param {function} options.lockClass - use this instead of internal Lock class\n\t * @param {function} options.shredFunction - use this to generate overwrite data when shredding record parts. Default is crypto.randomBytes. Signature: `function(size): Buffer`\n\t * @internal\n\t */\n\tconstructor(options = {}) {\n\t\t// Define state vars\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._options = {\n\t\t\trootDir: 'store',\n\t\t\tfileMode: 0o660,\n\t\t\tdirMode: 0o770,\n\t\t\tdefaultPart: 'r',\n\t\t\ttransactionTimeout: 0,\n\t\t\ttransactionWait: 10,\n\t\t\tlockTimeout: 0,\n\t\t\tlockWait: 10,\n\t\t\tshredPassCount: 3,\n\t\t\tfsModule: 'fs',\n\t\t\tpathModule: 'path',\n\t\t\trecordClass: './Record',\n\t\t\tlockClass: './Lock',\n\t\t\tshredFunction: null,\n\t\t\trecordsDir: 'records',\n\t\t\tlocksDir: 'locks',\n\t\t\tcollectionsDir: 'collections',\n\t\t\tallCollection: '@all'\n\t\t};\n\t\t/**\n\t\t * @access private\n\t\t */\n\t\tthis._fsop = {};\n\n\t\t// Finalize options\n\t\tif (typeof options == 'object') {\n\t\t\tfor (let k in options) {\n\t\t\t\tif (this._options[k] !== undefined) {\n\t\t\t\t\tthis._options[k] = options[k];\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tfor (let k of ['fileMode', 'dirMode']) {\n\t\t\tif (typeof this._options[k] != 'number') {\n\t\t\t\tthis._options[k] = parseInt(this._options[k], 8);\n\t\t\t}\n\t\t}\n\t\tfor (let k of ['transactionTimeout', 'transactionWait', 'lockTimeout', 'lockWait']) {\n\t\t\tif (typeof this._options[k] != 'number') {\n\t\t\t\tthis._options[k] = parseInt(this._options[k], 10);\n\t\t\t}\n\t\t}\n\t\tfor (let k of ['fsModule', 'pathModule', 'recordClass', 'lockClass']) {\n\t\t\tif (typeof this._options[k] != 'object') {\n\t\t\t\tthis._options[k] = require(this._options[k]);\n\t\t\t}\n\t\t}\n\t\tif (typeof this._options.shredFunction != 'function') {\n\t\t\tthis._options.shredFunction = require('crypto').randomBytes;\n\t\t}\n\n\t\t// Promisify fs methods\n\t\tlet fs = this.fs;\n\t\tfor (let k of ['access', 'close', 'fdatasync', 'fsync', 'ftruncate', 'mkdir', 'open', 'readdir', 'readFile', 'rename', 'rmdir', 'stat', 'unlink', 'write', 'writeFile']) {\n\t\t\tthis._fsop[k] = util.promisify(fs[k]);\n\t\t}\n\t}\n\n\n\t// Utility methods\n\n\t/**\n\t * Filesystem module\n\t *\n\t * @type {module}\n\t */\n\tget fs() {\n\t\treturn this.option('fsModule');\n\t}\n\n\t/**\n\t * Filepaths module\n\t *\n\t * @type {module}\n\t */\n\tget path() {\n\t\treturn this.option('pathModule');\n\t}\n\n\t/**\n\t * Object with promisified fs operation methods\n\t *\n\t * @type {object<string,function>}\n\t */\n\tget fsop() {\n\t\treturn this._fsop;\n\t}\n\n\t/**\n\t * Return a configured option\n\t *\n\t * @param {string} name - option property name\n\t * @returns {*} option value\n\t */\n\toption(name) {\n\t\treturn this._options[name];\n\t}\n\n\t/**\n\t * Get directory path within store\n\t *\n\t * Utility function, normally there is no need to call this directly.\n\t *\n\t * @param {array} dirParts - dir path components\n\t * @param {bool} create - true to create directory if it does not exist\n\t * @returns {Promise<string>} dirpath\n\t */\n\tasync dir(dirParts, create) {\n\t\tconst\n\t\t\tpath = this.path,\n\t\t\tfs  = this.fs,\n\t\t\tfsop = this.fsop,\n\t\t\tdir = path.resolve(this.option('rootDir'), ...dirParts)\n\t\t;\n\t\ttry {\n\t\t\tawait fsop.access(dir, fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK);\n\t\t}\n\t\tcatch (err) {\n\t\t\tif (err.code != 'ENOENT') {\n\t\t\t\tthrow err;\n\t\t\t}\n\t\t\tif (create) {\n\t\t\t\ttry {\n\t\t\t\t\tawait fsop.mkdir(\n\t\t\t\t\t\tdir,\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\trecursive: true,\n\t\t\t\t\t\t\tmode: this.option('dirMode')\n\t\t\t\t\t\t}\n\t\t\t\t\t);\n\t\t\t\t}\n\t\t\t\tcatch (err2) {\n\t\t\t\t\tif (err2.code != 'EEXIST') {\n\t\t\t\t\t\tthrow err2;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn dir;\n\t}\n\n\t/**\n\t * Return subdirectories in directory\n\t *\n\t * Utility function, normally there is no need to call this directly.\n\t *\n\t * @param {string} dirpath - directory path\n\t * @return {Promise<array<string>>} subdirectory names\n\t */\n\tasync listDirectoriesInDir(dirpath) {\n\t\tconst\n\t\t\tfsop  = this.fsop\n\t\t;\n\t\tlet entries;\n\t\ttry {\n\t\t\tentries = await fsop.readdir(\n\t\t\t\tdirpath,\n\t\t\t\t{\n\t\t\t\t\twithFileTypes: true\n\t\t\t\t},\n\t\t\t);\n\t\t}\n\t\tcatch (err) {\n\t\t\tif (err.code == 'ENOENT') {\n\t\t\t\treturn [];\n\t\t\t}\n\t\t\tthrow err;\n\t\t}\n\t\tlet dirs = [];\n\t\tfor (let ent of entries) {\n\t\t\tif (ent.isDirectory()) {\n\t\t\t\tdirs.push(ent.name);\n\t\t\t}\n\t\t}\n\t\treturn dirs;\n\t}\n\n\t/**\n\t * Perform an operation and retry it if first attempt(s) fail\n\t *\n\t * Utility function, normally there is no need to call this directly.\n\t *\n\t * @param {function} operation - Signature: `function(resolve: function, reject: function, retry: function, tryCount: number): Promise<void>`\n\t * @param {function} onTimeout - On timeout, operation promise is rejected with value returned by this function\n\t * @param {number} timeout - max retry time in milliseconds, default is as provided to Lock constructor\n\t * @param {number} wait - min time to wait before first retry, default is as provided to Lock constructor\n\t */\n\tasync runWithRetry(operation, onTimeout, timeout, wait) {\n\t\tfunction calcRetries(timeout, wait) {\n\t\t\tlet retries = [];\n\t\t\tif (timeout > 0) {\n\t\t\t\twhile (timeout >= wait) {\n\t\t\t\t\tretries.unshift(timeout);\n\t\t\t\t\ttimeout = Math.floor(timeout / 3);\n\t\t\t\t}\n\t\t\t\tfor (let i = 1; i < retries.length; i++) {\n\t\t\t\t\tretries[i] -= retries[i - 1];\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn retries;\n\t\t}\n\t\treturn /* await */ new Promise((resolve, reject) => {\n\t\t\tlet retries = calcRetries(timeout, wait);\n\t\t\tlet tryCount = 0;\n\t\t\tfunction retry() {\n\t\t\t\tif (retries.length == 0) {\n\t\t\t\t\treject(onTimeout());\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tsetTimeout(run, retries.shift());\n\t\t\t}\n\t\t\tfunction run() {\n\t\t\t\toperation(resolve, reject, retry, tryCount++);\n\t\t\t}\n\t\t\trun();\n\t\t});\n\t}\n\n\n\t// Factory methods\n\n\t/**\n\t * Return an object to interact with a record\n\t *\n\t * @param {string} identifier - record identifier\n\t * @returns {Record} record object\n\t */\n\trecord(identifier) {\n\t\treturn new (this.option('recordClass'))(this, identifier);\n\t}\n\n\t/**\n\t * Return an object to perform exclusive access locking\n\t *\n\t * @param {object} options\n\t * @param {number} options.timeout - default max retry time in milliseconds\n\t * @param {number} options.wait - default min time in ms to wait before first retry\n\t * @returns {Lock} locking instance\n\t */\n\tlock(options = {}) {\n\t\toptions.timeout = parseInt(options.timeout, 10) || this.option('lockTimeout');\n\t\toptions.wait = parseInt(options.wait, 10) || this.option('lockWait');\n\t\treturn new (this.option('lockClass'))(this, options);\n\t}\n\n\n\t// Data operation methods\n\n\t/**\n\t * Perform a sequence of operations requiring exclusive access\n\t *\n\t * The operation should request exclusive locks using the provided instance of the Lock class.\n\t * If a lock cannot be applied, the entire transaction will fail.\n\t * The operation code must structure calls to ensure that it holds all needed locks prior to making any data changes or assumptions about the immutability of loaded records.\n\t *\n\t * By default, no attempt is made to retry if a lock is not available.\n\t * Likewise, no attempt is made to retry the entire transaction if any lock is unavailable.\n\t * Both individual locks and the transaction as a whole can be configured to retry automatically after a delay.\n\t * The delay before the first transaction retry is specified by the `transactionWait` option.\n\t * The maximum total transaction retry delay is specified by the `transactionTimeout` option.\n\t *\n\t * @param {function} callback - perform operations; may be called multiple times, may be halted at any point where a lock is acquired\n\t *   Signature: `async function(lockObject: Lock, storeObject: Store, tryCount: number): Promise<*>`\n\t * @param {object} options\n\t * @param {number} options.transactionTimeout - maximum milliseconds to retry transaction until giving up, default 0 (no retry)\n\t * @param {number} options.transactionWait - minimum milliseconds before first transaction retry, default 10 ms.\n\t * @param {number} options.lockTimeout - maximum milliseconds to retry each lock until giving up, default 0 (no retry)\n\t * @param {number} options.lockWait - minimum milliseconds before first lock retry, default 10 ms\n\t * @param {Lock} options.lock - use this Lock instance, do not create or manage a lock for just this transaction. Note: if lock is provided then transaction() will NOT automatically release held locks before resolving\n\t * @returns {Promise<*>} On success, resolves with result of callback function's promise. On failure due to lock conflict, rejects with code 'ELOCKED'\n\t */\n\tasync transaction(callback, options = {}) {\n\t\toptions.transactionTimeout = parseInt(options.transactionTimeout, 10) || this.option('transactionTimeout');\n\t\toptions.transactionWait = parseInt(options.transactionWait, 10) || this.option('transactionWait');\n\t\toptions.lockTimeout = parseInt(options.lockTimeout, 10) || this.option('lockTimeout');\n\t\toptions.lockWait = parseInt(options.lockWait, 10) || this.option('lockWait');\n\n\t\tlet lock;\n\t\tlet clearLocks = true;\n\t\tif (options.lock) {\n\t\t\tlock = options.lock;\n\t\t\tclearLocks = false;\n\t\t}\n\t\telse {\n\t\t\tlock = this.lock(\n\t\t\t\tthis,\n\t\t\t\t{\n\t\t\t\t\ttimeout: options.lockTimeout,\n\t\t\t\t\twait: options.lockWait\n\t\t\t\t}\n\t\t\t);\n\t\t}\n\n\t\treturn /* await */ this.runWithRetry(\n\t\t\t(resolve, reject, retry, tryCount) => {\n\t\t\t\tcallback(lock, this, tryCount)\n\t\t\t\t\t.then((result) => {\n\t\t\t\t\t\tif (clearLocks) {\n\t\t\t\t\t\t\tlock.unlockAll();\n\t\t\t\t\t\t}\n\t\t\t\t\t\tresolve(result);\n\t\t\t\t\t})\n\t\t\t\t\t.catch((err) => {\n\t\t\t\t\t\tif (clearLocks) {\n\t\t\t\t\t\t\tlock.unlockAll();\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (err.code != 'ELOCKED') {\n\t\t\t\t\t\t\treject(err);\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tretry();\n\t\t\t\t\t})\n\t\t\t\t;\n\t\t\t},\n\t\t\t(originalErr) => {\n\t\t\t\tconst err = new Error('Error: ELOCKED: unable to acquire locks');\n\t\t\t\terr.code = 'ELOCKED';\n\t\t\t\terr.lockType = 'transaction';\n\t\t\t\terr.cause = originalErr;\n\t\t\t\treturn err;\n\t\t\t},\n\t\t\toptions.transactionTimeout,\n\t\t\toptions.transactionWait\n\t\t);\n\t}\n\n\t/**\n\t * Return list of named collections\n\t *\n\t * Returned collections always have at least one record. (Empty collections are automatically deleted.)\n\t *\n\t * Special collection \"@all\" is not included in the returned list.\n\t *\n\t * @return {array<string>} named collections\n\t */\n\tasync collections() {\n\t\tlet collections = await this.listDirectoriesInDir(await this.dir([this.option('collectionsDir')], false));\n\t\tcollections.sort();\n\t\treturn collections;\n\t}\n\n\t/**\n\t * Iterate over records in a collection\n\t *\n\t * @param {string} collection - name of collection, or \"@all\" to traverse all records in store\n\t * @param {function} callback - called for each record found\n\t *   Signature: `function(identifier, recordIndex): {(void|bool}}`\n\t *   If callback returns bool false, traversal is halted\n\t * @returns {Promise<number>} total records traversed\n\t */\n\tasync traverse(collection, callback) {\n\t\tconst path = this.path;\n\t\tlet rootDir;\n\t\tif (collection == this.option('allCollection')) {\n\t\t\trootDir = await this.dir([this.option('recordsDir')], false);\n\t\t}\n\t\telse {\n\t\t\trootDir = await this.dir([this.option('collectionsDir'), collection], false);\n\t\t}\n\t\tlet stack = [\n\t\t\t[rootDir, await this.listDirectoriesInDir(rootDir)]\n\t\t];\n\t\tlet recordCount = 0;\n\t\twhile (stack.length) {\n\t\t\tlet level = stack.length - 1;\n\t\t\tif (!stack[level][1].length) {\n\t\t\t\tstack.pop();\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tlet dir = path.join(stack[level][0], stack[level][1].pop());\n\t\t\tlet subdirs = await this.listDirectoriesInDir(dir);\n\t\t\tif (!subdirs.length) {\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tif (level < TRAVERSE_DEPTH) {\n\t\t\t\tstack.push([dir, subdirs]);\n\t\t\t\tcontinue;\n\t\t\t}\n\t\t\tfor (let identifier of subdirs) {\n\t\t\t\tif (callback(identifier, recordCount++, this) === false) {\n\t\t\t\t\tstack = [];\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn recordCount;\n\t}\n};\n",
     "static": true,
     "longname": "/Users/ky/Documents/local/morvren-achronos/code/fs-atomic-data-store/src/Store.js",
     "access": "public",
@@ -2591,7 +2252,28 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 112,
+    "__docId__": 103,
+    "kind": "variable",
+    "name": "TRAVERSE_DEPTH",
+    "memberof": "src/Store.js",
+    "static": true,
+    "longname": "src/Store.js~TRAVERSE_DEPTH",
+    "access": "public",
+    "export": false,
+    "importPath": "fs-atomic-data-store/src/Store.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 9,
+    "undocument": true,
+    "type": {
+      "types": [
+        "number"
+      ]
+    },
+    "ignore": true
+  },
+  {
+    "__docId__": 104,
     "kind": "class",
     "name": "Store",
     "memberof": "src/Store.js",
@@ -2601,12 +2283,12 @@
     "export": true,
     "importPath": "fs-atomic-data-store/src/Store.js",
     "importStyle": "Store",
-    "description": "Interact with a datastore",
-    "lineNumber": 8,
+    "description": "Access a datastore\n\nDo not instantiate this class directly, use function {@link store()} exported by module.",
+    "lineNumber": 16,
     "interface": false
   },
   {
-    "__docId__": 113,
+    "__docId__": 105,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "src/Store.js~Store",
@@ -2615,8 +2297,14 @@
     "static": false,
     "longname": "src/Store.js~Store#constructor",
     "access": "public",
-    "description": "Create new Store instance",
-    "lineNumber": 24,
+    "description": "Create new Store instance\n\nDo not instantiate this class directly, use function {@link store()} exported by module.",
+    "lineNumber": 39,
+    "unknown": [
+      {
+        "tagName": "@internal",
+        "tagValue": ""
+      }
+    ],
     "params": [
       {
         "nullable": null,
@@ -2635,7 +2323,7 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "options.dirPath",
+        "name": "options.rootDir",
         "description": "root directory for this store. Default is subdirectory \"store\" in current working directory"
       },
       {
@@ -2671,6 +2359,56 @@
       {
         "nullable": null,
         "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.transactionTimeout",
+        "description": "transaction timeout option (see {@link transaction}, default 0 (no retry)"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.transactionWait",
+        "description": "transaction wait option (see {@link transaction}, default 10 ms"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.lockTimeout",
+        "description": "lock timeout option (see {@link lock}, default 0 (no retry)"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.lockWait",
+        "description": "lock wait option (see {@link lock}, default 10 ms"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.shredPassCount",
+        "description": "number of times to overwrite data when shredding record parts. Default 3"
+      },
+      {
+        "nullable": null,
+        "types": [
           "module"
         ],
         "spread": false,
@@ -2685,7 +2423,7 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "options.pathModule-",
+        "name": "options.pathModule",
         "description": "use this instead of Node.js buitin path (filepaths) module"
       },
       {
@@ -2697,16 +2435,6 @@
         "optional": false,
         "name": "options.recordClass",
         "description": "use this instead of internal Record class"
-      },
-      {
-        "nullable": null,
-        "types": [
-          "function"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "options.collectionClass",
-        "description": "use this instead of internal Collection class"
       },
       {
         "nullable": null,
@@ -2731,7 +2459,7 @@
     ]
   },
   {
-    "__docId__": 114,
+    "__docId__": 106,
     "kind": "member",
     "name": "_options",
     "memberof": "src/Store.js~Store",
@@ -2739,23 +2467,23 @@
     "longname": "src/Store.js~Store#_options",
     "access": "private",
     "description": "",
-    "lineNumber": 28,
+    "lineNumber": 44,
     "type": {
       "types": [
-        "{\"rootDir\": string, \"fileMode\": number, \"dirMode\": number, \"defaultPart\": string, \"fsModule\": string, \"pathModule\": string, \"recordClass\": string, \"collectionClass\": string, \"lockClass\": string, \"shredFunction\": *, \"recordsDir\": string, \"locksDir\": string}"
+        "{\"rootDir\": string, \"fileMode\": number, \"dirMode\": number, \"defaultPart\": string, \"transactionTimeout\": *, \"transactionWait\": number, \"lockTimeout\": *, \"lockWait\": number, \"shredPassCount\": number, \"fsModule\": string, \"pathModule\": string, \"recordClass\": string, \"lockClass\": string, \"shredFunction\": *, \"recordsDir\": string, \"locksDir\": string, \"collectionsDir\": string, \"allCollection\": string}"
       ]
     }
   },
   {
-    "__docId__": 115,
+    "__docId__": 107,
     "kind": "member",
-    "name": "_collections",
+    "name": "_fsop",
     "memberof": "src/Store.js~Store",
     "static": false,
-    "longname": "src/Store.js~Store#_collections",
+    "longname": "src/Store.js~Store#_fsop",
     "access": "private",
     "description": "",
-    "lineNumber": 45,
+    "lineNumber": 67,
     "type": {
       "types": [
         "{}"
@@ -2763,7 +2491,7 @@
     }
   },
   {
-    "__docId__": 116,
+    "__docId__": 108,
     "kind": "get",
     "name": "fs",
     "memberof": "src/Store.js~Store",
@@ -2773,7 +2501,7 @@
     "longname": "src/Store.js~Store#fs",
     "access": "public",
     "description": "Filesystem module",
-    "lineNumber": 72,
+    "lineNumber": 111,
     "type": {
       "nullable": null,
       "types": [
@@ -2784,7 +2512,7 @@
     }
   },
   {
-    "__docId__": 117,
+    "__docId__": 109,
     "kind": "get",
     "name": "path",
     "memberof": "src/Store.js~Store",
@@ -2794,7 +2522,7 @@
     "longname": "src/Store.js~Store#path",
     "access": "public",
     "description": "Filepaths module",
-    "lineNumber": 81,
+    "lineNumber": 120,
     "type": {
       "nullable": null,
       "types": [
@@ -2805,7 +2533,28 @@
     }
   },
   {
-    "__docId__": 118,
+    "__docId__": 110,
+    "kind": "get",
+    "name": "fsop",
+    "memberof": "src/Store.js~Store",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "src/Store.js~Store#fsop",
+    "access": "public",
+    "description": "Object with promisified fs operation methods",
+    "lineNumber": 129,
+    "type": {
+      "nullable": null,
+      "types": [
+        "object<string,function>"
+      ],
+      "spread": false,
+      "description": null
+    }
+  },
+  {
+    "__docId__": 111,
     "kind": "method",
     "name": "option",
     "memberof": "src/Store.js~Store",
@@ -2815,7 +2564,7 @@
     "longname": "src/Store.js~Store#option",
     "access": "public",
     "description": "Return a configured option",
-    "lineNumber": 91,
+    "lineNumber": 139,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2844,7 +2593,7 @@
     }
   },
   {
-    "__docId__": 119,
+    "__docId__": 112,
     "kind": "method",
     "name": "dir",
     "memberof": "src/Store.js~Store",
@@ -2853,12 +2602,12 @@
     "static": false,
     "longname": "src/Store.js~Store#dir",
     "access": "public",
-    "description": "Get directory path within store\n\nDirectory is created if it doesn't exist.",
-    "lineNumber": 104,
+    "description": "Get directory path within store\n\nUtility function, normally there is no need to call this directly.",
+    "lineNumber": 152,
     "unknown": [
       {
         "tagName": "@returns",
-        "tagValue": "{Promise<s?tring>} dirpath"
+        "tagValue": "{Promise<string>} dirpath"
       }
     ],
     "params": [
@@ -2886,30 +2635,24 @@
     "return": {
       "nullable": null,
       "types": [
-        "Promise<s?tring>"
+        "Promise<string>"
       ],
       "spread": false,
       "description": "dirpath"
     }
   },
   {
-    "__docId__": 120,
+    "__docId__": 113,
     "kind": "method",
-    "name": "collection",
+    "name": "listDirectoriesInDir",
     "memberof": "src/Store.js~Store",
     "generator": false,
-    "async": false,
+    "async": true,
     "static": false,
-    "longname": "src/Store.js~Store#collection",
+    "longname": "src/Store.js~Store#listDirectoriesInDir",
     "access": "public",
-    "description": "Return an object to interact with a named collection of records",
-    "lineNumber": 155,
-    "unknown": [
-      {
-        "tagName": "@returns",
-        "tagValue": "{Collection} collection object"
-      }
-    ],
+    "description": "Return subdirectories in directory\n\nUtility function, normally there is no need to call this directly.",
+    "lineNumber": 194,
     "params": [
       {
         "nullable": null,
@@ -2918,21 +2661,81 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "name",
-        "description": "collection name"
+        "name": "dirpath",
+        "description": "directory path"
       }
     ],
     "return": {
       "nullable": null,
       "types": [
-        "Collection"
+        "Promise<array<string>>"
       ],
       "spread": false,
-      "description": "collection object"
+      "description": "subdirectory names"
     }
   },
   {
-    "__docId__": 121,
+    "__docId__": 114,
+    "kind": "method",
+    "name": "runWithRetry",
+    "memberof": "src/Store.js~Store",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Store.js~Store#runWithRetry",
+    "access": "public",
+    "description": "Perform an operation and retry it if first attempt(s) fail\n\nUtility function, normally there is no need to call this directly.",
+    "lineNumber": 232,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "operation",
+        "description": "Signature: `function(resolve: function, reject: function, retry: function, tryCount: number): Promise<void>`"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "onTimeout",
+        "description": "On timeout, operation promise is rejected with value returned by this function"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "timeout",
+        "description": "max retry time in milliseconds, default is as provided to Lock constructor"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "wait",
+        "description": "min time to wait before first retry, default is as provided to Lock constructor"
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 115,
     "kind": "method",
     "name": "record",
     "memberof": "src/Store.js~Store",
@@ -2942,7 +2745,7 @@
     "longname": "src/Store.js~Store#record",
     "access": "public",
     "description": "Return an object to interact with a record",
-    "lineNumber": 170,
+    "lineNumber": 272,
     "unknown": [
       {
         "tagName": "@returns",
@@ -2950,16 +2753,6 @@
       }
     ],
     "params": [
-      {
-        "nullable": null,
-        "types": [
-          "string"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "collection",
-        "description": "collection name"
-      },
       {
         "nullable": null,
         "types": [
@@ -2981,7 +2774,7 @@
     }
   },
   {
-    "__docId__": 122,
+    "__docId__": 116,
     "kind": "method",
     "name": "lock",
     "memberof": "src/Store.js~Store",
@@ -2991,7 +2784,7 @@
     "longname": "src/Store.js~Store#lock",
     "access": "public",
     "description": "Return an object to perform exclusive access locking",
-    "lineNumber": 180,
+    "lineNumber": 284,
     "unknown": [
       {
         "tagName": "@returns",
@@ -3007,7 +2800,27 @@
         "spread": false,
         "optional": false,
         "name": "options",
-        "description": "see Lock class"
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.timeout",
+        "description": "default max retry time in milliseconds"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.wait",
+        "description": "default min time in ms to wait before first retry"
       }
     ],
     "return": {
@@ -3020,7 +2833,7 @@
     }
   },
   {
-    "__docId__": 123,
+    "__docId__": 117,
     "kind": "method",
     "name": "transaction",
     "memberof": "src/Store.js~Store",
@@ -3029,8 +2842,8 @@
     "static": false,
     "longname": "src/Store.js~Store#transaction",
     "access": "public",
-    "description": "Perform a sequence of operations requiring exclusive access\n\nThe operation should request exclusive locks using the provided instance of the Lock class.\nIf a lock cannot be applied, the entire transaction will fail.\nThe operation code must structure calls to ensure that it holds all needed locks prior to making any data changes or assumptions about the immutability of loaded records.\n\nBy default, no attempt is made to retry if a lock is not available.\nLikewise, no attempt is made to retry the entire transaction if any lock is unavailable.\nBoth individual locks and the transaction as a whole can be configured to retry automatically after a delay.\nThe delay before the first transaction retry is specified by the `retryWait` option.\nThe maximum total transaction retry delay is specified by the `retryTimeout` option.",
-    "lineNumber": 209,
+    "description": "Perform a sequence of operations requiring exclusive access\n\nThe operation should request exclusive locks using the provided instance of the Lock class.\nIf a lock cannot be applied, the entire transaction will fail.\nThe operation code must structure calls to ensure that it holds all needed locks prior to making any data changes or assumptions about the immutability of loaded records.\n\nBy default, no attempt is made to retry if a lock is not available.\nLikewise, no attempt is made to retry the entire transaction if any lock is unavailable.\nBoth individual locks and the transaction as a whole can be configured to retry automatically after a delay.\nThe delay before the first transaction retry is specified by the `transactionWait` option.\nThe maximum total transaction retry delay is specified by the `transactionTimeout` option.",
+    "lineNumber": 316,
     "unknown": [
       {
         "tagName": "@returns",
@@ -3046,7 +2859,7 @@
         "spread": false,
         "optional": false,
         "name": "callback",
-        "description": "perform operations; may be called multiple times, may be halted at any point where a lock is acquired\n  Signature: `async function(lockObject, storeObject, tryCount): Promise<*>`"
+        "description": "perform operations; may be called multiple times, may be halted at any point where a lock is acquired\n  Signature: `async function(lockObject: Lock, storeObject: Store, tryCount: number): Promise<*>`"
       },
       {
         "nullable": null,
@@ -3065,8 +2878,8 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "options.retryTimeout",
-        "description": "int maximum milliseconds to retry transaction until giving up, default 0 (no retry)"
+        "name": "options.transactionTimeout",
+        "description": "maximum milliseconds to retry transaction until giving up, default 0 (no retry)"
       },
       {
         "nullable": null,
@@ -3075,8 +2888,8 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "options.retryWait",
-        "description": "int minimum milliseconds before first transaction retry, default 10 ms."
+        "name": "options.transactionWait",
+        "description": "minimum milliseconds before first transaction retry, default 10 ms."
       },
       {
         "nullable": null,
@@ -3086,7 +2899,7 @@
         "spread": false,
         "optional": false,
         "name": "options.lockTimeout",
-        "description": "int maximum milliseconds to retry each lock until giving up, default 0 (no retry)"
+        "description": "maximum milliseconds to retry each lock until giving up, default 0 (no retry)"
       },
       {
         "nullable": null,
@@ -3096,7 +2909,17 @@
         "spread": false,
         "optional": false,
         "name": "options.lockWait",
-        "description": "int minimum milliseconds before first lock retry, default 10 ms"
+        "description": "minimum milliseconds before first lock retry, default 10 ms"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Lock"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.lock",
+        "description": "use this Lock instance, do not create or manage a lock for just this transaction. Note: if lock is provided then transaction() will NOT automatically release held locks before resolving"
       }
     ],
     "return": {
@@ -3109,8 +2932,282 @@
     }
   },
   {
+    "__docId__": 118,
+    "kind": "method",
+    "name": "collections",
+    "memberof": "src/Store.js~Store",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Store.js~Store#collections",
+    "access": "public",
+    "description": "Return list of named collections\n\nReturned collections always have at least one record. (Empty collections are automatically deleted.)\n\nSpecial collection \"@all\" is not included in the returned list.",
+    "lineNumber": 380,
+    "return": {
+      "nullable": null,
+      "types": [
+        "array<string>"
+      ],
+      "spread": false,
+      "description": "named collections"
+    },
+    "params": []
+  },
+  {
+    "__docId__": 119,
+    "kind": "method",
+    "name": "traverse",
+    "memberof": "src/Store.js~Store",
+    "generator": false,
+    "async": true,
+    "static": false,
+    "longname": "src/Store.js~Store#traverse",
+    "access": "public",
+    "description": "Iterate over records in a collection",
+    "lineNumber": 395,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Promise<number>} total records traversed"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "collection",
+        "description": "name of collection, or \"@all\" to traverse all records in store"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "callback",
+        "description": "called for each record found\n  Signature: `function(identifier, recordIndex): {(void|bool}}`\n  If callback returns bool false, traversal is halted"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Promise<number>"
+      ],
+      "spread": false,
+      "description": "total records traversed"
+    }
+  },
+  {
+    "__docId__": 120,
+    "kind": "file",
+    "name": "src/exports.js",
+    "content": "/**\n * fs-atomic-data-store exports\n */\n\n// Libraries\nconst Store = require('./Store');\n\nexports = {};\n\n/**\n * Return a Store instance for interacting with a datastore\n *\n * @param {string} datadir - store root directory\n * @param {object} options\n * @param {string} options.rootDir - root directory for this store. Default is subdirectory \"store\" in current working directory\n * @param {number} options.fileMode - octal file permission mode when creating files. Default 0o660\n * @param {number} options.dirMode - octal file permission mode when creating directories. Default 0o770\n * @param {string} options.defaultPart - default part name to use when none is specified. Default \"r\"\n * @param {number} options.transactionTimeout - transaction timeout option (see {@link transaction}, default 0 (no retry)\n * @param {number} options.transactionWait - transaction wait option (see {@link transaction}, default 10 ms\n * @param {number} options.lockTimeout - lock timeout option (see {@link lock}, default 0 (no retry)\n * @param {number} options.lockWait - lock wait option (see {@link lock}, default 10 ms\n * @param {number} options.shredPassCount - number of times to overwrite data when shredding record parts. Default 3\n * @param {module} options.fsModule - use this instead of Node.js builtin fs (filesystem) module\n * @param {module} options.pathModule - use this instead of Node.js buitin path (filepaths) module\n * @param {function} options.recordClass - use this instead of internal Record class\n * @param {function} options.lockClass - use this instead of internal Lock class\n * @param {function} options.shredFunction - use this to generate overwrite data when shredding record parts. Default is crypto.randomBytes. Signature: `function(size): Buffer`\n * @returns {Store} datastore instance\n */\nexports.store = (datadir, options) => {\n\toptions.rootDir = datadir;\n\treturn new Store(options);\n};\n\nmodule.exports = exports;\n",
+    "static": true,
+    "longname": "/Users/ky/Documents/local/morvren-achronos/code/fs-atomic-data-store/src/exports.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 121,
+    "kind": "function",
+    "name": "store",
+    "memberof": "src/exports.js",
+    "generator": false,
+    "async": false,
+    "static": true,
+    "longname": "src/exports.js~store",
+    "access": "public",
+    "export": true,
+    "importPath": "fs-atomic-data-store",
+    "importStyle": "{store}",
+    "description": "Return a Store instance for interacting with a datastore",
+    "lineNumber": 31,
+    "unknown": [
+      {
+        "tagName": "@returns",
+        "tagValue": "{Store} datastore instance"
+      }
+    ],
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "datadir",
+        "description": "store root directory"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.rootDir",
+        "description": "root directory for this store. Default is subdirectory \"store\" in current working directory"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.fileMode",
+        "description": "octal file permission mode when creating files. Default 0o660"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.dirMode",
+        "description": "octal file permission mode when creating directories. Default 0o770"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.defaultPart",
+        "description": "default part name to use when none is specified. Default \"r\""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.transactionTimeout",
+        "description": "transaction timeout option (see {@link transaction}, default 0 (no retry)"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.transactionWait",
+        "description": "transaction wait option (see {@link transaction}, default 10 ms"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.lockTimeout",
+        "description": "lock timeout option (see {@link lock}, default 0 (no retry)"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.lockWait",
+        "description": "lock wait option (see {@link lock}, default 10 ms"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.shredPassCount",
+        "description": "number of times to overwrite data when shredding record parts. Default 3"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "module"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.fsModule",
+        "description": "use this instead of Node.js builtin fs (filesystem) module"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "module"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.pathModule",
+        "description": "use this instead of Node.js buitin path (filepaths) module"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.recordClass",
+        "description": "use this instead of internal Record class"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.lockClass",
+        "description": "use this instead of internal Lock class"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options.shredFunction",
+        "description": "use this to generate overwrite data when shredding record parts. Default is crypto.randomBytes. Signature: `function(size): Buffer`"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Store"
+      ],
+      "spread": false,
+      "description": "datastore instance"
+    }
+  },
+  {
     "kind": "index",
-    "content": "# fs-atomic-data-store\n\nkey-record store, uses filesystem, allows any data, transactional\n\n## Overview\n\n### Features\n\n* **key-record store**  \n  Persistent key-value database.  \n  A store is a collection of records, each record has a unique key and one or more values.\n\n* **uses filesystem**    \n  Plain files, nothing fancy.  \n  No external applications or libraries, pure Node.js javascript.\n\n* **allows any data**  \n  A record value can contain anything, no structure is imposed or supplied.  \n  For example this is _not_ a JSON database. You can store JSON if you want, or BSON or YAML or an octet-stream.\n\n* **transactional**  \n  Supports atomic operations across one or multiple records.  \n  You can read-then-write or read-then-delete with assurance that no other actor is operating simultaneously.\n\n### Design goals\n\n* Self-contained. No fancy dependencies, no database engine.\n* No assumptions about stored data. Values are binary buffers.\n* Streaming.\n* No constraints. Throughput and size limitations are provided by the system not the library. Caching is done elsewhere.\n* Atomic locks across processes. OK for simultaneous requests to Node.js, multiple Node.js instances, network/shared filesystems, etc.\n* POSIX-compliant.\n\n### Why use it?\n\n* If you need a persistent key-value store.\n* If your dataset may be large.\n* If individual entries may be large in size.\n* If you need control over how data is serialized (e.g. not being coerced into JSON when you may sometimes need to store big binary files)\n* If you need to guarantee that only one actor is working on a record at a time\n* If you don't need (or will provide your own) automatic magic for caching, change observers, object persistence, etc.\n\n### Why build it?\n\n* We needed a simple storage solution.\n* We didn't need indexes or foreign keys or anything like that, and we didn't want to rely on an external database system without a compelling reason.\n* We need to support both *lots of little records* and *some records being huge binary files*, so storing as e.g. JSON is no good.\n* Basically every module we could find was either tinker-toy or had a baked in record format like JSON. (Whereas we wanted BSON or MessagePack mostly, but sometimes just an octet-stream).\n* So, we built one. Here it is.\n\n### Environment\n\n* Node v10+ series (uses ES6 syntax)\n* Built for Mac and Linux. Any POSIX-compliant system *should* be fine. Windows should be ok in theory although this is completely untested (2019-03).\n* Any filesystem is supported.\n\n## Installation\n\nInstall via npm:\n\n npm install --save fs-atomic-data-store\n\n## Usage\n\n```javascript\nconst fads = require('fs-atomic-data-store');\n\n// Access a store, provide store root directory. Store may or may not exist\nlet mystore = new fads.Store('./path/to/my/store/dir');\n\n// Access a collection by name. Collection may or may not exist\nlet mycollection = mystore.collection('foo');\n\n// Access a record by identifier. Record may or may not exist\nlet myrecord = mycollection.record('bar');\n\n// Read record into Buffer\nmyrecord.readBuffer().then((content) => {\n\tconsole.log('foo.bar contains: ' + content.toString('utf8'));\n});\n```\n## Notes\n\n### Format\n\n* A store is a set of records stored within a directory on the filesystem.\n* Stores are subdivided into named collections.\n* Each collection has a string name.  \n  Names should be 7-bit ASCII, suggested max size of 64 bytes.\n* Each collection has zero or more records.\n* Each record has a string identifier.  \n  Identifiers should be 7-bit ASCII, suggested max size of 200 bytes.  \n  For non-ASCII or binary identifiers, serialize first, e.g. by converting to hex (`mybufferkey.toString('hex')`).\n* Each record has one or more content parts.\n* Each part has a string key (7-bit ASCII, suggested max size 32 bytes).\n* Each part has a binary (buffer) value.\n\n### Locking model\n\nThe use case this model is designed for is one where simultaneous access is expected to be uncommon, but must be absolutely guaranteed to never happen.\n\n* Locks can be established at record level, collection level or \"globally\" at store level.\n* Record locks are guaranteed exclusive and atomic.  \n  No one record can be locked by multiple actors at the same time.  \n  This includes different actors running within the same Node process.\n* Store and collection locks are also guaranteed exclusive and atomic.  \n  Once a global lock is established, no further record locks will be allowed.  \n  To ensure exclusive access to enire store/collection, wait until all existing record locks have been unlocked.\n* Locks are first-come-first-served, non-blocking, non-queued.  \n  If a requested lock is unavailable, fail immediately (default) or retry with escalating delay.  \n  Does not block.  \n  Does not keep a lock request queue, so prioritization for highly-contested resources must be handled by the application.\n\nThe default included locking system is a wrapper around [proper-lockfile](https://www.npmjs.com/package/proper-lockfile).\n\n### Storage on filesystem\n\n* Each collection is a subdirectory within `$dataDir/records`.\n* Each record is a nested subdirectory within the collection directory, path based on a hash of the record identifier.\n* Each record part is stored in a separate plain file within the record directory.\n* Lock data is stored in `$datadir/locks`.\n\n### Backup strategies\n\n* archive tool\n\t* if\n\t\t* write volume is low\n\t\t* a point-in-time snapshot is not absolutely required\n\t\t* you can live with the small chance of catching a record in the middle of a write\n\t* then\n\t\t* use `fsync` or `tar` or your favourite archiving utility\n* store-level lock plus archive tool\n\t* if\n\t\t* you need consistency and don't mind some downtime\n\t* then\n\t\t* establish a store-level lock, wait for other open locks to clear, use `fsync`/`tar`/etc., then remove the store-level lock\n* traversal script\n\t* if\n\t\t* downtime is no good\n\t\t* even small chance of one corrupted record in archive is no good\n\t\t* you don't need a point-in-time snapshot\n\t* then\n\t\t* write a program to traverse the store, for each record lock then copy/add to archive then unlock\n* snapshotting filesystem\n\t* if\n\t\t* you need a real point-in-time snapshot\n\t\t* and no downtime\n\t\t* and no corrupted records in archive from bad reads\n\t\t* and a pony\n\t* then\n\t\t* use a snapshotting filesystem\n\t\t* and the power of wishes\n",
+    "content": "# fs-atomic-data-store\n\nkey-record store, uses filesystem, allows any data, transactional\n\n## Overview\n\n### Features\n\n* **key-record store**  \n  Persistent key-value database.  \n  A store is a collection of records, each record has a unique key and one or more values.\n\n* **uses filesystem**    \n  Plain files, nothing fancy.  \n  No external applications or libraries, pure Node.js javascript.\n\n* **allows any data**  \n  A record value can contain anything, no structure is imposed or supplied.  \n  For example this is _not_ a JSON database. You can store JSON if you want, or BSON or YAML or an octet-stream.\n\n* **transactional**  \n  Supports atomic operations across one or multiple records.  \n  You can read-then-write or read-then-delete with assurance that no other actor is operating simultaneously.\n\n### Design goals\n\n* Self-contained. No fancy dependencies, no database engine.\n* No assumptions about stored data. Values are binary buffers.\n* Streaming.\n* No constraints. Throughput and size limitations are provided by the system not the library. Caching is done elsewhere.\n* Atomic locks across processes. OK for simultaneous requests to Node.js, multiple Node.js instances, network/shared filesystems, etc.\n* POSIX-compliant.\n\n### Why use it?\n\n* If you need a persistent key-value store.\n* If your dataset may be large.\n* If individual entries may be large in size.\n* If you need control over how data is serialized (e.g. not being coerced into JSON when you may sometimes need to store big binary files)\n* If you need to guarantee that only one actor is working on a record at a time\n* If you don't need (or will provide your own) automatic magic for caching, change observers, object persistence, etc.\n\n### Why build it?\n\n* We needed a simple storage solution.\n* We didn't need indexes or foreign keys or anything like that, and we didn't want to rely on an external database system without a compelling reason.\n* We need to support both *lots of little records* and *some records being huge binary files*, so storing as e.g. JSON is no good.\n* Basically every module we could find was either tinker-toy or had a baked in record format like JSON. (Whereas we wanted BSON or MessagePack mostly, but sometimes just an octet-stream).\n* So, we built one. Here it is.\n\n### Environment\n\n* Node v10+ series (uses ES6 syntax)\n* Built for Mac and Linux. Any POSIX-compliant system *should* be fine. Windows should be ok in theory although this is completely untested (as of 2019-04).\n* Any filesystem is supported.\n\n## Installation\n\nInstall via npm:\n\n npm install --save fs-atomic-data-store\n\n## Usage\n\n```javascript\nconst fsads = require('fs-atomic-data-store');\n\n// Access a store, provide store root directory (store may or may not exist already)\nlet mystore = fsads.store('./path/to/my/store/dir');\n\n// Access a record by identifier (record may or may not exist already)\nlet myrecord = mystore.record('myrecord');\n\n// Read and write a record using Buffers\nlet content = await myrecord.readBuffer();\nawait myrecord.writeBuffer(Buffer.from('new content'));\n\n// Lock a record then write\nmylock = mystore.lock();\ntry {\n\tawait mylock.lock('myrecord');\n\tawait myrecord.writeBuffer(Buffer.from('atomically written content'));\n}\ncatch (err) {\n\t// ...\n}\nfinally {\n\tmylock.unlockAll();\n}\n\n// Perform a transaction involving multiple locks, allowing for retries in case of lock contention\nawait mystore.transaction(\n\t(lock) => {\n\t\t// Get record objects (does not load any data yet)\n\t\tlet record1 = mystore.record('record1');\n\t\tlet record2 = mystore.record('record2');\n\n\t\t// Lock records\n\t\tawait lock.lock('record1');\n\t\tawait lock.lock('record2');\n\n\t\t// Read the records. We do this only after locking to ensure no one changes the content between reading and writing\n\t\tlet content1 = await record1.readBuffer();\n\t\tlet content2 = await record2.readBuffer();\n\n\t\t// Operate on the record data\n\t\tlet newcontent1 = Buffer.concat(content1, Buffer.from(', also record2 is '), content2);\n\t\tlet newcontent2 = Buffer.concat(content2, Buffer.from(', also record1 is '), content1);\n\t\t\n\t\t// Update the records\n\t\tawait record1.writeBuffer(newcontent1);\n\t\tawait record2.writeBuffer(newcontent2);\n\n\t\t// all locks are released automatically by transaction(), we don't need to do it explicitly\n\t},\n\t{\n\t\t// Retry for up to a maximum of 50 milliseconds\n\t\ttransactionTimeout: 50\n\t}\n);\n\n// Iterate over all records\nawait mystore.traverse('@all', (identifier) => {\n\tconsole.log('found record identifier ' + identifier);\n});\n```\n## Notes\n\n### Format\n\n* A store is a set of records stored within a directory on the filesystem.\n* Each record has a string identifier.  \n  Identifiers should be 7-bit ASCII, suggested max size of 100 bytes.  \n  Identifiers should not begin with a dot (`.`) or at-sign (`@`).  \n  For non-ASCII or binary identifiers, serialize first, e.g. by converting to hex (`mybufferidentifier.toString('hex')`).\n* Each record has one or more content parts.\n* Each part has a string name.  \n  Part names should be 7-bit ASCII, suggested max size 50 bytes.  \n  Part names should not begin with a dot (`.`) or at-sign (`@`).\n* Each part has a binary (buffer) value.\n* Records may belong to collections.\n* Each collection has a string name.  \n  Collection names should be 7-bit ASCII, suggested max size of 50 bytes.\n  Collection names should not begin with a dot (`.`) or at-sign (`@`).\n* All records belong to the special collection \"@all\".\n* Records can belong to zero or more other collections.\n\n### Locking model\n\nThe use case this model is designed for is one where simultaneous access is expected to be uncommon, but must be absolutely guaranteed to never happen.\n\n* Locks can be established at record level or \"globally\" at store level.\n* Record locks are guaranteed exclusive and atomic.  \n  No one record can be locked by multiple actors at the same time.  \n  This includes different actors running within the same Node process, and actors running within other Node processes utilizing the same physical store.\n* Store locks are also guaranteed exclusive and atomic.  \n  Once a store lock is established, no further locks will be allowed.  \n  Existing record locks are not cancelled.  \n  To ensure exclusive access, wait until all existing record locks have been unlocked.\n* Locks are first-come-first-served, non-blocking, non-queued.  \n  If a requested lock is unavailable, fail immediately (default) or retry with escalating delay (up to a specified maximum amount of time).  \n  Does not block.  \n  Does not keep a lock request queue, so prioritization for highly-contested resources must be handled by the application.\n\nThe default included locking system is a wrapper around [proper-lockfile](https://www.npmjs.com/package/proper-lockfile).\n\n### Storage on filesystem\n\n* Each record is a nested subdirectory within `$dataDir/records/`, path based on a hash of the record identifier.\n* Each record part is stored in a separate plain file within the record directory.\n* Each collection is a subdirectory within `$dataDir/collections`.\n* Each record belonging to a collection is an empty nested subdirectory within the collection, path based on a hash of the record identifier.\n* Lock data is stored in `$datadir/locks`.\n\n### Backup strategies\n\n* archive tool\n\t* if\n\t\t* write volume is low\n\t\t* a point-in-time snapshot is not absolutely required\n\t\t* you can live with the small chance of catching a record in the middle of a write\n\t* then\n\t\t* use `fsync` or `tar` or your favourite archiving utility\n* store-level lock plus archive tool\n\t* if\n\t\t* you need consistency and don't mind some downtime\n\t* then\n\t\t* establish a store-level lock, wait for other open locks to clear, use `fsync`/`tar`/etc., then remove the store-level lock\n* traversal script\n\t* if\n\t\t* downtime is no good\n\t\t* even small chance of one corrupted record in archive is no good\n\t\t* you don't need a point-in-time snapshot\n\t* then\n\t\t* write a program to traverse the store, for each record lock then copy/add to archive then unlock\n* snapshotting filesystem\n\t* if\n\t\t* you need a real point-in-time snapshot\n\t\t* and no downtime\n\t\t* and no corrupted records in archive from bad reads\n\t\t* and a pony\n\t* then\n\t\t* use a snapshotting filesystem\n\t\t* and the power of wishes\n",
     "longname": "/Users/ky/Documents/local/morvren-achronos/code/fs-atomic-data-store/README.md",
     "name": "./README.md",
     "static": true,
@@ -3118,7 +3215,7 @@
   },
   {
     "kind": "packageJSON",
-    "content": "{\n  \"name\": \"fs-atomic-data-store\",\n  \"version\": \"0.0.1\",\n  \"description\": \"key-record store, allows any data, uses filesystem, supports transactions\",\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"github:morvren-achronos/node-fs-atomic-data-store\"\n  },\n  \"keywords\": [\n    \"storage\",\n    \"file\",\n    \"filesystem\",\n    \"nosql\",\n    \"key-store\",\n    \"atomic\",\n    \"transactional\"\n  ],\n  \"author\": \"Ky Patterson Morvren-Achronos <ky@morvren-achronos.com>\",\n  \"license\": \"Apache-2.0\",\n  \"main\": \"index.js\",\n  \"directories\": {\n    \"lib\": \"src\",\n    \"doc\": \"doc\",\n    \"test\": \"test\"\n  },\n  \"scripts\": {\n    \"test\": \"mocha\",\n    \"doc\": \"esdoc\",\n    \"lint\": \"eslint ./src ./test\"\n  },\n  \"dependencies\": {\n    \"node\": \"^10.10.0\",\n    \"proper-lockfile\": \"^4.0.0\"\n  },\n  \"devDependencies\": {\n    \"chai\": \"^4.2.0\",\n    \"chai-as-promised\": \"^7.1.1\",\n    \"esdoc\": \"^1.1.0\",\n    \"esdoc-node\": \"^1.0.4\",\n    \"esdoc-standard-plugin\": \"^1.0.0\",\n    \"eslint\": \"^5.15.2\",\n    \"mocha\": \"^5.2.0\",\n    \"rimraf\": \"^2.6.3\"\n  },\n  \"esdoc\": {\n    \"source\": \"./src\",\n    \"destination\": \"./doc\",\n    \"plugins\": [\n      {\n        \"name\": \"esdoc-standard-plugin\",\n        \"option\": {\n          \"test\": {\n            \"source\": \"./test/\",\n            \"interfaces\": [\n              \"describe\",\n              \"it\",\n              \"context\",\n              \"suite\",\n              \"test\"\n            ]\n          }\n        }\n      },\n      {\n        \"name\": \"esdoc-node\"\n      }\n    ]\n  }\n}\n",
+    "content": "{\n  \"name\": \"fs-atomic-data-store\",\n  \"version\": \"0.0.1\",\n  \"description\": \"key-record store, allows any data, uses filesystem, supports transactions\",\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"github:morvren-achronos/node-fs-atomic-data-store\"\n  },\n  \"keywords\": [\n    \"storage\",\n    \"file\",\n    \"filesystem\",\n    \"nosql\",\n    \"key-store\",\n    \"atomic\",\n    \"transactional\"\n  ],\n  \"author\": \"Ky Patterson Morvren-Achronos <ky@morvren-achronos.com>\",\n  \"license\": \"Apache-2.0\",\n  \"main\": \"index.js\",\n  \"directories\": {\n    \"bin\": \"bin\",\n    \"lib\": \"src\",\n    \"doc\": \"doc\",\n    \"test\": \"test\"\n  },\n  \"scripts\": {\n    \"doc\": \"esdoc\",\n    \"check-shred\": \"./bin/check-shred\",\n    \"lint\": \"eslint ./src ./test\",\n    \"test\": \"mocha\"\n  },\n  \"dependencies\": {\n    \"node\": \"^10.10.0\",\n    \"proper-lockfile\": \"^4.0.0\"\n  },\n  \"devDependencies\": {\n    \"chai\": \"^4.2.0\",\n    \"chai-as-promised\": \"^7.1.1\",\n    \"esdoc\": \"^1.1.0\",\n    \"esdoc-importpath-plugin\": \"^1.0.2\",\n    \"esdoc-node\": \"^1.0.4\",\n    \"esdoc-standard-plugin\": \"^1.0.0\",\n    \"eslint\": \"^5.15.2\",\n    \"mocha\": \"^5.2.0\",\n    \"rimraf\": \"^2.6.3\"\n  },\n  \"esdoc\": {\n    \"source\": \"./src\",\n    \"destination\": \"./doc\",\n    \"plugins\": [\n      {\n        \"name\": \"esdoc-standard-plugin\",\n        \"option\": {\n          \"test\": {\n            \"source\": \"./test/\",\n            \"interfaces\": [\n              \"describe\",\n              \"it\",\n              \"context\",\n              \"suite\",\n              \"test\"\n            ]\n          }\n        }\n      },\n      {\n        \"name\": \"esdoc-node\"\n      },\n      {\n        \"name\": \"esdoc-importpath-plugin\",\n        \"option\": {\n          \"stripPackageName\": false,\n          \"replaces\": [\n            {\"from\": \"^src/exports.js\", \"to\": \"\"}\n          ]\n        }\n      }\n    ]\n  }\n}\n",
     "longname": "/Users/ky/Documents/local/morvren-achronos/code/fs-atomic-data-store/package.json",
     "name": "package.json",
     "static": true,

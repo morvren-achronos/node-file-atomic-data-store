@@ -29,23 +29,22 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Lock.js~Lock.html">Lock</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Record.js~Record.html">Record</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/Store.js~Store.html">Store</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-LockInfo">LockInfo</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-store">store</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Record from &apos;<span><a href="file/src/Record.js.html#lineNumber13">fs-atomic-data-store/src/Record.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Record from &apos;<span><a href="file/src/Record.js.html#lineNumber20">fs-atomic-data-store/src/Record.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/Record.js.html#lineNumber13">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/Record.js.html#lineNumber20">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -66,7 +65,7 @@
   
   
   <div class="description" data-ice="description"><p>Interact with a record</p>
-<p>Do not instantiate this class directly, use methods from class {Store}</p>
+<p>Do not instantiate this class directly, use method <span><a href="class/src/Store.js~Store.html#instance-method-record">Store.record</a></span></p>
 </div>
   
 
@@ -99,7 +98,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-constructor-constructor">constructor</a></span></span><span class="code" data-ice="signature">(store: <span><a href="class/src/Store.js~Store.html">Store</a></span>, collection: <span><a href="class/src/Collection.js~Collection.html">Collection</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-constructor-constructor">constructor</a></span></span><span class="code" data-ice="signature">(store: <span><a href="class/src/Store.js~Store.html">Store</a></span>, collection: <span>Collection</span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
         </p>
       </div>
       <div>
@@ -122,35 +121,6 @@
   <tbody>
   
   <tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      <span class="kind" data-ice="kind">get</span>
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-          
-          
-          
-          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-get-collection">collection</a></span></span><span class="code" data-ice="signature">: <span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Collection instance for this record</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
     <td>
       <span class="access" data-ice="access">public</span>
       
@@ -228,7 +198,7 @@
           
           
           
-          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-member-_col">_col</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-member-_dirParts">_dirParts</a></span></span><span class="code" data-ice="signature">: <span>*</span></span>
         </p>
       </div>
       <div>
@@ -319,13 +289,13 @@
           
           <span data-ice="async">async</span>
           
-          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-deleteAll">deleteAll</a></span></span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&gt;</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-addCollection">addCollection</a></span></span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>bool</span>&gt;</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Delete entire record (delete all record parts)</p>
+        <div data-ice="description"><p>Add record to a collection</p>
 </div>
       </div>
     </td>
@@ -348,7 +318,65 @@
           
           <span data-ice="async">async</span>
           
-          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-deleteMultipleParts">deleteMultipleParts</a></span></span><span class="code" data-ice="signature">(parts: <span>array</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&gt;</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-addMultipleCollections">addMultipleCollections</a></span></span><span class="code" data-ice="signature">(collections: <span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Add record to multiple collections</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-deleteAllParts">deleteAllParts</a></span></span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Delete all record parts</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-deleteMultipleParts">deleteMultipleParts</a></span></span><span class="code" data-ice="signature">(parts: <span>array</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
         </p>
       </div>
       <div>
@@ -406,13 +434,13 @@
           
           <span data-ice="async">async</span>
           
-          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-dir">dir</a></span></span><span class="code" data-ice="signature">(create: <span>bool</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-deleteRecord">deleteRecord</a></span></span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Get directory path of record</p>
+        <div data-ice="description"><p>Delete entire record (delete all record parts and remove from all collections)</p>
 </div>
       </div>
     </td>
@@ -435,13 +463,13 @@
           
           <span data-ice="async">async</span>
           
-          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-filepath">filepath</a></span></span><span class="code" data-ice="signature">(part: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, createDir: <span>bool</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-dir">dir</a></span></span><span class="code" data-ice="signature">(create: <span>bool</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Get file path of record part</p>
+        <div data-ice="description"><p>Get directory path of record</p>
 </div>
       </div>
     </td>
@@ -471,6 +499,35 @@
         
         
         <div data-ice="description"><p>Return hex-encoded 32-bit unsigned integer hash of record identifier</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-listCollections">listCollections</a></span></span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Return collections this record is in</p>
 </div>
       </div>
     </td>
@@ -609,13 +666,129 @@
           
           <span data-ice="async">async</span>
           
-          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-shredMultipleParts">shredMultipleParts</a></span></span><span class="code" data-ice="signature">(parts: <span>array</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-removeAllCollections">removeAllCollections</a></span></span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Overwrite contents of multiple record parts</p>
+        <div data-ice="description"><p>Remove record from all collections</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-removeCollection">removeCollection</a></span></span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>bool</span>&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Remove record from a collection</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-removeMultipleCollections">removeMultipleCollections</a></span></span><span class="code" data-ice="signature">(collections: <span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Remove record from multiple collections</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-setCollections">setCollections</a></span></span><span class="code" data-ice="signature">(collections: <span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Set collections for this record</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-shredMultipleParts">shredMultipleParts</a></span></span><span class="code" data-ice="signature">(parts: <span>array</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Delete multiple record parts and make contents unrecoverable</p>
 </div>
       </div>
     </td>
@@ -644,7 +817,7 @@
       <div>
         
         
-        <div data-ice="description"><p>Overwrite part contents</p>
+        <div data-ice="description"><p>Delete a record part and make contents unrecoverable</p>
 </div>
       </div>
     </td>
@@ -818,6 +991,93 @@
           
           <span data-ice="async">async</span>
           
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-_cleanupDirs">_cleanupDirs</a></span></span><span class="code" data-ice="signature">(dirpath: <span>*</span>, depth: <span>*</span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Remove empty record storage directories</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">private</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-_getDirParts">_getDirParts</a></span></span><span class="code" data-ice="signature">(): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Return array of subdirs based on record hash</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">private</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
+          <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-_iterateCollections">_iterateCollections</a></span></span><span class="code" data-ice="signature">(collections: <span>*</span>, callback: <span>*</span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Run callback on provided collections, providing dir</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">private</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          <span data-ice="async">async</span>
+          
           <span class="code" data-ice="name"><span><a href="class/src/Record.js~Record.html#instance-method-_singlePartOperation">_singlePartOperation</a></span></span><span class="code" data-ice="signature">(method: <span>*</span>, part: <span>*</span>, value: <span>*</span>): <span>*</span></span>
         </p>
       </div>
@@ -851,11 +1111,11 @@
     
     
     
-    <span class="code" data-ice="name">constructor</span><span class="code" data-ice="signature">(store: <span><a href="class/src/Store.js~Store.html">Store</a></span>, collection: <span><a href="class/src/Collection.js~Collection.html">Collection</a></span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+    <span class="code" data-ice="name">constructor</span><span class="code" data-ice="signature">(store: <span><a href="class/src/Store.js~Store.html">Store</a></span>, collection: <span>Collection</span>, identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber21">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber31">source</a></span></span>
     </span>
   </h3>
 
@@ -863,6 +1123,7 @@
   
   
   <div data-ice="description"><p>Get record interaction instance</p>
+<p>Do not instantiate this class directly, use method <span><a href="class/src/Store.js~Store.html#instance-method-record">Store.record</a></span></p>
 </div>
 
   
@@ -884,7 +1145,7 @@
     </tr>
 <tr data-ice="property" data-depth="0">
       <td data-ice="name" class="code" data-depth="0">collection</td>
-      <td data-ice="type" class="code"><span><a href="class/src/Collection.js~Collection.html">Collection</a></span></td>
+      <td data-ice="type" class="code"><span>Collection</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>object</p>
 </td>
@@ -922,50 +1183,6 @@
 <div data-ice="memberDetails"><h2 data-ice="title">Public Members</h2>
 
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-get-collection">
-    <span class="access" data-ice="access">public</span>
-    
-    <span class="kind" data-ice="kind">get</span>
-    
-    
-    
-    <span class="code" data-ice="name">collection</span><span class="code" data-ice="signature">: <span><a href="class/src/Collection.js~Collection.html">Collection</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber53">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Collection instance for this record</p>
-</div>
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-get-identifier">
     <span class="access" data-ice="access">public</span>
     
@@ -977,7 +1194,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber62">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber63">source</a></span></span>
     </span>
   </h3>
 
@@ -1021,7 +1238,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber44">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber54">source</a></span></span>
     </span>
   </h3>
 
@@ -1056,18 +1273,18 @@
 <h2 data-ice="title">Private Members</h2>
 
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-_col">
+  <h3 data-ice="anchor" id="instance-member-_dirParts">
     <span class="access" data-ice="access">private</span>
     
     
     
     
     
-    <span class="code" data-ice="name">_col</span><span class="code" data-ice="signature">: <span>*</span></span>
+    <span class="code" data-ice="name">_dirParts</span><span class="code" data-ice="signature">: <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber29">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber43">source</a></span></span>
     </span>
   </h3>
 
@@ -1110,7 +1327,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber33">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber39">source</a></span></span>
     </span>
   </h3>
 
@@ -1153,7 +1370,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber25">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber35">source</a></span></span>
     </span>
   </h3>
 
@@ -1188,25 +1405,173 @@
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-deleteAll">
+  <h3 data-ice="anchor" id="instance-method-addCollection">
     <span class="access" data-ice="access">public</span>
     
     
     
     <span data-ice="async">async</span>
     
-    <span class="code" data-ice="name">deleteAll</span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&gt;</span>
+    <span class="code" data-ice="name">addCollection</span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>bool</span>&gt;</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber535">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber615">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Delete entire record (delete all record parts)</p>
+  <div data-ice="description"><p>Add record to a collection</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">collection</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>name of collection</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>bool</span>&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>true if record was not in collection and was added, false record was already in collection</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-addMultipleCollections">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">addMultipleCollections</span><span class="code" data-ice="signature">(collections: <span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber444">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Add record to multiple collections</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">collections</td>
+      <td data-ice="type" class="code"><span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>collection names to add record to</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>collections added</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-deleteAllParts">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">deleteAllParts</span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber593">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Delete all record parts</p>
 </div>
 
   
@@ -1219,8 +1584,8 @@
     <table>
       <tbody>
         <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&gt;</td>
-          <td class="return-desc" data-ice="returnDescription"><p>removed part names</p>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>parts deleted</p>
 </td>
         </tr>
       </tbody>
@@ -1252,11 +1617,11 @@
     
     <span data-ice="async">async</span>
     
-    <span class="code" data-ice="name">deleteMultipleParts</span><span class="code" data-ice="signature">(parts: <span>array</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&gt;</span>
+    <span class="code" data-ice="name">deleteMultipleParts</span><span class="code" data-ice="signature">(parts: <span>array</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber350">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber317">source</a></span></span>
     </span>
   </h3>
 
@@ -1281,7 +1646,7 @@
       <td data-ice="name" class="code" data-depth="0">parts</td>
       <td data-ice="type" class="code"><span>array</span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>part names to remove</p>
+      <td data-ice="description"><p>part names to delete</p>
 </td>
     </tr>
 </tbody>
@@ -1294,8 +1659,8 @@
     <table>
       <tbody>
         <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&gt;</td>
-          <td class="return-desc" data-ice="returnDescription"><p>part names deleted</p>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>parts deleted</p>
 </td>
         </tr>
       </tbody>
@@ -1331,7 +1696,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber526">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber584">source</a></span></span>
     </span>
   </h3>
 
@@ -1339,6 +1704,7 @@
   
   
   <div data-ice="description"><p>Delete a record part</p>
+<p>Parts that do not exist are ignored (not treated as an error).</p>
 </div>
 
   
@@ -1394,6 +1760,62 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-deleteRecord">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">deleteRecord</span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber516">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Delete entire record (delete all record parts and remove from all collections)</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-dir">
     <span class="access" data-ice="access">public</span>
     
@@ -1405,7 +1827,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber98">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber101">source</a></span></span>
     </span>
   </h3>
 
@@ -1413,7 +1835,7 @@
   
   
   <div data-ice="description"><p>Get directory path of record</p>
-<p>Directory is created if it doesn&apos;t exist.</p>
+<p>Utility function, normally there is no need to call this directly.</p>
 </div>
 
   
@@ -1469,87 +1891,6 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-filepath">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    <span data-ice="async">async</span>
-    
-    <span class="code" data-ice="name">filepath</span><span class="code" data-ice="signature">(part: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, createDir: <span>bool</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber116">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Get file path of record part</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">part</td>
-      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-      <td data-ice="appendix"><ul><li>nullable: true</li></ul></td>
-      <td data-ice="description"><p>name of part, or null for default part</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" class="code" data-depth="0">createDir</td>
-      <td data-ice="type" class="code"><span>bool</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>true to create directory if it does not exist</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tbody>
-        <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</td>
-          <td class="return-desc" data-ice="returnDescription"><p>filepath</p>
-</td>
-        </tr>
-      </tbody>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-generateHash">
     <span class="access" data-ice="access">public</span>
     
@@ -1561,7 +1902,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber74">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber77">source</a></span></span>
     </span>
   </h3>
 
@@ -1569,6 +1910,7 @@
   
   
   <div data-ice="description"><p>Return hex-encoded 32-bit unsigned integer hash of record identifier</p>
+<p>Utility function, normally there is no need to call this directly.</p>
 <p>Based on npm module string-hash (<a href="https://github.com/darkskyapp/string-hash">https://github.com/darkskyapp/string-hash</a>) by The Dark Sky Company, LLC
 That code is licensed under CC0-1.0</p>
 </div>
@@ -1609,6 +1951,63 @@ That code is licensed under CC0-1.0</p>
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-listCollections">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">listCollections</span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber415">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Return collections this record is in</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>collection names</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-listParts">
     <span class="access" data-ice="access">public</span>
     
@@ -1620,7 +2019,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber131">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber120">source</a></span></span>
     </span>
   </h3>
 
@@ -1641,7 +2040,7 @@ That code is licensed under CC0-1.0</p>
       <tbody>
         <tr>
           <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&gt;</td>
-          <td class="return-desc" data-ice="returnDescription"><p>partnames</p>
+          <td class="return-desc" data-ice="returnDescription"><p>part names</p>
 </td>
         </tr>
       </tbody>
@@ -1677,7 +2076,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber485">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber541">source</a></span></span>
     </span>
   </h3>
 
@@ -1751,7 +2150,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber208">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber185">source</a></span></span>
     </span>
   </h3>
 
@@ -1846,7 +2245,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber506">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber562">source</a></span></span>
     </span>
   </h3>
 
@@ -1908,6 +2307,287 @@ That code is licensed under CC0-1.0</p>
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-removeAllCollections">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">removeAllCollections</span><span class="code" data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber636">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Remove record from all collections</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>collections removed</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-removeCollection">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">removeCollection</span><span class="code" data-ice="signature">(collection: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>bool</span>&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber627">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Remove record from a collection</p>
+<p>Collections that the record does not belong to are ignored (not treated as an error).</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">collection</td>
+      <td data-ice="type" class="code"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>name of collection</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>bool</span>&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>true if record was in collection and was removed, false record was not in collection</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-removeMultipleCollections">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">removeMultipleCollections</span><span class="code" data-ice="signature">(collections: <span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber494">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Remove record from multiple collections</p>
+<p>Collections that the record does not belong to are ignored (not treated as an error).</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">collections</td>
+      <td data-ice="type" class="code"><span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>collection names to remove record from</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>collections removed</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-setCollections">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">setCollections</span><span class="code" data-ice="signature">(collections: <span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber648">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Set collections for this record</p>
+<p>Add record to/remove record from collections to match provided list.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">collections</td>
+      <td data-ice="type" class="code"><span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;</td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>collection names to add record to (record will be removed from others)</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-shredMultipleParts">
     <span class="access" data-ice="access">public</span>
     
@@ -1915,18 +2595,19 @@ That code is licensed under CC0-1.0</p>
     
     <span data-ice="async">async</span>
     
-    <span class="code" data-ice="name">shredMultipleParts</span><span class="code" data-ice="signature">(parts: <span>array</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</span>
+    <span class="code" data-ice="name">shredMultipleParts</span><span class="code" data-ice="signature">(parts: <span>array</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber405">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber355">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Overwrite contents of multiple record parts</p>
+  <div data-ice="description"><p>Delete multiple record parts and make contents unrecoverable</p>
+<p>Parts that do not exist are ignored (not treated as an error).</p>
 </div>
 
   
@@ -1956,8 +2637,9 @@ That code is licensed under CC0-1.0</p>
     <table>
       <tbody>
         <tr>
-          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</td>
-          
+          <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>array</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>&gt;&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>parts shredded</p>
+</td>
         </tr>
       </tbody>
     </table>
@@ -1992,14 +2674,15 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber545">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber605">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Overwrite part contents</p>
+  <div data-ice="description"><p>Delete a record part and make contents unrecoverable</p>
+<p>Parts that do not exist are ignored (not treated as an error).</p>
 </div>
 
   
@@ -2030,7 +2713,8 @@ That code is licensed under CC0-1.0</p>
       <tbody>
         <tr>
           <td class="return-type code" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>void</span>&gt;</td>
-          
+          <td class="return-desc" data-ice="returnDescription"><p>true if part existed and was shredded, false if it did not exist</p>
+</td>
         </tr>
       </tbody>
     </table>
@@ -2065,7 +2749,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber169">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber156">source</a></span></span>
     </span>
   </h3>
 
@@ -2089,7 +2773,7 @@ That code is licensed under CC0-1.0</p>
       <td data-ice="name" class="code" data-depth="0">parts</td>
       <td data-ice="type" class="code"><span>array</span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>part names to remove</p>
+      <td data-ice="description"><p>part names to look up</p>
 </td>
     </tr>
 </tbody>
@@ -2139,7 +2823,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber475">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber531">source</a></span></span>
     </span>
   </h3>
 
@@ -2213,7 +2897,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber496">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber552">source</a></span></span>
     </span>
   </h3>
 
@@ -2293,7 +2977,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber276">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber244">source</a></span></span>
     </span>
   </h3>
 
@@ -2388,7 +3072,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber516">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber572">source</a></span></span>
     </span>
   </h3>
 
@@ -2452,6 +3136,206 @@ That code is licensed under CC0-1.0</p>
 <h2 data-ice="title">Private Methods</h2>
 
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-_cleanupDirs">
+    <span class="access" data-ice="access">private</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">_cleanupDirs</span><span class="code" data-ice="signature">(dirpath: <span>*</span>, depth: <span>*</span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber719">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Remove empty record storage directories</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">dirpath</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">depth</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-_getDirParts">
+    <span class="access" data-ice="access">private</span>
+    
+    
+    
+    
+    
+    <span class="code" data-ice="name">_getDirParts</span><span class="code" data-ice="signature">(): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber671">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Return array of subdirs based on record hash</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type code" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-_iterateCollections">
+    <span class="access" data-ice="access">private</span>
+    
+    
+    
+    <span data-ice="async">async</span>
+    
+    <span class="code" data-ice="name">_iterateCollections</span><span class="code" data-ice="signature">(collections: <span>*</span>, callback: <span>*</span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber704">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Run callback on provided collections, providing dir</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">collections</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" class="code" data-depth="0">callback</td>
+      <td data-ice="type" class="code"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-_singlePartOperation">
     <span class="access" data-ice="access">private</span>
     
@@ -2463,7 +3347,7 @@ That code is licensed under CC0-1.0</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber556">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/Record.js.html#lineNumber686">source</a></span></span>
     </span>
   </h3>
 
