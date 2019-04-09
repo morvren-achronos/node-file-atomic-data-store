@@ -72,7 +72,7 @@
         "option": {
           "stripPackageName": false,
           "replaces": [
-            {"from": "^src/exports", "to": ""}
+            {"from": "^src/exports.js", "to": ""}
           ]
         }
       }
