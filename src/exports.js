@@ -2,8 +2,10 @@
  * fs-atomic-data-store exports
  */
 
- // Libraries
- const Store = require('./Store');
+// Libraries
+const Store = require('./Store');
+
+exports = {};
 
 /**
  * Return a Store instance for interacting with a datastore
@@ -26,7 +28,9 @@
  * @param {function} options.shredFunction - use this to generate overwrite data when shredding record parts. Default is crypto.randomBytes. Signature: `function(size): Buffer`
  * @returns {Store} datastore instance
  */
-module.exports.store = (datadir, options) => {
+exports.store = (datadir, options) => {
 	options.rootDir = datadir;
 	return new Store(options);
 };
+
+module.exports = exports;
