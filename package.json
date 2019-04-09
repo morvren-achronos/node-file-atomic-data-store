@@ -38,6 +38,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "esdoc": "^1.1.0",
+    "esdoc-importpath-plugin": "^1.0.2",
     "esdoc-node": "^1.0.4",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^5.15.2",
@@ -65,6 +66,15 @@
       },
       {
         "name": "esdoc-node"
+      },
+      {
+        "name": "esdoc-importpath-plugin",
+        "option": {
+          "stripPackageName": false,
+          "replaces": [
+            {"from": "^src/exports", "to": ""}
+          ]
+        }
       }
     ]
   }
