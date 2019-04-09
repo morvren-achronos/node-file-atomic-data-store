@@ -431,6 +431,7 @@ module.exports = class Record {
 				}
 			}
 		);
+		results.sort();
 		return results;
 	}
 
