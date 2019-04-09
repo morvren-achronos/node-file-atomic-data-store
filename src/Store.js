@@ -9,11 +9,15 @@ const util = require('util');
 const TRAVERSE_DEPTH = 3; // .../01/02/03/04/...
 
 /**
- * Interact with a datastore
+ * Access a datastore
+ *
+ * Do not instantiate this class directly, use function {@link store()} exported by module.
  */
 module.exports = class Store {
 	/**
 	 * Create new Store instance
+	 *
+	 * Do not instantiate this class directly, use function {@link store()} exported by module.
 	 *
 	 * @param {object} options
 	 * @param {string} options.rootDir - root directory for this store. Default is subdirectory "store" in current working directory
@@ -30,6 +34,7 @@ module.exports = class Store {
 	 * @param {function} options.recordClass - use this instead of internal Record class
 	 * @param {function} options.lockClass - use this instead of internal Lock class
 	 * @param {function} options.shredFunction - use this to generate overwrite data when shredding record parts. Default is crypto.randomBytes. Signature: `function(size): Buffer`
+	 * @internal
 	 */
 	constructor(options = {}) {
 		// Define state vars
@@ -183,8 +188,8 @@ module.exports = class Store {
 	 *
 	 * Utility function, normally there is no need to call this directly.
 	 *
-	 * @param {string} directory path
-	 * @return {Promise<array<string>} subdirectory names
+	 * @param {string} dirpath - directory path
+	 * @return {Promise<array<string>>} subdirectory names
 	 */
 	async listDirectoriesInDir(dirpath) {
 		const

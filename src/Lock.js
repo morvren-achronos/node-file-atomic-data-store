@@ -14,16 +14,19 @@ const STORE_LOCK = '@store';
 /**
  * Lock resources for exclusive access
  *
- * Do not instantiate this class directly, use methods from class {@link Store}
+ * Do not instantiate this class directly, use method {@link Store.lock}.
  */
 module.exports = class Lock {
 	/**
 	 * Get locking instance
 	 *
+	 * Do not instantiate this class directly, use method {@link Store.lock}.
+	 *
 	 * @param {Store} store - object
 	 * @param {object} options
 	 * @param {number} options.timeout - default max retry time in milliseconds
 	 * @param {number} options.wait - default min time in ms to wait before first retry
+	 * @internal
 	 */
 	constructor(store, options) {
 		/**

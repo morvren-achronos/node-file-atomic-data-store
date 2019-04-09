@@ -15,15 +15,18 @@ const
 /**
  * Interact with a record
  *
- * Do not instantiate this class directly, use methods from class {@link Store}
+ * Do not instantiate this class directly, use method {@link Store.record}
  */
 module.exports = class Record {
 	/**
 	 * Get record interaction instance
 	 *
+	 * Do not instantiate this class directly, use method {@link Store.record}
+	 *
 	 * @param {Store} store - object
 	 * @param {Collection} collection - object
 	 * @param {string} identifier - record identifier
+	 * @internal
 	 */
 	constructor(store, identifier) {
 		/**
