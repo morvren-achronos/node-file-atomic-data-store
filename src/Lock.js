@@ -175,7 +175,6 @@ module.exports = class Lock {
 	 * @returns {Promise<void>}
 	 */
 	async unlockAll() {
-		let errs = [];
 		for (let identifier of Object.keys(this._locks)) {
 			// Release lock
 			await this._locks[identifier]();

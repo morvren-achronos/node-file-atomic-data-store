@@ -148,10 +148,11 @@ module.exports = class Store {
 		const
 			path = this.path,
 			fs  = this.fs,
+			fsop = this.fsop,
 			dir = path.resolve(this.option('rootDir'), ...dirParts)
 		;
 		try {
-			await this.fsop.access(dir, fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK);
+			await fsop.access(dir, fs.constants.R_OK | fs.constants.W_OK | fs.constants.X_OK);
 		}
 		catch (err) {
 			if (err.code != 'ENOENT') {
@@ -159,7 +160,7 @@ module.exports = class Store {
 			}
 			if (create) {
 				try {
-					await this.fsop.mkdir(
+					await fsop.mkdir(
 						dir,
 						{
 							recursive: true,
@@ -167,9 +168,9 @@ module.exports = class Store {
 						}
 					);
 				}
-				catch (err) {
-					if (err.code != 'EEXIST') {
-						throw err;
+				catch (err2) {
+					if (err2.code != 'EEXIST') {
+						throw err2;
 					}
 				}
 			}
@@ -333,11 +334,15 @@ module.exports = class Store {
 			(resolve, reject, retry, tryCount) => {
 				callback(lock, this, tryCount)
 					.then((result) => {
-						clearLocks && lock.unlockAll();
+						if (clearLocks) {
+							lock.unlockAll();
+						}
 						resolve(result);
 					})
 					.catch((err) => {
-						clearLocks && lock.unlockAll();
+						if (clearLocks) {
+							lock.unlockAll();
+						}
 						if (err.code != 'ELOCKED') {
 							reject(err);
 							return;

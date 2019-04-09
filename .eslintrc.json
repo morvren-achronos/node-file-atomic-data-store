@@ -100,7 +100,7 @@
         "jsx-quotes": "error",
         "key-spacing": "error",
         "keyword-spacing": "off",
-        "line-comment-position": "error",
+        "line-comment-position": "off",
         "linebreak-style": [
             "error",
             "unix"
@@ -162,7 +162,7 @@
         "no-implicit-coercion": "error",
         "no-implicit-globals": "error",
         "no-implied-eval": "error",
-        "no-inline-comments": "error",
+        "no-inline-comments": "off",
         "no-invalid-this": "error",
         "no-iterator": "error",
         "no-label-var": "error",
@@ -254,7 +254,7 @@
         "prefer-arrow-callback": "error",
         "prefer-const": "off",
         "prefer-destructuring": "off",
-        "prefer-named-capture-group": "error",
+        "prefer-named-capture-group": "off",
         "prefer-numeric-literals": "error",
         "prefer-object-spread": "error",
         "prefer-promise-reject-errors": "error",

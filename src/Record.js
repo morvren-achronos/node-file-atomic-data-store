@@ -162,12 +162,9 @@ module.exports = class Record {
 		let promises = [];
 		let results = {};
 		for (let part of parts) {
-			promises.push(
-				fsop.stat(path.join(dir, part))
-					.then((stat) => {
-						results[part] = stat;
-					})
-			);
+			promises.push(fsop.stat(path.join(dir, part)).then((stat) => {
+				results[part] = stat;
+			}));
 		}
 		await Promise.all(promises);
 		return results;
@@ -386,7 +383,7 @@ module.exports = class Record {
 				for (let pass = 0; pass < passCount; pass++) {
 					await fsop.ftruncate(fd);
 					let bytesRemaining = stat.size;
-					while (bytesRemaining >= stat.blksize) {;
+					while (bytesRemaining >= stat.blksize) {
 						await fsop.write(fd, shred(stat.blksize));
 						bytesRemaining -= stat.blksize;
 					}
@@ -426,7 +423,9 @@ module.exports = class Record {
 					await fsop.access(dir, mode);
 					results.push(collection);
 				}
-				catch (err) {}
+				catch (err) {
+					/**/
+				}
 			}
 		);
 		return results;
@@ -456,7 +455,9 @@ module.exports = class Record {
 					await fsop.access(dir, mode);
 					return;
 				}
-				catch (err) {}
+				catch (err) {
+					/**/
+				}
 				try {
 					await fsop.mkdir(
 						dir,
@@ -491,7 +492,6 @@ module.exports = class Record {
 			collections = Object.keys(collections);
 		}
 		let results = [];
-console.log('removeMultipleCollections collections=', collections);
 		await this._iterateCollections(
 			collections,
 			async (collection, dir) => {
@@ -500,7 +500,6 @@ console.log('removeMultipleCollections collections=', collections);
 				}
 			}
 		);
-console.log('removeMultipleCollections results=', results);
 		results.sort();
 		return results;
 	}
@@ -699,10 +698,7 @@ console.log('removeMultipleCollections results=', results);
 	 * @access private
 	 */
 	async _iterateCollections(collections, callback) {
-		const
-			fsop = this.store.fsop,
-			path = this.store.path
-		;
+		const path = this.store.path;
 		let prefixDir = await this.store.dir([this.store.option('collectionsDir')], false);
 		let suffixDir = path.join(...this._getDirParts(), this.identifier);
 		let promises = [];
@@ -728,7 +724,9 @@ console.log('removeMultipleCollections results=', results);
 				dirpath = path.dirname(dirpath);
 			}
 		}
-		catch (err) {}
+		catch (err) {
+			/**/
+		}
 		return i;
 	}
 };

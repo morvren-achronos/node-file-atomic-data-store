@@ -52,7 +52,7 @@ afterEach(async function() {
 });
 
 describe('entrypoint script', function() {
-	it('should return the four public classes', function() {
+	it('should return the public classes', function() {
 		const index = require('../index');
 		expect(index.Store, 'class Store').to.equal(Store);
 		expect(index.Record, 'class Record').to.equal(Record);
@@ -312,7 +312,7 @@ describe('classes', function() {
 					'records/a1/b0/c0/d0/testrec7',
 					'collections/testcol3/a1/b0/c0/d0/testrec7',
 					'records/a1/b0/c0/d0/testrec8',
-					'records/a1/b0/c1/d0/testrec9',
+					'records/a1/b0/c1/d0/testrec9'
 				];
 				const testrecs = {
 					'@all': [
@@ -352,7 +352,10 @@ describe('classes', function() {
 						const testids = testrecs[colname];
 						let foundids = [];
 						await expect(store.traverse(colname, (identifier, recordIndex) => {
-							expect(identifier).to.be.a('string').lengthOf(8).match(/^testrec\d$/);
+							expect(identifier).to.be.a('string')
+								.lengthOf(8)
+								.match(/^testrec\d$/)
+							;
 							expect(recordIndex).to.be.a('number').equal(foundids.length);
 							foundids.push(identifier);
 						})).to.eventually.equal(testids.length);
@@ -444,7 +447,9 @@ describe('classes', function() {
 					try {
 						fs.rmdirSync(recorddir);
 					}
-					catch(err) {}
+					catch(err) {
+						/**/
+					}
 					let hash = record.generateHash();
 					let hashparts = [];
 					for (let i = 0; i < 8; i += 2) {
@@ -477,7 +482,9 @@ describe('classes', function() {
 					try {
 						fs.rmdirSync(recorddir);
 					}
-					catch(err) {}
+					catch(err) {
+						/**/
+					}
 					await expect(record.listParts()).to.eventually.be.an('array').lengthOf(0);
 				});
 			});
@@ -690,7 +697,9 @@ describe('classes', function() {
 					try {
 						fs.rmdirSync(recorddir);
 					}
-					catch(err) {}
+					catch(err) {
+						/**/
+					}
 					let parts = [
 						'test1',
 						'test2'
@@ -710,19 +719,19 @@ describe('classes', function() {
 			describe('#shredMultipleParts', function() {
 				async function shredCaptureContent(parts) {
 					let shredFdFilenameMap = {};
-					const fs_open = store._fsop.open;
+					const originalOpen = store._fsop.open;
 					store._fsop.open = async (...args) => {
-						let fd = await fs_open(...args);
+						let fd = await originalOpen(...args);
 						shredFdFilenameMap[fd] = args[0];
 						return fd;
 					};
 					let contentBeforeUnlink = {};
-					const fs_ftruncate = store._fsop.ftruncate;
+					const originalTruncate = store._fsop.ftruncate;
 					store._fsop.ftruncate = async (fd) => {
 						let filename = shredFdFilenameMap[fd];
-						let part = /(test\d)\.shred/.exec(filename)[1];
+						let part = (/(test\d)\.shred/).exec(filename)[1];
 						contentBeforeUnlink[part] = fs.readFileSync(filename);
-						return fs_ftruncate(fd);
+						return originalTruncate(fd);
 					};
 					await expect(record.shredMultipleParts(parts)).to.eventually.deep.equal(parts);
 					return contentBeforeUnlink;
@@ -742,12 +751,14 @@ describe('classes', function() {
 					for (let part of parts) {
 						let filepath = path.join(recorddir, part);
 
-						expect(function() { return fs.statSync(filepath); }).to.throw();
-						
+						expect(function() {
+							return fs.statSync(filepath);
+						}).to.throw();
+
 						let stat = fs.statSync(filepath + '-copy');
 						expect(stat.size).to.equal(0);
 						fs.unlinkSync(filepath + '-copy');
-						
+
 						expect(contentBeforeUnlink[part]).to.be.instanceof(Buffer).lengthOf(16 * 1024);
 						expect(contentBeforeUnlink[part].indexOf(Buffer.from('0123456789abcdef'))).to.equal(-1);
 					}
@@ -762,9 +773,9 @@ describe('classes', function() {
 				});
 				it('should overwrite all of large parts', async function() {
 					let filepath = path.join(recorddir, 'test1');
-					fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(512 * 1024 + 1))); // 8M plus 16 bytes
+					fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat((512 * 1024) + 1))); // 8M plus 16 bytes
 					let contentBeforeUnlink = await shredCaptureContent(['test1']);
-					expect(contentBeforeUnlink.test1).to.be.instanceof(Buffer).lengthOf(16 * 512 * 1024 + 1024);
+					expect(contentBeforeUnlink.test1).to.be.instanceof(Buffer).lengthOf((16 * 512 * 1024) + 1024);
 					expect(contentBeforeUnlink.test1.indexOf(Buffer.from('0123456789abcdef'))).to.equal(-1);
 				});
 			});
@@ -773,7 +784,7 @@ describe('classes', function() {
 					const mkdirs = [
 						recorddir.replace(rootDir + '/records/', 'collections/testcol1/'),
 						recorddir.replace(rootDir + '/records/', 'collections/testcol2/'),
-						recorddir.replace(rootDir + '/records/', 'collections/testcol3/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol3/')
 					];
 					await makeDirs(mkdirs);
 					await expect(record.listCollections()).to.eventually.deep.equal(['testcol1', 'testcol2', 'testcol3']);
@@ -782,7 +793,7 @@ describe('classes', function() {
 					const mkdirs = [
 						recorddir.replace(rootDir + '/records/', 'collections/testcol1/'),
 						recorddir.replace(rootDir + '/records/', 'collections/testcol2/'),
-						recorddir.replace(rootDir + '/records/', 'collections/testcol3/'),
+						recorddir.replace(rootDir + '/records/', 'collections/testcol3/')
 					];
 					await makeDirs(mkdirs);
 					await store.dir(['collections/testcol4/00/01/02/03/foobar'], true)
@@ -1006,7 +1017,9 @@ describe('classes', function() {
 					const filepath = path.join(recorddir, 'test1');
 					fs.writeFileSync(filepath, Buffer.from('0123456789abcdef'.repeat(1024)));
 					await expect(record.shredPart('test1')).to.eventually.be.fulfilled;
-					expect(function() { return fs.statSync(filepath); }).to.throw();
+					expect(function() {
+						return fs.statSync(filepath);
+					}).to.throw();
 				});
 			});
 			describe('#addCollection', function() {
@@ -1215,7 +1228,9 @@ describe('classes', function() {
 					try{
 						fs.rmdirSync(lockdir);
 					}
-					catch (err) {}
+					catch (err) {
+						/**/
+					}
 					await expect(lock.unlockAll()).to.eventually.be.fulfilled;
 				});
 			});
@@ -1233,7 +1248,9 @@ describe('classes', function() {
 					try{
 						fs.rmdirSync(lockdir);
 					}
-					catch (err) {}
+					catch (err) {
+						/**/
+					}
 					expect(lock.list()).to.be.an('array').lengthOf(0);
 				});
 			});
@@ -1252,7 +1269,9 @@ describe('classes', function() {
 					try{
 						fs.rmdirSync(lockdir);
 					}
-					catch (err) {}
+					catch (err) {
+						/**/
+					}
 					await expect(lock.listGlobal()).to.eventually.be.an('array').lengthOf(0);
 				});
 			});
