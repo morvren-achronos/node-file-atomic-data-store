@@ -63,26 +63,64 @@ Install via npm:
 ## Usage
 
 ```javascript
-const fads = require('fs-atomic-data-store');
+const fsads = require('fs-atomic-data-store');
 
-// Access a store, provide store root directory. Store may or may not exist
-let mystore = new fads.Store('./path/to/my/store/dir');
+// Access a store, provide store root directory (store may or may not exist already)
+let mystore = fsads.store('./path/to/my/store/dir');
 
-// Access a record by identifier. Record may or may not exist
+// Access a record by identifier (record may or may not exist already)
 let myrecord = mystore.record('myrecord');
 
-// Write record from Buffer
-myrecord.writeBuffer(Buffer.from('some content!')).then(() => {
-	console.log('updated myrecord');
-});
+// Read and write a record using Buffers
+let content = await myrecord.readBuffer();
+await myrecord.writeBuffer(Buffer.from('new content'));
 
-// Read record into Buffer
-myrecord.readBuffer().then((content) => {
-	console.log('myrecord contains: ' + content.toString('utf8'));
-});
+// Lock a record then write
+mylock = mystore.lock();
+try {
+	await mylock.lock('myrecord');
+	await myrecord.writeBuffer(Buffer.from('atomically written content'));
+}
+catch (err) {
+	// ...
+}
+finally {
+	mylock.unlockAll();
+}
+
+// Perform a transaction involving multiple locks, allowing for retries in case of lock contention
+await mystore.transaction(
+	(lock) => {
+		// Get record objects (does not load any data yet)
+		let record1 = mystore.record('record1');
+		let record2 = mystore.record('record2');
+
+		// Lock records
+		await lock.lock('record1');
+		await lock.lock('record2');
+
+		// Read the records. We do this only after locking to ensure no one changes the content between reading and writing
+		let content1 = await record1.readBuffer();
+		let content2 = await record2.readBuffer();
+
+		// Operate on the record data
+		let newcontent1 = Buffer.concat(content1, Buffer.from(', also record2 is '), content2);
+		let newcontent2 = Buffer.concat(content2, Buffer.from(', also record1 is '), content1);
+		
+		// Update the records
+		await record1.writeBuffer(newcontent1);
+		await record2.writeBuffer(newcontent2);
+
+		// all locks are released automatically by transaction(), we don't need to do it explicitly
+	},
+	{
+		// Retry for up to a maximum of 50 milliseconds
+		transactionTimeout: 50
+	}
+);
 
 // Iterate over all records
-mystore.traverse('@all', (identifier) => {
+await mystore.traverse('@all', (identifier) => {
 	console.log('found record identifier ' + identifier);
 });
 ```
