@@ -8,6 +8,7 @@
 
 // Libraries
 const
+	fsads = require('../index'),
 	Store = require('../src/Store'),
 	Record = require('../src/Record'),
 	Lock = require('../src/Lock'),
@@ -52,11 +53,19 @@ afterEach(async function() {
 });
 
 describe('entrypoint script', function() {
-	it('should return the public classes', function() {
-		const index = require('../index');
-		expect(index.Store, 'class Store').to.equal(Store);
-		expect(index.Record, 'class Record').to.equal(Record);
-		expect(index.Lock, 'class Lock').to.equal(Lock);
+	describe('#store', function() {
+		it('should return a configured Store object', function() {
+			expect(fsads.store).is.a('function');
+			let store = fsads.store(
+				rootDir,
+				{
+					defaultPart: 'test'
+				}
+			);
+			expect(store).is.instanceof(Store);
+			expect(store.option('rootDir')).to.equal(rootDir);
+			expect(store.option('defaultPart')).to.equal('test');
+		});
 	});
 });
 
